@@ -165,6 +165,7 @@ dd { margin: 5px 0 0; font-size: 1.2rem; font-weight: 900; }
   background: #eef7ff;
 }
 .info-box.soft { background: var(--cream); }
+.info-box.warning { background: #fff1c9; }
 .info-box p { margin-bottom: 0; color: var(--muted); line-height: 1.7; }
 
 .encouragement, .today-status {
@@ -184,6 +185,8 @@ dd { margin: 5px 0 0; font-size: 1.2rem; font-weight: 900; }
 }
 .record-buttons button { background: #edf6f4; color: var(--primary-dark); }
 .record-buttons button.active { background: var(--primary); color: white; }
+.confirm-btn { width: 100%; margin-top: 12px; }
+.confirm-btn:disabled { cursor: not-allowed; opacity: 0.55; transform: none; box-shadow: none; }
 
 .record-days {
   display: grid;

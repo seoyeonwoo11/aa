@@ -65,6 +65,10 @@
             <h3>실천 방법</h3>
             <p id="result-method"></p>
           </div>
+          <div class="info-box warning">
+            <h3>설문으로 확인한 나의 스마트폰 습관</h3>
+            <p id="bad-habit-summary"></p>
+          </div>
           <div class="info-box soft">
             <h3>추천 이유</h3>
             <p id="result-reason"></p>
@@ -92,11 +96,12 @@
             </div>
           </div>
           <p id="encouragement" class="encouragement"></p>
-          <div class="record-buttons" aria-label="오늘 실천 상태 기록">
+          <div class="record-buttons" aria-label="오늘 실천 상태 선택">
             <button type="button" data-status="done">완료했어요</button>
             <button type="button" data-status="partial">일부만 했어요</button>
             <button type="button" data-status="missed">오늘은 못 했어요</button>
           </div>
+          <button id="confirm-record-btn" class="primary-btn confirm-btn" type="button" disabled>확인</button>
           <p id="today-status" class="today-status"></p>
           <div class="button-row">
             <button id="open-records-btn" class="secondary-btn" type="button">최근 기록 보기</button>

@@ -105,6 +105,7 @@ const defaultState = {
 let appState = loadState();
 let currentQuestionIndex = 0;
 let alternateIndex = 0;
+let pendingRecordStatus = null;
 
 const screens = document.querySelectorAll('.screen');
 const startSurveyBtn = document.querySelector('#start-survey-btn');
@@ -117,6 +118,7 @@ const optionsList = document.querySelector('#options-list');
 const prevQuestionBtn = document.querySelector('#prev-question-btn');
 const selectHabitBtn = document.querySelector('#select-habit-btn');
 const anotherHabitBtn = document.querySelector('#another-habit-btn');
+const confirmRecordBtn = document.querySelector('#confirm-record-btn');
 const recordButtons = document.querySelectorAll('[data-status]');
 
 function loadState() {
@@ -214,6 +216,7 @@ function renderResult() {
   document.querySelector('#result-duration').textContent = habit.duration;
   document.querySelector('#result-difficulty').textContent = habit.difficulty;
   document.querySelector('#result-method').textContent = habit.method;
+  document.querySelector('#bad-habit-summary').textContent = analyzeBadHabit(appState.answers);
   document.querySelector('#result-reason').textContent = habit.reason;
 }
 
@@ -224,6 +227,29 @@ function showAnotherHabit() {
   alternateIndex += 1;
   saveState();
   renderResult();
+}
+
+function analyzeBadHabit(answers) {
+  const timeText = answers.timeOfUse ? `${answers.timeOfUse}에 스마트폰을 자주 사용하고` : '특정 시간에 스마트폰을 자주 사용하고';
+  const reasonText = answers.reason ? `${answers.reason}` : '무의식적으로';
+
+  if (answers.timeOfUse === '자기 전') {
+    return `${timeText}, ${reasonText} 스마트폰을 보는 습관이 보여요. 잠들기 전 화면 시간이 길어지면 수면 리듬이 흐트러질 수 있어요.`;
+  }
+
+  if (answers.timeOfUse === '학교 또는 공부 시간' || answers.reason === '공부를 피하고 싶어서') {
+    return `${timeText}, ${reasonText} 스마트폰을 보는 습관이 보여요. 공부를 시작하기 전 작은 방해 요소가 집중 시간을 줄일 수 있어요.`;
+  }
+
+  if (answers.reason === '스트레스를 풀기 위해') {
+    return `스트레스를 풀기 위해 스마트폰을 자주 찾는 습관이 보여요. 잠깐은 편해도 계속 화면을 넘기면 휴식이 충분하지 않을 수 있어요.`;
+  }
+
+  if (answers.reason === '습관적으로') {
+    return `특별한 목적 없이 스마트폰을 확인하는 습관이 보여요. 확인하기 전 짧은 대체 행동을 정하면 반복 사용을 줄이는 데 도움이 됩니다.`;
+  }
+
+  return `${timeText}, ${reasonText} 스마트폰을 사용하는 패턴이 보여요. 스마트폰을 혼내듯 줄이기보다 같은 시간에 할 작은 대체 습관을 정해보면 좋아요.`;
 }
 
 function selectHabit() {
@@ -237,22 +263,37 @@ function renderHome() {
   const habit = getHabit(appState.selectedHabitId);
   const today = getDateKey(new Date());
   const todayRecord = appState.records[today];
+  pendingRecordStatus = null;
 
   document.querySelector('#today-habit-name').textContent = habit.name;
   document.querySelector('#today-method').textContent = habit.method;
   document.querySelector('#today-duration').textContent = habit.duration;
   document.querySelector('#current-streak').textContent = `${calculateStreak()}일`;
   document.querySelector('#encouragement').textContent = getEncouragement();
-  document.querySelector('#today-status').textContent = todayRecord ? `오늘 기록: ${getStatusLabel(todayRecord)}` : '오늘 기록은 아직 없어요. 작은 실천부터 시작해보세요.';
+  document.querySelector('#today-status').textContent = todayRecord ? `오늘 기록: ${getStatusLabel(todayRecord)} · 바꾸고 싶으면 상태를 다시 고른 뒤 확인을 눌러주세요.` : '오늘 기록은 아직 없어요. 상태를 고른 뒤 확인 버튼을 눌러 제출해 주세요.';
+  confirmRecordBtn.disabled = true;
 
   recordButtons.forEach((button) => {
     button.classList.toggle('active', button.dataset.status === todayRecord);
   });
 }
 
-function recordToday(status) {
+function selectRecordStatus(status) {
+  pendingRecordStatus = status;
+  confirmRecordBtn.disabled = false;
+
+  recordButtons.forEach((button) => {
+    button.classList.toggle('active', button.dataset.status === status);
+  });
+
+  document.querySelector('#today-status').textContent = `${getStatusLabel(status)}로 선택했어요. 최종 제출하려면 확인 버튼을 눌러주세요.`;
+}
+
+function confirmTodayRecord() {
+  if (!pendingRecordStatus) return;
+
   const today = getDateKey(new Date());
-  appState.records[today] = status;
+  appState.records[today] = pendingRecordStatus;
   saveState();
   renderHome();
 }
@@ -391,8 +432,9 @@ document.querySelectorAll('[data-nav]').forEach((button) => {
     }
   });
 });
+confirmRecordBtn.addEventListener('click', confirmTodayRecord);
 recordButtons.forEach((button) => {
-  button.addEventListener('click', () => recordToday(button.dataset.status));
+  button.addEventListener('click', () => selectRecordStatus(button.dataset.status));
 });
 
 if (appState.selectedHabitId) {
