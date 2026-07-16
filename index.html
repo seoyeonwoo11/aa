@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>습관씨앗 | 스마트폰 대신 좋은 습관</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">스마트폰 과의존 개선 프로젝트</p>
+        <h1>습관씨앗</h1>
+      </div>
+      <nav class="top-nav" aria-label="주요 화면 이동">
+        <button type="button" data-nav="home">오늘의 습관</button>
+        <button type="button" data-nav="records">기록 보기</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="start-screen" class="screen active">
+        <div class="hero card">
+          <span class="badge">금지보다 대체 습관</span>
+          <h2>스마트폰을 억지로 끊기보다, 나에게 맞는 작은 습관으로 바꿔보세요.</h2>
+          <p>간단한 설문으로 스마트폰을 자주 쓰는 이유와 관심사를 확인하고, 오늘 바로 실천할 수 있는 대체 습관을 추천합니다.</p>
+          <div class="button-row">
+            <button id="start-survey-btn" class="primary-btn" type="button">나에게 맞는 습관 찾기</button>
+            <button id="go-current-btn" class="secondary-btn hidden" type="button">오늘의 습관으로 이동</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="survey-screen" class="screen">
+        <div class="card survey-card">
+          <div class="progress-info">
+            <span id="question-count">1 / 5</span>
+            <span id="progress-percent">20%</span>
+          </div>
+          <div class="progress-bar" aria-hidden="true">
+            <div id="progress-fill"></div>
+          </div>
+          <h2 id="question-title"></h2>
+          <div id="options-list" class="options-list"></div>
+          <button id="prev-question-btn" class="text-btn" type="button">이전</button>
+        </div>
+      </section>
+
+      <section id="result-screen" class="screen">
+        <div class="card result-card">
+          <p class="eyebrow">추천 결과</p>
+          <h2 id="result-name"></h2>
+          <dl class="habit-details">
+            <div>
+              <dt>하루 실천 시간</dt>
+              <dd id="result-duration"></dd>
+            </div>
+            <div>
+              <dt>예상 난이도</dt>
+              <dd id="result-difficulty"></dd>
+            </div>
+          </dl>
+          <div class="info-box">
+            <h3>실천 방법</h3>
+            <p id="result-method"></p>
+          </div>
+          <div class="info-box soft">
+            <h3>추천 이유</h3>
+            <p id="result-reason"></p>
+          </div>
+          <div class="button-row">
+            <button id="select-habit-btn" class="primary-btn" type="button">이 습관으로 시작하기</button>
+            <button id="another-habit-btn" class="secondary-btn" type="button">다른 습관 보기</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="home-screen" class="screen">
+        <div class="card today-card">
+          <p class="eyebrow">오늘의 습관</p>
+          <h2 id="today-habit-name"></h2>
+          <p id="today-method" class="lead"></p>
+          <div class="stat-grid">
+            <div>
+              <span class="stat-value" id="today-duration"></span>
+              <span class="stat-label">예상 소요 시간</span>
+            </div>
+            <div>
+              <span class="stat-value" id="current-streak">0일</span>
+              <span class="stat-label">연속 실천</span>
+            </div>
+          </div>
+          <p id="encouragement" class="encouragement"></p>
+          <div class="record-buttons" aria-label="오늘 실천 상태 기록">
+            <button type="button" data-status="done">완료했어요</button>
+            <button type="button" data-status="partial">일부만 했어요</button>
+            <button type="button" data-status="missed">오늘은 못 했어요</button>
+          </div>
+          <p id="today-status" class="today-status"></p>
+          <div class="button-row">
+            <button id="open-records-btn" class="secondary-btn" type="button">최근 기록 보기</button>
+            <button id="restart-btn" class="text-btn" type="button">습관 다시 찾기</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="records-screen" class="screen">
+        <div class="card">
+          <p class="eyebrow">최근 실천 현황</p>
+          <h2>최근 7일 기록</h2>
+          <div id="record-days" class="record-days"></div>
+          <div class="stat-grid records-stats">
+            <div>
+              <span class="stat-value" id="record-streak">0일</span>
+              <span class="stat-label">연속 실천</span>
+            </div>
+            <div>
+              <span class="stat-value" id="week-success">0회</span>
+              <span class="stat-label">최근 7일 완료</span>
+            </div>
+            <div>
+              <span class="stat-value" id="success-rate">0%</span>
+              <span class="stat-label">전체 성공률</span>
+            </div>
+          </div>
+          <div class="bar-wrap" aria-label="전체 성공률 막대그래프">
+            <div id="success-bar"></div>
+          </div>
+          <p id="record-message" class="encouragement"></p>
+          <button id="back-home-btn" class="primary-btn" type="button">오늘의 습관으로 돌아가기</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
