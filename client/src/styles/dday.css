@@ -1,0 +1,84 @@
+/* D-Day 카드, 카운트다운, 통계, 진행률 */
+
+.main-card { text-align: center; }
+
+.exam-meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.badge {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+}
+.badge.estimated { background: #fff1d6; color: #a86200; }
+
+.dday {
+  margin: 8px 0 0;
+  font-size: clamp(3.5rem, 18vw, 5.5rem);
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.dday.today { color: var(--accent); }
+
+.exam-date { margin: 6px 0 0; color: var(--muted); }
+.message { margin: 10px 0 0; font-weight: 600; }
+
+.countdown {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.countdown div {
+  background: var(--primary-soft);
+  border-radius: 12px;
+  padding: 10px 4px;
+  display: flex;
+  flex-direction: column;
+}
+.countdown span {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.countdown small { color: var(--muted); }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+.stat-value { display: block; font-size: 1.3rem; font-weight: 800; }
+.stat-label { color: var(--muted); font-size: 0.82rem; }
+
+.progress-head {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.progress-bar {
+  margin-top: 6px;
+  height: 12px;
+  background: var(--primary-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+#progress-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}

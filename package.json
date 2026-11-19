@@ -1,0 +1,14 @@
+{
+  "name": "suneung-dday",
+  "private": true,
+  "description": "수능 D-Day 계산기",
+  "workspaces": [
+    "client"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w client",
+    "build": "npm run build -w client",
+    "preview": "npm run preview -w client",
+    "test": "npm run test -w client"
+  }
+}
