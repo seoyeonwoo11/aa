@@ -110,7 +110,10 @@ function renderCalendar() {
       const head = el('span', 'cal-cell-head');
       head.append(el('span', 'cal-num', String(day.getDate())));
       const hasMemo = Boolean(memoFor(plans, date));
-      if (hasMemo) head.append(memoIcon());
+      if (hasMemo) {
+        cell.classList.add('has-memo');
+        cell.append(memoIcon()); // 칸 오른쪽 위의 노란 포스트잇
+      }
       if (date === examDate) head.append(el('span', 'cal-tag', '수능'));
       else if (date === customDate) head.append(el('span', 'cal-tag', '목표'));
       for (const mock of mocks[date] || []) head.append(el('span', 'cal-tag mock', mock.short));
@@ -225,11 +228,12 @@ function renderDay() {
 
 /* ---------- 날짜별 메모 ---------- */
 
-const MEMO_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg>';
+// 노란 포스트잇 (오른쪽 아래 모서리가 살짝 접힌 모양)
+export const POSTIT_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path class="postit-paper" d="M2 2h12v8.5L10.5 14H2z"/><path class="postit-fold" d="M14 10.5h-3.5V14z"/><path class="postit-line" d="M4.5 5.5h7M4.5 8h5"/></svg>';
 
 function memoIcon() {
   const icon = el('span', 'cal-memo');
-  icon.innerHTML = MEMO_SVG; // 고정된 아이콘 모양 (사용자 글 아님)
+  icon.innerHTML = POSTIT_SVG; // 고정된 아이콘 모양 (사용자 글 아님)
   return icon;
 }
 

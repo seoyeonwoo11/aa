@@ -361,19 +361,33 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 
 .cal-cell { padding: 3px 4px; }
 .cal-cell-head { justify-content: flex-start; gap: 1px; }
-.cal-memo { display: inline-grid; place-items: center; flex: none; width: 14px; height: 14px; color: var(--muted); }
-.cal-memo svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.cal-cell.selected .cal-memo { color: var(--primary); }
-@media (min-width: 700px) {
-  .cal-memo { width: 16px; height: 16px; }
-  .cal-memo svg { width: 14px; height: 14px; }
+/* 메모가 있는 날: 칸 오른쪽 위에 노란 포스트잇 */
+.cal-memo {
+  position: absolute;
+  top: 4px;
+  right: 3px;
+  width: 13px;
+  height: 13px;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.18));
 }
+.cal-memo svg { display: block; width: 100%; height: 100%; }
+.cal-cell.has-memo .cal-cell-head { padding-right: 14px; } /* 시험 표시가 포스트잇 밑으로 들어가지 않게 */
+@media (min-width: 700px) {
+  .cal-memo { top: 5px; right: 5px; width: 16px; height: 16px; }
+  .cal-cell.has-memo .cal-cell-head { padding-right: 18px; }
+}
+
+/* 포스트잇 색 (밝은·어두운 화면 공통) */
+.postit-paper { fill: #ffd43b; }
+.postit-fold { fill: #e8b100; }
+.postit-line { fill: none; stroke: #b88a00; stroke-width: 1.2; stroke-linecap: round; opacity: 0.55; }
 
 /* ---------- 선택한 날의 메모 ---------- */
 
 .day-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .memo-btn { display: inline-flex; align-items: center; gap: 4px; flex: none; }
-.memo-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.memo-btn svg { width: 15px; height: 15px; }
 .memo-btn.has-memo { color: var(--primary); border-color: var(--primary); }
 
 .memo-view {
