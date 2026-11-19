@@ -3,7 +3,7 @@
 import { $ } from './dom.js';
 
 export const TABS = {
-  home: '수능 D-Day',
+  home: '홈',
   study: '공부 모드',
   plan: '계획',
   settings: '설정'
@@ -47,7 +47,7 @@ export function setTabsVisible(visible) {
   $('nav-bar').hidden = !visible;
   document.body.classList.toggle('has-nav', visible);
   if (!visible) {
-    $('page-title').textContent = '수능 D-Day 계산기';
+    $('page-title').textContent = '하루수능';
     delete document.body.dataset.tab;
   }
 }

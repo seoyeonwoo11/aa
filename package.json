@@ -1,7 +1,7 @@
 {
-  "name": "suneung-dday",
+  "name": "haru-suneung",
   "private": true,
-  "description": "수능 D-Day 계산기",
+  "description": "하루수능 - 수험생용 D-Day·공부·계획 웹앱",
   "workspaces": [
     "client"
   ],
