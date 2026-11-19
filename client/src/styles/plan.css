@@ -23,7 +23,7 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 
 .cal-header {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 8px;
   padding: 0 4px;

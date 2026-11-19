@@ -423,11 +423,6 @@ export function initPlanView() {
     setExpanded(isCollapsed()); // 접혀 있으면 펼치고, 펼쳐져 있으면 접는다
   });
   compactQuery.addEventListener('change', () => render());
-  $('cal-today').addEventListener('click', () => {
-    selected = toDateText(new Date());
-    showMonthOf(selected);
-    render();
-  });
 
   $('cal-grid').addEventListener('click', (event) => {
     const cell = event.target.closest('.cal-cell');
