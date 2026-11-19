@@ -1,20 +1,184 @@
-/* 계획 */
+/* 계획: 달력, 기간 계획, 날짜별 할 일 */
 
-.date-nav {
-  display: flex;
+/* 태블릿·PC에서는 계획 탭을 넓게 쓴다 */
+body[data-tab="plan"] .app { max-width: 1080px; }
+.plan-side { display: grid; gap: 16px; align-content: start; }
+
+@media (min-width: 960px) {
+  .plan-panel {
+    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+    align-items: start;
+  }
+  .plan-side { position: sticky; top: 16px; }
+}
+
+/* ---------- 달력 ---------- */
+
+.calendar-card { padding: 16px 12px; }
+
+.cal-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
   gap: 8px;
+  padding: 0 4px;
 }
-.date-nav-center {
-  flex: 1;
+.cal-title { margin: 0; text-align: center; font-size: 1.15rem; }
+
+.cal-weekdays {
+  margin-top: 12px;
   display: grid;
-  justify-items: center;
-  gap: 2px;
+  grid-template-columns: repeat(7, 1fr);
   text-align: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.cal-weekdays .sun { color: #d6336c; }
+.cal-weekdays .sat { color: #3457d5; }
+
+.cal-grid {
+  margin-top: 6px;
+  display: grid;
+  border-top: 1px solid var(--border);
+}
+
+/* 한 주 = 7칸 격자. 1행: 날짜, 2~4행: 기간 막대, 5행: 할 일 표시 */
+.cal-week {
+  --lane: 17px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: 26px repeat(3, var(--lane)) 20px;
+  row-gap: 2px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2px;
+}
+
+.cal-cell {
+  grid-row: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 3px 2px;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cal-cell-head { display: flex; align-items: center; justify-content: center; gap: 2px; min-width: 0; }
+.cal-num {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.cal-cell.sun .cal-num { color: #d6336c; }
+.cal-cell.sat .cal-num { color: #3457d5; }
+.cal-cell.outside { opacity: 0.38; }
+.cal-cell.today .cal-num { color: #fff; background: var(--primary); }
+.cal-cell.selected { background: var(--primary-soft); box-shadow: inset 0 0 0 2px var(--primary); }
+.cal-cell.in-range { background: var(--primary-soft); }
+@media (hover: hover) { .cal-cell:hover { background: var(--bg); } }
+
+.cal-tag {
+  padding: 0 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.cal-cell-foot {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  min-height: 16px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.cal-todo { color: var(--primary); }
+.cal-todo.all-done { color: #2f9e44; }
+.cal-more { color: var(--muted); }
+
+.cal-bar {
+  z-index: 1;
+  min-width: 0;
+  margin: 0 2px;
+  padding: 0 5px;
+  overflow: hidden;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: var(--lane);
+  white-space: nowrap;
+  text-overflow: clip;
+  color: #fff;
+  background: var(--bar);
+  border-radius: 5px;
+  pointer-events: none; /* 막대를 눌러도 아래 날짜 칸이 눌리게 */
+}
+.cal-bar.cont-left { margin-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.cal-bar.cont-right { margin-right: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.cal-bar.done { opacity: 0.45; text-decoration: line-through; }
+
+.cal-grid.picking .cal-cell { cursor: crosshair; }
+
+.range-add { margin-top: 12px; }
+
+@media (min-width: 700px) {
+  .calendar-card { padding: 20px; }
+  .cal-week { --lane: 20px; grid-template-rows: 30px repeat(3, var(--lane)) 22px; }
+  .cal-num { width: 28px; height: 28px; font-size: 0.95rem; }
+  .cal-bar { font-size: 0.75rem; }
+  .cal-cell-foot { font-size: 0.75rem; }
+}
+
+/* ---------- 기간 계획 폼 ---------- */
+
+.range-form h2 { margin-bottom: 14px; }
+.range-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.range-dates .field { margin-bottom: 0; }
+.pick-hint { margin: 8px 0 14px; color: var(--primary); font-weight: 600; }
+
+.color-options { display: flex; gap: 10px; }
+.color-option {
+  width: 34px;
+  height: 34px;
+  background: var(--bar);
+  border: 3px solid var(--card);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--border);
+  cursor: pointer;
+}
+.color-option[aria-checked="true"] { box-shadow: 0 0 0 2px var(--text); }
+
+.form-actions {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 8px;
+}
+.form-actions .text-btn[hidden] + .secondary-btn { grid-column: 1 / 3; }
+.text-btn.danger { color: #d6392f; }
+
+/* ---------- 선택한 날 ---------- */
+
+.day-head {
+  display: grid;
+  gap: 2px;
   font-size: 0.85rem;
   color: var(--muted);
 }
-.date-nav-center strong { font-size: 1.05rem; color: var(--text); }
+.day-head strong { font-size: 1.1rem; color: var(--text); }
 
 .dday-chip {
   padding: 1px 8px;
@@ -25,10 +189,46 @@
   font-size: 0.78rem;
 }
 
-.plan-today { display: block; margin: 10px auto 0; }
+.day-ranges {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.day-ranges:empty { display: none; }
+.range-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 0 12px;
+  background: var(--bg);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+.range-color { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--bar); }
+.range-item input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--bar); }
+.range-body {
+  flex: 1;
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 6px 12px 6px 0;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.range-title { font-weight: 600; overflow-wrap: anywhere; }
+.range-meta { font-size: 0.78rem; color: var(--muted); }
+.range-item.done .range-title { color: var(--muted); text-decoration: line-through; }
 
 .plan-form {
-  margin-top: 16px;
+  margin-top: 14px;
   display: flex;
   gap: 8px;
 }

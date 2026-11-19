@@ -16,7 +16,7 @@
 | `saveSettings(userId, settings)` | `PUT /api/settings` | `{ academicYear, customDate, dailyGoalMinutes }` | – |
 | `loadStudy(userId)` | `GET /api/study` | – | `{ sessions: [{ date, subject, seconds }], running }` |
 | `saveStudy(userId, data)` | `PUT /api/study` | `{ sessions, running }` | – |
-| `loadPlans(userId)` | `GET /api/plans` | – | `{ 'YYYY-MM-DD': [{ id, text, done }] }` |
+| `loadPlans(userId)` | `GET /api/plans` | – | `{ days: { 'YYYY-MM-DD': [{ id, text, done }] }, ranges: [{ id, title, start, end, color, done }] }` |
 | `savePlans(userId, plans)` | `PUT /api/plans` | 위와 같은 형태 | – |
 
 - 세션은 httpOnly 쿠키를 권장합니다.

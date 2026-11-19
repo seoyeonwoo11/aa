@@ -105,26 +105,70 @@
       </section>
 
       <!-- 계획 -->
-      <section id="panel-plan" class="tab-panel" hidden>
-        <div class="card">
-          <div class="date-nav">
-            <button id="plan-prev" type="button" class="icon-btn" aria-label="이전 날">‹</button>
-            <div class="date-nav-center">
+      <section id="panel-plan" class="tab-panel plan-panel" hidden>
+        <div class="card calendar-card">
+          <div class="cal-header">
+            <button id="cal-prev" type="button" class="icon-btn" aria-label="이전 달">‹</button>
+            <h2 id="cal-title" class="cal-title"></h2>
+            <button id="cal-next" type="button" class="icon-btn" aria-label="다음 달">›</button>
+            <button id="cal-today" type="button" class="text-btn small">오늘</button>
+          </div>
+          <div class="cal-weekdays" aria-hidden="true">
+            <span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span>
+          </div>
+          <div id="cal-grid" class="cal-grid"></div>
+          <button id="range-add" type="button" class="secondary-btn range-add">+ 기간 계획 추가</button>
+        </div>
+
+        <div class="plan-side">
+          <!-- 기간 계획 추가·수정 -->
+          <form id="range-form" class="card range-form" hidden novalidate>
+            <h2 id="range-form-title">기간 계획 추가</h2>
+            <label class="field">
+              <span>계획 이름</span>
+              <input id="range-title" type="text" maxlength="100" placeholder="예: 수학 기출 1회독" autocomplete="off">
+            </label>
+            <div class="range-dates">
+              <label class="field">
+                <span>시작일</span>
+                <input id="range-start" type="date">
+              </label>
+              <label class="field">
+                <span>종료일</span>
+                <input id="range-end" type="date">
+              </label>
+            </div>
+            <p id="range-pick-hint" class="hint pick-hint"></p>
+            <div class="field">
+              <span>색</span>
+              <div id="range-colors" class="color-options" role="radiogroup" aria-label="색"></div>
+            </div>
+            <p id="range-error" class="error" role="alert"></p>
+            <div class="form-actions">
+              <button id="range-delete" type="button" class="text-btn danger" hidden>삭제</button>
+              <button id="range-cancel" type="button" class="secondary-btn">취소</button>
+              <button type="submit" class="primary-btn">저장</button>
+            </div>
+          </form>
+
+          <!-- 선택한 날의 상세 계획 -->
+          <div id="day-card" class="card day-card">
+            <div class="day-head">
               <strong id="plan-date"></strong>
               <span><span id="plan-relative"></span> <span id="plan-dday" class="dday-chip"></span></span>
             </div>
-            <button id="plan-next" type="button" class="icon-btn" aria-label="다음 날">›</button>
+
+            <ul id="day-ranges" class="day-ranges"></ul>
+
+            <form id="plan-form" class="plan-form">
+              <input id="plan-input" type="text" maxlength="100" placeholder="이 날 할 일 추가" autocomplete="off" aria-label="할 일">
+              <button type="submit" class="primary-btn">추가</button>
+            </form>
+
+            <p id="plan-progress" class="plan-progress"></p>
+            <ul id="plan-list" class="plan-list"></ul>
+            <p id="plan-empty" class="empty">이 날 할 일이 없어요.</p>
           </div>
-          <button id="plan-today" type="button" class="text-btn small plan-today" hidden>오늘로 돌아가기</button>
-
-          <form id="plan-form" class="plan-form">
-            <input id="plan-input" type="text" maxlength="100" placeholder="할 일 추가" autocomplete="off" aria-label="할 일">
-            <button type="submit" class="primary-btn">추가</button>
-          </form>
-
-          <p id="plan-progress" class="plan-progress"></p>
-          <ul id="plan-list" class="plan-list"></ul>
-          <p id="plan-empty" class="empty">아직 계획이 없어요.</p>
         </div>
       </section>
 

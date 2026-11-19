@@ -25,6 +25,7 @@ export function showTab(tab) {
     else btn.removeAttribute('aria-current');
   });
   $('page-title').textContent = TABS[tab];
+  document.body.dataset.tab = tab; // 탭별 레이아웃(계획 탭은 넓게)
   window.scrollTo(0, 0);
   onChange(tab);
 }
@@ -45,5 +46,8 @@ export function initTabs({ onTabChange }) {
 export function setTabsVisible(visible) {
   $('nav-bar').hidden = !visible;
   document.body.classList.toggle('has-nav', visible);
-  if (!visible) $('page-title').textContent = '수능 D-Day 계산기';
+  if (!visible) {
+    $('page-title').textContent = '수능 D-Day 계산기';
+    delete document.body.dataset.tab;
+  }
 }
