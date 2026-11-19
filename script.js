@@ -1,4 +1,6 @@
-const STORAGE_KEY = 'suneungDdayState';
+const USERS_KEY = 'suneungDdayUsers';
+const SESSION_KEY = 'suneungDdaySession';
+const YEARS_AHEAD = 10; // 다가오는 수능부터 10년 뒤 학년도까지 선택 가능
 const EXAM_START_HOUR = 8;
 const EXAM_START_MINUTE = 40;
 
@@ -70,26 +72,92 @@ function formatKoreanDate(date) {
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${days[date.getDay()]})`;
 }
 
-function loadState() {
+/* ---------- 저장소 ---------- */
+
+function readJSON(key, fallback) {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    return JSON.parse(localStorage.getItem(key)) ?? fallback;
   } catch (error) {
-    return {};
+    return fallback;
   }
 }
 
-function saveState() {
+function writeJSON(key, value) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
   } catch (error) {
-    // 저장이 막힌 환경(시크릿 모드 등)에서는 저장 없이 계속 동작한다.
+    return false; // 저장이 막힌 환경(시크릿 모드 등)
   }
 }
+
+function removeKey(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    // 무시
+  }
+}
+
+const loadUsers = () => readJSON(USERS_KEY, {});
+const saveUsers = (users) => writeJSON(USERS_KEY, users);
+
+/* ---------- 로그인 ---------- */
+
+function randomSalt() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// 비밀번호는 그대로 저장하지 않고 salt를 붙여 SHA-256 해시로 저장한다.
+async function hashPassword(password, salt) {
+  const data = new TextEncoder().encode(`${salt}:${password}`);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function signUp(id, password) {
+  const users = loadUsers();
+  if (users[id]) throw new Error('이미 사용 중인 아이디입니다.');
+  const salt = randomSalt();
+  users[id] = {
+    salt,
+    hash: await hashPassword(password, salt),
+    createdAt: new Date().toISOString(),
+    settings: {}
+  };
+  if (!saveUsers(users)) throw new Error('이 브라우저에서는 저장할 수 없어요. 시크릿 모드인지 확인해 주세요.');
+}
+
+async function logIn(id, password) {
+  const user = loadUsers()[id];
+  if (!user || (await hashPassword(password, user.salt)) !== user.hash) {
+    throw new Error('아이디 또는 비밀번호가 올바르지 않습니다.');
+  }
+}
+
+/* ---------- 상태 ---------- */
 
 const today = startOfDay(new Date());
 const upcomingYear = findUpcomingAcademicYear(today);
-const state = { academicYear: upcomingYear, customDate: '', ...loadState() };
-if (state.academicYear < upcomingYear) state.academicYear = upcomingYear;
+const lastYear = upcomingYear + YEARS_AHEAD;
+let currentUser = null;
+let state = null;
+
+function loadUserState(id) {
+  const saved = loadUsers()[id]?.settings || {};
+  const merged = { academicYear: upcomingYear, customDate: '', ...saved };
+  merged.academicYear = Math.min(Math.max(Number(merged.academicYear) || upcomingYear, upcomingYear), lastYear);
+  return merged;
+}
+
+function saveState() {
+  const users = loadUsers();
+  if (!currentUser || !users[currentUser]) return;
+  users[currentUser].settings = state;
+  saveUsers(users);
+}
 
 function getTarget() {
   if (state.customDate) {
@@ -107,7 +175,7 @@ function getTarget() {
 function renderExamOptions() {
   const select = $('exam-select');
   select.innerHTML = '';
-  for (let year = upcomingYear; year < upcomingYear + 4; year += 1) {
+  for (let year = upcomingYear; year <= lastYear; year += 1) {
     const exam = getExam(year);
     const option = document.createElement('option');
     option.value = year;
@@ -196,11 +264,86 @@ $('clear-custom').addEventListener('click', () => {
   render();
 });
 
-renderExamOptions();
-render();
+/* ---------- 화면 전환 ---------- */
+
+let authMode = 'login';
+
+function setAuthMode(mode) {
+  authMode = mode;
+  const isSignup = mode === 'signup';
+  $('tab-login').classList.toggle('active', !isSignup);
+  $('tab-signup').classList.toggle('active', isSignup);
+  $('tab-login').setAttribute('aria-selected', String(!isSignup));
+  $('tab-signup').setAttribute('aria-selected', String(isSignup));
+  $('confirm-field').hidden = !isSignup;
+  $('auth-password').autocomplete = isSignup ? 'new-password' : 'current-password';
+  $('auth-submit').textContent = isSignup ? '가입하고 시작하기' : '로그인';
+  $('auth-error').textContent = '';
+}
+
+function enterApp(id) {
+  currentUser = id;
+  state = loadUserState(id);
+  writeJSON(SESSION_KEY, id);
+  $('auth-error').textContent = '';
+  $('auth-form').reset();
+  $('user-name').textContent = id;
+  $('auth-screen').hidden = true;
+  $('user-bar').hidden = false;
+  $('app-content').hidden = false;
+  renderExamOptions();
+  render();
+}
+
+function showAuth() {
+  currentUser = null;
+  state = null;
+  removeKey(SESSION_KEY);
+  $('auth-form').reset();
+  setAuthMode('login');
+  $('auth-screen').hidden = false;
+  $('user-bar').hidden = true;
+  $('app-content').hidden = true;
+  $('auth-id').focus();
+}
+
+$('tab-login').addEventListener('click', () => setAuthMode('login'));
+$('tab-signup').addEventListener('click', () => setAuthMode('signup'));
+$('logout-btn').addEventListener('click', showAuth);
+
+$('auth-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = $('auth-id').value.trim();
+  const password = $('auth-password').value;
+  const error = $('auth-error');
+
+  try {
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(id)) throw new Error('아이디는 영문·숫자·밑줄(_) 3~20자로 입력해 주세요.');
+    if (password.length < 4) throw new Error('비밀번호는 4자 이상 입력해 주세요.');
+    if (authMode === 'signup') {
+      if (password !== $('auth-password-confirm').value) throw new Error('비밀번호 확인이 일치하지 않습니다.');
+      await signUp(id, password);
+    } else {
+      await logIn(id, password);
+    }
+    enterApp(id);
+  } catch (err) {
+    error.textContent = err.message;
+  }
+});
+
+/* ---------- 시작 ---------- */
+
+const savedSession = readJSON(SESSION_KEY, null);
+if (savedSession && loadUsers()[savedSession]) {
+  enterApp(savedSession);
+} else {
+  showAuth();
+}
 
 let lastDay = toDateText(new Date());
 setInterval(() => {
+  if (!state) return;
   renderCountdown();
   const day = toDateText(new Date());
   if (day !== lastDay) {

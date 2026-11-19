@@ -11,8 +11,37 @@
     <header class="app-header">
       <p class="eyebrow">대학수학능력시험</p>
       <h1>수능 D-Day 계산기</h1>
+      <div id="user-bar" class="user-bar" hidden>
+        <span><strong id="user-name"></strong>님, 오늘도 화이팅!</span>
+        <button id="logout-btn" type="button" class="text-btn small">로그아웃</button>
+      </div>
     </header>
 
+    <section id="auth-screen" class="card auth-card">
+      <div class="tabs" role="tablist">
+        <button id="tab-login" type="button" role="tab" class="tab active" aria-selected="true">로그인</button>
+        <button id="tab-signup" type="button" role="tab" class="tab" aria-selected="false">회원가입</button>
+      </div>
+      <form id="auth-form" novalidate>
+        <label class="field">
+          <span>아이디</span>
+          <input id="auth-id" type="text" autocomplete="username" maxlength="20" placeholder="영문·숫자 3~20자">
+        </label>
+        <label class="field">
+          <span>비밀번호</span>
+          <input id="auth-password" type="password" autocomplete="current-password" placeholder="4자 이상">
+        </label>
+        <label id="confirm-field" class="field" hidden>
+          <span>비밀번호 확인</span>
+          <input id="auth-password-confirm" type="password" autocomplete="new-password">
+        </label>
+        <p id="auth-error" class="error" role="alert"></p>
+        <button id="auth-submit" type="submit" class="primary-btn">로그인</button>
+      </form>
+      <p class="hint">계정과 설정은 이 브라우저에만 저장됩니다. 다른 기기에서는 다시 가입해야 해요.</p>
+    </section>
+
+    <div id="app-content" hidden>
     <section class="card main-card" aria-live="polite">
       <div class="exam-meta">
         <span id="exam-label">2028학년도 수능</span>
@@ -60,6 +89,7 @@
       </label>
       <p class="hint">'예상' 표시된 날짜는 교육부 공식 발표 전 추정일입니다. 발표 후 날짜가 다르면 직접 입력해 주세요.</p>
     </section>
+    </div>
   </main>
 
   <script src="script.js"></script>
