@@ -345,15 +345,14 @@ body[data-tab="plan"] .app { max-width: 1080px; }
   background: #ae3ec9;
 }
 
-/* 날과 날 사이 구분선: 짧고 얇은 실선 (일요일 왼쪽에는 없음) */
-.cal-cell { position: relative; }
-.cal-cell:not(:first-child)::before {
-  content: '';
-  position: absolute;
-  left: 0; /* 칸의 왼쪽 경계 */
-  top: 8px;
-  bottom: 8px;
+/* 날과 날 사이 구분선: 칸과 따로 그려서(칸이 흐려져도 선은 그대로) 모두 같은 굵기·색·길이 */
+.cal-divider {
+  grid-row: 1 / -1;
+  justify-self: start;
   width: 1px;
+  margin: 8px 0;
   background: #e3e7f0;
   pointer-events: none;
 }
+.cal-cell { position: relative; z-index: 1; } /* 칸(선택 테두리)이 선보다 위 */
+.cal-bar { z-index: 2; }                       /* 기간 막대가 가장 위 */

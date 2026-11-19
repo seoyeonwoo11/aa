@@ -131,6 +131,16 @@ function renderCalendar() {
       row.append(cell);
     });
 
+    // 날 사이 구분선 (선택한 날의 양옆은 테두리와 겹치지 않게 뺀다)
+    const selectedIndex = editing ? -1 : week.findIndex((d) => toDateText(d) === selected);
+    for (let i = 1; i < 7; i++) {
+      if (selectedIndex !== -1 && (i === selectedIndex || i === selectedIndex + 1)) continue;
+      const divider = el('span', 'cal-divider');
+      divider.style.gridColumn = String(i + 1);
+      divider.setAttribute('aria-hidden', 'true');
+      row.append(divider);
+    }
+
     for (const seg of segments) {
       if (seg.lane >= MAX_LANES) continue;
       const { range } = seg;
