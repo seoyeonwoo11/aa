@@ -24,7 +24,7 @@ function renderOptions() {
 
 export function showSettings(next, user) {
   settings = next;
-  $('user-name').textContent = user.id;
+  $('user-name').textContent = user.email;
   renderOptions();
 }
 

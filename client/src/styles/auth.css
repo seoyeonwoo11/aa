@@ -19,3 +19,12 @@
   cursor: pointer;
 }
 .tab.active { background: var(--card); color: var(--primary); box-shadow: 0 1px 4px rgba(29, 36, 51, 0.1); }
+
+.auth-message {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 10px;
+}

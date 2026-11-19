@@ -9,7 +9,7 @@
 - **계획**: 월 달력에 기간 계획(시작~종료)을 막대로 표시, 날짜 칸을 눌러 그날의 기간 계획과 할 일 관리, 수능 날짜 표시
 - **설정**: 목표 수능 학년도(기본: 다음 수능, 시험 당일엔 내년 수능) 또는 날짜 직접 입력, 하루 목표 공부 시간, 로그아웃
 
-아이디·비밀번호로 로그인하며, 데이터는 사용자별로 저장됩니다. (지금은 브라우저 localStorage, 나중에 서버로 교체 예정)
+이메일로 로그인하고, 데이터는 [Supabase](https://supabase.com)에 저장되어 여러 기기에서 이어서 쓸 수 있습니다. 인터넷이 끊겨도 브라우저에 먼저 저장했다가 연결되면 올립니다.
 
 ## 실행
 
@@ -21,6 +21,19 @@ npm run dev      # 개발 서버 http://localhost:5173
 npm test         # 단위 테스트
 npm run build    # 배포용 빌드 → client/dist/
 ```
+
+## Supabase 설정 (처음 한 번)
+
+1. Supabase 대시보드 → **SQL Editor**에 [`supabase/schema.sql`](supabase/schema.sql)을 붙여 넣고 **Run**
+   (사용자별 데이터 테이블 `user_data`와, 본인 데이터만 읽고 쓰게 하는 보안 규칙(RLS)을 만듭니다)
+2. **Authentication → URL Configuration**
+   - Site URL: `https://seoyeonwoo11.github.io/aa/`
+   - Redirect URLs에 추가: `https://seoyeonwoo11.github.io/aa/`, `http://localhost:5173/`
+3. (선택) **Authentication → Sign In / Providers → Email**의 *Confirm email*을 끄면 가입 즉시 로그인됩니다.
+   켜 두면 가입 확인 메일의 링크를 눌러야 로그인됩니다.
+
+연결 정보는 `client/src/config.js`에 있습니다. 여기 들어가는 publishable 키는 공개용이라 코드에 있어도 되고,
+**service_role / secret 키는 절대 넣지 마세요.**
 
 ## 배포
 
@@ -44,24 +57,25 @@ PR에서는 테스트와 빌드만 확인합니다.
 │   │   ├── study/             # 공부 타이머·기록 계산
 │   │   ├── plan/              # 기간 계획·할 일, 달력 배치 계산
 │   │   ├── settings/          # 설정 기본값
-│   │   ├── services/          # 데이터 접근 계층 ← 서버가 생기면 여기만 바꾼다
-│   │   │   ├── authService.js #   회원가입·로그인·로그아웃·현재 사용자
-│   │   │   ├── settingsService.js
-│   │   │   ├── studyService.js
-│   │   │   └── planService.js
-│   │   ├── storage/           # localStorage 래퍼
+│   │   ├── services/          # 데이터 접근 계층 (Supabase)
+│   │   │   ├── supabaseClient.js
+│   │   │   ├── authService.js #   가입·로그인·로그아웃 (Supabase Auth)
+│   │   │   ├── userDataStore.js # user_data 테이블 + 브라우저 캐시 동기화
+│   │   │   ├── settingsService.js / studyService.js / planService.js
+│   │   │   └── legacyImport.js  # 예전 브라우저 전용 계정 데이터 가져오기
+│   │   ├── storage/           # localStorage 래퍼, 캐시·서버 중 최신 값 고르기
 │   │   ├── ui/                # 탭별 화면 (tabs, ddayView, studyView, planView, settingsView, authView)
 │   │   ├── utils/date.js      # 날짜 유틸
 │   │   └── styles/            # 화면별 스타일
 │   ├── tests/                 # Vitest 단위 테스트
 │   └── vite.config.js
 ├── .github/workflows/       # 자동 테스트·배포
-├── server/                    # 백엔드 (예정) — server/README.md 참고
+├── supabase/schema.sql        # 데이터베이스 테이블과 보안 규칙
 └── package.json               # npm workspaces 루트
 ```
 
 ## 규칙
 
 - **계산 로직은 `exam/`, `study/`, `plan/`, `utils/`에** 두고 DOM에 접근하지 않습니다. 그래야 테스트하기 쉽고 서버에서도 재사용할 수 있습니다.
-- **UI는 `services/`를 통해서만 데이터에 접근**합니다. 서비스 함수는 모두 Promise를 반환하므로, 서버 API로 바꿔도 UI 코드는 그대로입니다.
+- **UI는 `services/`를 통해서만 데이터에 접근**합니다. 서비스 함수는 모두 Promise를 반환합니다.
 - 새 수능 날짜가 공식 발표되면 `client/src/exam/examDates.js`의 `OFFICIAL_DATES`에 추가합니다.

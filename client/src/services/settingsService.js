@@ -1,14 +1,11 @@
-// 사용자별 설정 저장 (현재: localStorage, 나중에 '/api/settings'로 교체)
+// 사용자 설정 (Supabase user_data 'settings')
 
-import { loadUsers, saveUsers } from './authService.js';
+import { loadUserData, saveUserData } from './userDataStore.js';
 
 export async function loadSettings(userId) {
-  return loadUsers()[userId]?.settings ?? {};
+  return loadUserData('settings', userId, {});
 }
 
 export async function saveSettings(userId, settings) {
-  const users = loadUsers();
-  if (!users[userId]) return;
-  users[userId].settings = settings;
-  saveUsers(users);
+  await saveUserData('settings', userId, settings);
 }

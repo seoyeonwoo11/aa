@@ -1,41 +1,62 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { signUp, logIn, logOut, getCurrentUser } from '../src/services/authService.js';
-import { loadSettings, saveSettings } from '../src/services/settingsService.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// 테스트용 메모리 localStorage
-beforeEach(() => {
-  const store = new Map();
-  globalThis.localStorage = {
-    getItem: (k) => (store.has(k) ? store.get(k) : null),
-    setItem: (k, v) => store.set(k, String(v)),
-    removeItem: (k) => store.delete(k)
-  };
-});
+const auth = {
+  signUp: vi.fn(),
+  signInWithPassword: vi.fn(),
+  signOut: vi.fn(),
+  getSession: vi.fn(),
+  onAuthStateChange: vi.fn()
+};
+vi.mock('../src/services/supabaseClient.js', () => ({ supabase: { auth } }));
+globalThis.location = { origin: 'https://example.github.io', pathname: '/aa/' };
+
+const { signUp, logIn, logOut, getCurrentUser, toKoreanError } = await import('../src/services/authService.js');
+
+const user = { id: 'u1', email: 'kim@example.com', identities: [{ id: 'i1' }] };
+
+beforeEach(() => Object.values(auth).forEach((fn) => fn.mockReset()));
 
 describe('authService', () => {
-  it('signs up, keeps the session, and logs out', async () => {
-    await signUp('kim', '1234');
-    expect(await getCurrentUser()).toEqual({ id: 'kim' });
-    expect(localStorage.getItem('suneungDdayUsers')).not.toContain('1234');
+  it('validates input before calling Supabase', async () => {
+    await expect(signUp('not-an-email', '123456')).rejects.toThrow('이메일 주소');
+    await expect(logIn('kim@example.com', '123')).rejects.toThrow('6자 이상');
+    expect(auth.signUp).not.toHaveBeenCalled();
+  });
+
+  it('signs up and logs in immediately when email confirmation is off', async () => {
+    auth.signUp.mockResolvedValue({ data: { user, session: { user } }, error: null });
+    await expect(signUp('kim@example.com', 'secret1')).resolves.toEqual({ user: { id: 'u1', email: 'kim@example.com' }, needsConfirmation: false });
+    expect(auth.signUp.mock.calls[0][0].options.emailRedirectTo).toBe('https://example.github.io/aa/');
+  });
+
+  it('asks for email confirmation when there is no session', async () => {
+    auth.signUp.mockResolvedValue({ data: { user, session: null }, error: null });
+    await expect(signUp('kim@example.com', 'secret1')).resolves.toEqual({ user: null, needsConfirmation: true });
+  });
+
+  it('detects an already registered email', async () => {
+    auth.signUp.mockResolvedValue({ data: { user: { ...user, identities: [] }, session: null }, error: null });
+    await expect(signUp('kim@example.com', 'secret1')).rejects.toThrow('이미 가입된');
+  });
+
+  it('logs in, reads the session and logs out', async () => {
+    auth.signInWithPassword.mockResolvedValue({ data: { user }, error: null });
+    await expect(logIn('kim@example.com', 'secret1')).resolves.toEqual({ id: 'u1', email: 'kim@example.com' });
+    auth.getSession.mockResolvedValue({ data: { session: { user } } });
+    await expect(getCurrentUser()).resolves.toEqual({ id: 'u1', email: 'kim@example.com' });
+    auth.getSession.mockResolvedValue({ data: { session: null } });
+    await expect(getCurrentUser()).resolves.toBeNull();
+
+    auth.signOut.mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValueOnce({});
     await logOut();
-    expect(await getCurrentUser()).toBeNull();
+    expect(auth.signOut).toHaveBeenLastCalledWith({ scope: 'local' });
   });
 
-  it('rejects duplicate ids, bad passwords and invalid input', async () => {
-    await signUp('kim', '1234');
-    await expect(signUp('kim', '5678')).rejects.toThrow('이미 사용 중');
-    await expect(logIn('kim', 'wrong')).rejects.toThrow('올바르지 않습니다');
-    await expect(logIn('nobody', '1234')).rejects.toThrow('올바르지 않습니다');
-    await expect(signUp('a', '1234')).rejects.toThrow('아이디는');
-    await expect(signUp('lee', '12')).rejects.toThrow('비밀번호는');
-    expect(await logIn('kim', '1234')).toEqual({ id: 'kim' });
-  });
-
-  it('stores settings per user', async () => {
-    await signUp('kim', '1234');
-    await signUp('lee', 'abcd');
-    await saveSettings('kim', { academicYear: 2030, customDate: '' });
-    expect(await loadSettings('kim')).toEqual({ academicYear: 2030, customDate: '' });
-    expect(await loadSettings('lee')).toEqual({});
+  it('translates Supabase errors to Korean', async () => {
+    auth.signInWithPassword.mockResolvedValue({ data: {}, error: { code: 'invalid_credentials', message: 'Invalid login credentials' } });
+    await expect(logIn('kim@example.com', 'secret1')).rejects.toThrow('올바르지 않습니다');
+    expect(toKoreanError({ code: 'email_not_confirmed' }).message).toContain('가입 확인 링크');
+    expect(toKoreanError({ code: 'weak_password' }).message).toContain('6자 이상');
+    expect(toKoreanError(new TypeError('Failed to fetch')).message).toContain('인터넷');
   });
 });

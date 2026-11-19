@@ -1,12 +1,12 @@
-// 공부 기록 저장 (현재: localStorage, 나중에 '/api/study'로 교체)
+// 공부 기록 (Supabase user_data 'study')
 
 import { loadUserData, saveUserData } from './userDataStore.js';
 
 export async function loadStudy(userId) {
-  const data = loadUserData('study', userId, {});
+  const data = (await loadUserData('study', userId, {})) || {};
   return { sessions: Array.isArray(data.sessions) ? data.sessions : [], running: data.running ?? null };
 }
 
 export async function saveStudy(userId, data) {
-  saveUserData('study', userId, data);
+  await saveUserData('study', userId, data);
 }

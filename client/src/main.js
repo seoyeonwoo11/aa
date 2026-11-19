@@ -2,8 +2,9 @@
 
 import './styles/main.css';
 import { $ } from './ui/dom.js';
-import { getCurrentUser, logOut } from './services/authService.js';
+import { getCurrentUser, logOut, onAuthChange } from './services/authService.js';
 import { loadSettings, saveSettings } from './services/settingsService.js';
+import { flushUserData, retryUnsynced, clearUserCache } from './services/userDataStore.js';
 import { normalizeSettings } from './settings/settings.js';
 import { initAuthView, showAuthView, hideAuthView } from './ui/authView.js';
 import { initTabs, showTab, getTabFromHash, setTabsVisible } from './ui/tabs.js';
@@ -14,32 +15,47 @@ import { initSettingsView, showSettings } from './ui/settingsView.js';
 
 let currentUser = null;
 let settings = null;
+let entering = null; // 같은 사용자로 두 번 들어가지 않도록
 
-async function enterApp(user) {
+function enterApp(user) {
+  if (currentUser?.id === user.id) return entering;
   currentUser = user;
-  settings = normalizeSettings(await loadSettings(user.id));
-  hideAuthView();
+  entering = (async () => {
+    settings = normalizeSettings(await loadSettings(user.id));
+    hideAuthView();
 
-  setDdaySettings(settings);
-  showSettings(settings, user);
-  await Promise.all([showStudy(user.id, settings), showPlans(user.id, settings)]);
+    setDdaySettings(settings);
+    showSettings(settings, user);
+    await Promise.all([showStudy(user.id, settings), showPlans(user.id, settings)]);
 
-  $('app-content').hidden = false;
-  setTabsVisible(true);
-  showTab(getTabFromHash());
+    $('app-content').hidden = false;
+    setTabsVisible(true);
+    showTab(getTabFromHash());
+  })();
+  return entering;
 }
 
-async function leaveApp() {
-  await logOut();
+// 화면만 로그인 전 상태로 되돌린다.
+function resetToAuth(message) {
+  const userId = currentUser?.id;
   currentUser = null;
   settings = null;
+  entering = null;
   clearDdayView();
   clearStudy();
   clearPlans();
+  if (userId) clearUserCache(userId);
   $('app-content').hidden = true;
   setTabsVisible(false);
   history.replaceState(null, '', location.pathname);
-  showAuthView();
+  showAuthView(message);
+}
+
+async function leaveApp() {
+  clearStudy(); // 진행 중인 타이머를 멈추고 저장
+  await flushUserData(); // 서버에 못 올린 저장을 마저 올린 뒤
+  await logOut();
+  resetToAuth();
 }
 
 function updateSettings(next) {
@@ -63,4 +79,18 @@ initStudyView();
 initPlanView();
 initSettingsView({ onChange: updateSettings, onLogout: leaveApp });
 
-getCurrentUser().then((user) => (user ? enterApp(user) : showAuthView()));
+// 가입 확인 링크로 돌아왔을 때, 다른 탭에서 로그아웃했을 때 등
+onAuthChange((event, user) => {
+  if (event === 'SIGNED_OUT' && currentUser) resetToAuth();
+  else if (user && event === 'SIGNED_IN') enterApp(user);
+});
+
+// 앱을 나갈 때 기다리는 저장을 서버로 올리고, 연결이 돌아오면 못 올린 것을 다시 올린다.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushUserData();
+});
+window.addEventListener('online', () => currentUser && retryUnsynced(currentUser.id));
+
+getCurrentUser()
+  .then((user) => (user ? enterApp(user) : showAuthView()))
+  .catch(() => showAuthView('인터넷 연결을 확인해 주세요.'));

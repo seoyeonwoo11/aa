@@ -1,70 +1,83 @@
-// 로그인 서비스 (현재: 브라우저 localStorage 구현)
-//
-// 서버를 만들면 이 파일의 함수 내부만 fetch('/api/auth/...') 호출로 바꾸면 된다.
-// 함수 이름과 반환 형태(Promise)는 그대로 두어 UI 코드는 고치지 않아도 되게 한다.
+// 로그인 (Supabase Auth, 이메일 + 비밀번호)
 
-import { readJSON, writeJSON, removeKey } from '../storage/localStore.js';
+import { supabase } from './supabaseClient.js';
 
-const USERS_KEY = 'suneungDdayUsers';
-const SESSION_KEY = 'suneungDdaySession';
+export const MIN_PASSWORD_LENGTH = 6;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const ID_PATTERN = /^[A-Za-z0-9_]{3,20}$/;
-export const MIN_PASSWORD_LENGTH = 4;
+const toUser = (user) => (user ? { id: user.id, email: user.email } : null);
 
-export const loadUsers = () => readJSON(USERS_KEY, {});
-export const saveUsers = (users) => writeJSON(USERS_KEY, users);
-
-function toHex(bytes) {
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+// Supabase 오류를 한국어 안내로 바꾼다.
+export function toKoreanError(error) {
+  const code = error?.code || '';
+  const message = error?.message || '';
+  if (code === 'invalid_credentials' || /invalid login credentials/i.test(message)) {
+    return new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+  }
+  if (code === 'email_not_confirmed' || /email not confirmed/i.test(message)) {
+    return new Error('메일함에서 가입 확인 링크를 먼저 눌러 주세요.');
+  }
+  if (code === 'user_already_exists' || /already registered/i.test(message)) {
+    return new Error('이미 가입된 이메일입니다.');
+  }
+  if (code === 'weak_password' || /password should be/i.test(message)) {
+    return new Error(`비밀번호는 ${MIN_PASSWORD_LENGTH}자 이상, 너무 쉽지 않게 정해 주세요.`);
+  }
+  if (code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit' || /rate limit/i.test(message)) {
+    return new Error('요청이 너무 많아요. 잠시 후 다시 시도해 주세요.');
+  }
+  if (code === 'email_address_invalid' || /invalid.*email|email.*invalid/i.test(message)) {
+    return new Error('사용할 수 없는 이메일 주소입니다.');
+  }
+  if (error instanceof TypeError || /fetch|network/i.test(message)) {
+    return new Error('인터넷 연결을 확인해 주세요.');
+  }
+  return new Error('문제가 생겼어요. 잠시 후 다시 시도해 주세요.');
 }
 
-function randomSalt() {
-  return toHex(crypto.getRandomValues(new Uint8Array(16)));
-}
-
-// 비밀번호는 그대로 저장하지 않고 salt를 붙여 SHA-256 해시로 저장한다.
-async function hashPassword(password, salt) {
-  const data = new TextEncoder().encode(`${salt}:${password}`);
-  return toHex(new Uint8Array(await crypto.subtle.digest('SHA-256', data)));
-}
-
-export function validateCredentials(id, password) {
-  if (!ID_PATTERN.test(id)) throw new Error('아이디는 영문·숫자·밑줄(_) 3~20자로 입력해 주세요.');
+export function validateCredentials(email, password) {
+  if (!EMAIL_PATTERN.test(email)) throw new Error('이메일 주소를 정확히 입력해 주세요.');
   if (password.length < MIN_PASSWORD_LENGTH) throw new Error(`비밀번호는 ${MIN_PASSWORD_LENGTH}자 이상 입력해 주세요.`);
 }
 
-export async function signUp(id, password) {
-  validateCredentials(id, password);
-  const users = loadUsers();
-  if (users[id]) throw new Error('이미 사용 중인 아이디입니다.');
-  const salt = randomSalt();
-  users[id] = {
-    salt,
-    hash: await hashPassword(password, salt),
-    createdAt: new Date().toISOString(),
-    settings: {}
-  };
-  if (!saveUsers(users)) throw new Error('이 브라우저에서는 저장할 수 없어요. 시크릿 모드인지 확인해 주세요.');
-  writeJSON(SESSION_KEY, id);
-  return { id };
+// 반환: { user, needsConfirmation }
+// Supabase에서 '이메일 확인'이 켜져 있으면 user 없이 needsConfirmation: true
+export async function signUp(email, password) {
+  validateCredentials(email, password);
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: `${location.origin}${location.pathname}` }
+  });
+  if (error) throw toKoreanError(error);
+  // 이메일 확인이 켜져 있을 때 이미 가입된 주소면 identities가 빈 배열로 온다.
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    throw new Error('이미 가입된 이메일입니다.');
+  }
+  return { user: toUser(data.session?.user), needsConfirmation: !data.session };
 }
 
-export async function logIn(id, password) {
-  validateCredentials(id, password);
-  const user = loadUsers()[id];
-  if (!user || (await hashPassword(password, user.salt)) !== user.hash) {
-    throw new Error('아이디 또는 비밀번호가 올바르지 않습니다.');
-  }
-  writeJSON(SESSION_KEY, id);
-  return { id };
+export async function logIn(email, password) {
+  validateCredentials(email, password);
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw toKoreanError(error);
+  return toUser(data.user);
 }
 
 export async function logOut() {
-  removeKey(SESSION_KEY);
+  try {
+    await supabase.auth.signOut();
+  } catch {
+    await supabase.auth.signOut({ scope: 'local' }); // 오프라인이어도 이 기기에서는 로그아웃
+  }
 }
 
-// 새로고침 후 로그인 유지: 저장된 세션이 있고 계정이 남아 있으면 사용자 정보를 돌려준다.
 export async function getCurrentUser() {
-  const id = readJSON(SESSION_KEY, null);
-  return id && loadUsers()[id] ? { id } : null;
+  const { data } = await supabase.auth.getSession();
+  return toUser(data.session?.user);
+}
+
+// 로그인 상태 변화 알림: callback(event, user)
+export function onAuthChange(callback) {
+  supabase.auth.onAuthStateChange((event, session) => callback(event, toUser(session?.user)));
 }
