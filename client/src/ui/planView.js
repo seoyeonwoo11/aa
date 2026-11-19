@@ -219,6 +219,7 @@ function renderHome() {
 function renderRangeForm() {
   const form = $('range-form');
   form.hidden = !editing;
+  $('panel-plan').classList.toggle('editing', Boolean(editing));
   $('range-add').hidden = Boolean(editing);
   if (!editing) return;
 

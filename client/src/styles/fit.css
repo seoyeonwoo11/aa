@@ -1,0 +1,146 @@
+/* 한 화면 맞춤: 로그인한 뒤에는 앱 전체를 화면 높이에 맞추고,
+   길이가 늘어나는 목록(.fill-card 안의 .card-scroll)만 카드 안에서 스크롤한다.
+   내용이 정말 많아 최소 높이로도 안 들어가면 그때만 페이지가 스크롤된다. */
+
+body.has-nav .app {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100vh;
+  height: 100dvh;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  padding-bottom: calc(80px + env(safe-area-inset-bottom)); /* 하단 탭 자리 */
+}
+
+body.has-nav #app-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+body.has-nav .tab-panel:not(.plan-panel) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+body.has-nav .tab-panel > .card:not(.fill-card) { flex: none; }
+
+/* 남은 높이를 채우는 카드: 머리글·입력칸은 고정, 가운데 목록만 스크롤 */
+body.has-nav .fill-card {
+  flex: 1 1 0;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+}
+.card-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+.card-scroll > :first-child { margin-top: 12px; }
+.fill-card .plan-form { margin-top: 12px; flex: none; }
+
+/* ---------- 휴대폰에 맞게 조금 촘촘하게 ---------- */
+
+body.has-nav .card { padding: 16px; }
+body.has-nav .card h2 { font-size: 1rem; }
+
+/* 홈: D-Day 카드 */
+body.has-nav .dday { margin-top: 2px; font-size: clamp(2.75rem, 13vw, 4.5rem); }
+body.has-nav .exam-date { margin-top: 2px; font-size: 0.9rem; }
+body.has-nav .countdown { margin-top: 12px; gap: 6px; }
+body.has-nav .countdown div { padding: 6px 2px; border-radius: 10px; }
+body.has-nav .countdown span { font-size: 1.25rem; }
+body.has-nav .countdown small { font-size: 0.72rem; }
+.main-card .stat-grid { margin-top: 14px; }
+body.has-nav .stat-value { font-size: 1.05rem; }
+body.has-nav .stat-label { font-size: 0.75rem; }
+body.has-nav .progress-head { margin-top: 10px; font-size: 0.78rem; }
+body.has-nav .progress-bar { height: 8px; }
+
+/* 홈: 오늘 계획 */
+.today-plan-card .card-scroll > .day-ranges { margin-top: 12px; }
+.today-plan-card .empty { margin: 16px 0; }
+
+/* 공부 모드 */
+body.has-nav .chips { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+body.has-nav .chip { min-height: 34px; padding: 0 2px; font-size: 0.82rem; }
+body.has-nav .study-timer { margin-top: 14px; font-size: clamp(2.5rem, 12vw, 4rem); }
+body.has-nav .study-status { font-size: 0.9rem; }
+body.has-nav .study-actions { margin-top: 12px; }
+body.has-nav .study-card .hint:empty { display: none; }
+body.has-nav .week-chart { height: 104px; }
+body.has-nav .subject-totals li { padding: 6px 12px; }
+
+/* 목록 항목 높이 조금 줄이기 */
+body.has-nav .range-body { min-height: 46px; }
+body.has-nav .plan-item label { min-height: 40px; }
+
+/* ---------- 계획 탭 ---------- */
+
+body.has-nav .plan-panel {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  grid-template-rows: minmax(150px, 1fr) auto auto;
+}
+body.has-nav .plan-panel > .day-card { min-height: 0; }
+body.has-nav .range-add { margin-top: 8px; min-height: 42px; }
+
+@media (min-width: 960px) {
+  body.has-nav .plan-panel {
+    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: stretch;
+  }
+  body.has-nav .plan-panel > .calendar-card { align-self: start; }
+  body.has-nav .plan-panel > .day-card { grid-row: 1 / -1; }
+  body.has-nav .plan-panel:has(> .range-form:not([hidden])) > .day-card { grid-row: 1; }
+  body.has-nav .plan-panel > .range-form { align-self: start; }
+}
+
+/* 높이가 낮은 화면(태블릿 가로 등): 달력 줄 높이를 줄인다 */
+@media (max-height: 900px) and (min-width: 700px) {
+  .cal-week { --lane: 16px; grid-template-rows: 26px repeat(3, var(--lane)) 18px; }
+  .cal-num { width: 24px; height: 24px; font-size: 0.85rem; }
+  .cal-bar { font-size: 0.68rem; }
+  .calendar-card { padding: 14px 16px; }
+}
+
+/* 아주 작은 휴대폰(iPhone SE 등 높이 620px 이하) */
+@media (max-height: 620px) {
+  body.has-nav .app { gap: 10px; }
+  body.has-nav .tab-panel:not(.plan-panel), body.has-nav .plan-panel { gap: 10px; }
+  body.has-nav .card { padding: 14px; }
+  body.has-nav .study-timer { margin-top: 10px; font-size: 2.5rem; }
+  body.has-nav .week-chart { height: 84px; }
+  body.has-nav .dday { font-size: 2.6rem; }
+}
+
+/* 폭이 좁은 휴대폰: 과목 버튼 글자가 두 줄로 나뉘지 않게 */
+body.has-nav .chip { white-space: nowrap; }
+@media (max-width: 360px) {
+  body.has-nav .chips { gap: 4px; }
+  body.has-nav .chip { font-size: 0.74rem; }
+}
+
+/* 기간 계획 폼을 여는 동안: 달력과 폼이 한 화면에 다 안 들어가므로 계획 탭 안에서 스크롤 */
+body.has-nav .plan-panel.editing {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+  align-content: start;
+}
+@media (max-width: 959px) {
+  body.has-nav .plan-panel.editing > .day-card { display: none; }
+}

@@ -181,7 +181,8 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 /* ---------- 기간 계획 폼 ---------- */
 
 .range-form h2 { margin-bottom: 14px; }
-.range-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.range-dates { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.range-dates input { min-width: 0; }
 .range-dates .field { margin-bottom: 0; }
 .pick-hint { margin: 8px 0 14px; color: var(--primary); font-weight: 600; }
 
