@@ -1,0 +1,138 @@
+/* 태블릿·PC: 넓은 화면에 맞춘 배치 (휴대폰 배치는 그대로)
+   - 760px 이상: 탭마다 카드를 두 칸으로 나란히, 큰 숫자는 더 크게
+   - 1024px 이상: 하단 탭 바 대신 왼쪽 세로 메뉴 */
+
+@media (min-width: 760px) {
+  body.has-nav .app,
+  body.has-nav[data-tab="plan"] .app { max-width: 1240px; padding-left: 24px; padding-right: 24px; }
+  body.has-nav .app,
+  body.has-nav .tab-panel,
+  body.has-nav .tab-panel:not(.plan-panel),
+  body.has-nav .plan-panel { gap: 16px; }
+  body.has-nav .card { padding: 20px; }
+  body.has-nav .card h2 { font-size: 1.05rem; }
+
+  /* ---------- 홈: 왼쪽 D-Day, 오른쪽 오늘 계획 ---------- */
+  body.has-nav #panel-home {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  #panel-home > .main-card { display: flex; flex-direction: column; justify-content: center; padding: 28px; }
+  body.has-nav #panel-home .dday { font-size: clamp(4rem, 8.5vw, 7.5rem); }
+  body.has-nav #panel-home .exam-date { font-size: 1rem; }
+  body.has-nav #panel-home .countdown { margin-top: 20px; gap: 10px; }
+  body.has-nav #panel-home .countdown div { padding: 12px 4px; }
+  body.has-nav #panel-home .countdown span { font-size: clamp(1.4rem, 2.6vw, 2.2rem); }
+  body.has-nav #panel-home .stat-grid { margin-top: 22px; }
+  body.has-nav #panel-home .stat-value { font-size: 1.35rem; }
+  body.has-nav #panel-home .progress-head { margin-top: 16px; }
+
+  /* ---------- 공부 모드: 왼쪽 타이머, 오른쪽 오늘 공부·최근 7일 ---------- */
+  body.has-nav #panel-study {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: "timer today" "timer week";
+  }
+  #panel-study > .study-card { grid-area: timer; display: flex; flex-direction: column; justify-content: center; padding: 28px; }
+  #panel-study > .today-study-card { grid-area: today; }
+  #panel-study > .week-card { grid-area: week; }
+  body.has-nav #panel-study .study-timer { margin-top: 28px; font-size: clamp(3.5rem, 7.5vw, 6.5rem); }
+  body.has-nav #panel-study .study-status { font-size: 1rem; }
+  body.has-nav #panel-study .study-actions { width: min(440px, 100%); margin: 24px auto 0; }
+  body.has-nav #panel-study .chips { width: min(560px, 100%); margin: 0 auto; }
+  body.has-nav #panel-study .chip { min-height: 40px; font-size: 0.9rem; }
+  body.has-nav #panel-study .week-chart { height: 130px; }
+
+  /* ---------- 통계: 위 요약, 아래 왼쪽 날짜별 막대 + 오른쪽 과목별 ---------- */
+  body.has-nav #panel-stats {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "head head" "chart subject";
+  }
+  #panel-stats > .stats-head { grid-area: head; }
+  #panel-stats > .chart-card { grid-area: chart; }
+  #panel-stats > .subject-card { grid-area: subject; }
+  .stats-head .stat-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .stats-head .tile { padding: 10px 12px; }
+  .stats-head .tile-value { font-size: 1.15rem; }
+  #panel-stats .seg-legend { flex-direction: column; flex-wrap: nowrap; gap: 8px; }
+  #panel-stats .seg-legend li { justify-content: flex-start; }
+  #panel-stats .seg-value { margin-left: auto; }
+
+  #panel-stats > .subject-card { align-self: start; }
+
+  /* ---------- 계획: 태블릿 세로부터 왼쪽 달력, 오른쪽 그날 계획 ---------- */
+  body.has-nav .plan-panel {
+    grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "cal day" "cal form";
+    align-items: stretch;
+  }
+  body.has-nav .plan-panel > .calendar-card { align-self: start; }
+  body.has-nav .plan-panel > .day-card { grid-row: 1 / -1; }
+  body.has-nav .plan-panel:has(> .range-form:not([hidden])) > .day-card { grid-row: 1; }
+  body.has-nav .plan-panel > .range-form { align-self: start; }
+  body.has-nav .plan-panel.editing > .day-card { display: flex; } /* 넓은 화면에서는 폼을 열어도 그날 계획을 숨기지 않음 */
+
+  /* ---------- 설정: 왼쪽 목표·모의고사, 오른쪽 설치·화면·계정 ---------- */
+  body.has-nav #panel-settings {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "goal install"
+      "goal theme"
+      "mock account"
+      "mock .";
+    align-content: start;
+  }
+  #panel-settings > .goal-card { grid-area: goal; }
+  #panel-settings > .mock-card { grid-area: mock; align-self: start; }
+  #panel-settings > .install-card { grid-area: install; }
+  #panel-settings > .theme-row { grid-area: theme; }
+  #panel-settings > .account-row { grid-area: account; }
+}
+
+/* ---------- PC·태블릿 가로: 왼쪽 세로 메뉴 ---------- */
+@media (min-width: 1024px) {
+  body.has-nav { padding-left: 96px; }
+  body.has-nav .app { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+
+  .nav-bar {
+    top: 0;
+    right: auto;
+    width: 96px;
+    grid-template-columns: none;
+    grid-auto-rows: min-content;
+    align-content: start;
+    gap: 6px;
+    padding: calc(20px + env(safe-area-inset-top)) 10px 20px;
+    border-top: 0;
+    border-right: 1px solid var(--border);
+  }
+  /* 메뉴 맨 위 앱 아이콘 */
+  .nav-bar::before {
+    content: '하';
+    justify-self: center;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 18px;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #3457d5, #6c8cff);
+    border-radius: 13px;
+  }
+  .nav-item { min-height: 66px; gap: 4px; font-size: 0.78rem; border-radius: 14px; }
+  .nav-item[aria-current="page"] { background: var(--primary-soft); }
+}
+
+/* 태블릿 세로(760~1023px): 오른쪽 그날 계획 칸을 조금 넓게 */
+@media (min-width: 760px) and (max-width: 1023px) {
+  body.has-nav .plan-panel { grid-template-columns: minmax(0, 1.25fr) minmax(300px, 1fr); }
+}

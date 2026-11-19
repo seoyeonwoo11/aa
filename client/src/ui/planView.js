@@ -435,7 +435,7 @@ export function initPlanView() {
     selected = date;
     if (cell.classList.contains('outside')) showMonthOf(date);
     render();
-    if (!isCollapsed() && window.matchMedia('(max-width: 959px)').matches) {
+    if (!isCollapsed() && window.matchMedia('(max-width: 759px)').matches) {
       $('day-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
