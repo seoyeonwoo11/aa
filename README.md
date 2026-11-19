@@ -17,6 +17,15 @@ npm test         # 단위 테스트
 npm run build    # 배포용 빌드 → client/dist/
 ```
 
+## 배포
+
+`main`에 머지되면 GitHub Actions(`.github/workflows/deploy.yml`)가 테스트 → 빌드 → GitHub Pages 배포를 자동으로 합니다.
+PR에서는 테스트와 빌드만 확인합니다.
+
+- 주소: https://seoyeonwoo11.github.io/aa/
+- 처음 한 번: 저장소 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 설정
+- 수동 배포: Actions 탭 → *Test and deploy* → *Run workflow*
+
 ## 폴더 구조
 
 ```
@@ -41,6 +50,7 @@ npm run build    # 배포용 빌드 → client/dist/
 │   │   └── styles/            # base / auth / dday 스타일
 │   ├── tests/                 # Vitest 단위 테스트
 │   └── vite.config.js
+├── .github/workflows/       # 자동 테스트·배포
 ├── server/                    # 백엔드 (예정) — server/README.md 참고
 └── package.json               # npm workspaces 루트
 ```
