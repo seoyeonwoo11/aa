@@ -16,13 +16,29 @@ export function getElapsedSeconds(running, now = Date.now()) {
 }
 
 export function startTimer(running, subject, now = Date.now()) {
-  if (!running) return { subject, firstStartedAt: now, startedAt: now, elapsedBefore: 0 };
-  return running.startedAt ? running : { ...running, startedAt: now };
+  if (!running) return { subject, firstStartedAt: now, startedAt: now, elapsedBefore: 0, lastSeenAt: now };
+  if (running.startedAt) return running;
+  const { autoPausedAt, ...rest } = running;
+  return { ...rest, startedAt: now, lastSeenAt: now };
 }
 
 export function pauseTimer(running, now = Date.now()) {
   if (!running?.startedAt) return running;
   return { ...running, startedAt: null, elapsedBefore: getElapsedSeconds(running, now) };
+}
+
+// 앱(화면)을 나가서 멈춘 경우. 돌아왔을 때 얼마나 나가 있었는지 알 수 있게 시각을 남긴다.
+export function autoPauseTimer(running, now = Date.now()) {
+  if (!running?.startedAt) return running;
+  return { ...pauseTimer(running, now), autoPausedAt: now };
+}
+
+// 화면을 나간 이벤트를 받지 못하고 앱이 꺼진 경우(강제 종료 등):
+// 마지막으로 앱이 살아 있던 시각에 멈춘 것으로 처리해, 나가 있던 시간이 공부 시간에 들어가지 않게 한다.
+export function recoverTimer(running, now = Date.now()) {
+  if (!running?.startedAt) return running;
+  const lastSeen = Math.min(running.lastSeenAt ?? now, now);
+  return autoPauseTimer(running, Math.max(lastSeen, running.startedAt));
 }
 
 // 타이머를 끝내고 저장할 기록을 돌려준다. 1분 미만이면 null.

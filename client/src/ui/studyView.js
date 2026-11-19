@@ -4,7 +4,7 @@ import { $ } from './dom.js';
 import { toDateText } from '../utils/date.js';
 import { loadStudy, saveStudy } from '../services/studyService.js';
 import {
-  SUBJECTS, MIN_SESSION_SECONDS, getElapsedSeconds, startTimer, pauseTimer, finishTimer,
+  SUBJECTS, MIN_SESSION_SECONDS, getElapsedSeconds, startTimer, pauseTimer, autoPauseTimer, recoverTimer, finishTimer,
   totalsForDate, lastDaysTotals, formatClock, formatDuration
 } from '../study/studyLog.js';
 
@@ -37,6 +37,20 @@ async function keepScreenOn(on) {
   }
 }
 
+function autoPause() {
+  if (!isRunning()) return;
+  data.running = autoPauseTimer(data.running);
+  persist(); // localStorage 저장은 즉시 끝나므로 앱이 닫히기 전에 기록된다.
+  renderAll();
+}
+
+function showAutoPauseNotice() {
+  const at = data?.running?.autoPausedAt;
+  if (!at) return;
+  const away = Math.max(0, Math.round((Date.now() - at) / 1000));
+  $('study-notice').textContent = `앱을 나가서 일시정지했어요.${away >= 60 ? ` (${formatDuration(away)} 동안 자리 비움)` : ''}`;
+}
+
 function renderChips() {
   const locked = Boolean(data?.running);
   const active = data?.running?.subject ?? subject;
@@ -54,6 +68,7 @@ function renderTimer() {
   $('study-start').hidden = isRunning();
   $('study-start').textContent = running ? '계속' : '시작';
   $('study-pause').hidden = !isRunning();
+  $('autopause-hint').hidden = !isRunning();
   $('study-stop').hidden = !running;
 }
 
@@ -166,12 +181,20 @@ export function initStudyView() {
   });
 
   // 다른 앱에 갔다 오면 화면 켜짐을 다시 요청한다.
+  // 앱을 나가면(홈 화면, 다른 앱, 다른 탭, 화면 잠금) 타이머를 자동으로 멈춘다.
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && isRunning()) keepScreenOn(true);
+    if (document.visibilityState === 'hidden') autoPause();
+    else showAutoPauseNotice();
   });
+  window.addEventListener('pagehide', autoPause);
 
   setInterval(() => {
     if (!data?.running) return;
+    // 강제 종료에 대비해 앱이 살아 있던 마지막 시각을 10초마다 남긴다.
+    if (isRunning() && Date.now() - (data.running.lastSeenAt ?? 0) >= 10000) {
+      data.running = { ...data.running, lastSeenAt: Date.now() };
+      persist();
+    }
     renderTimer();
     renderToday();
     renderWeek();
@@ -183,9 +206,13 @@ export async function showStudy(id, settings) {
   goalMinutes = settings.dailyGoalMinutes;
   data = await loadStudy(id);
   if (data.running) subject = data.running.subject;
+  if (isRunning()) {
+    data.running = recoverTimer(data.running);
+    await persist();
+  }
   $('study-notice').textContent = '';
+  showAutoPauseNotice();
   renderAll();
-  if (isRunning()) keepScreenOn(true);
 }
 
 export function setStudySettings(settings) {
@@ -202,6 +229,7 @@ export function refreshStudy() {
 }
 
 export function clearStudy() {
+  autoPause(); // 로그아웃하면 진행 중인 타이머를 멈춘다.
   keepScreenOn(false);
   userId = null;
   data = null;

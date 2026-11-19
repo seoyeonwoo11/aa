@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getElapsedSeconds, startTimer, pauseTimer, finishTimer, totalsForDate, lastDaysTotals, formatClock, formatDuration
+  getElapsedSeconds, startTimer, pauseTimer, autoPauseTimer, recoverTimer, finishTimer, totalsForDate, lastDaysTotals, formatClock, formatDuration
 } from '../src/study/studyLog.js';
 
 const at = (h, m = 0, s = 0) => new Date(2026, 10, 19, h, m, s).getTime();
@@ -15,6 +15,22 @@ describe('study timer', () => {
     expect(r.subject).toBe('수학');
     expect(getElapsedSeconds(r, at(10, 15))).toBe(2700);
     expect(finishTimer(r, at(10, 15))).toEqual({ date: '2026-11-19', subject: '수학', seconds: 2700 });
+  });
+
+  it('auto-pauses when leaving and clears the mark on resume', () => {
+    let r = autoPauseTimer(startTimer(null, '수학', at(9)), at(9, 20));
+    expect(r).toMatchObject({ startedAt: null, elapsedBefore: 1200, autoPausedAt: at(9, 20) });
+    expect(getElapsedSeconds(r, at(11))).toBe(1200);
+    r = startTimer(r, '수학', at(11));
+    expect(r.autoPausedAt).toBeUndefined();
+    expect(getElapsedSeconds(r, at(11, 10))).toBe(1800);
+  });
+
+  it('recovers a timer left running by a killed app at its last heartbeat', () => {
+    const r = { ...startTimer(null, '영어', at(9)), lastSeenAt: at(9, 40) };
+    const recovered = recoverTimer(r, at(13));
+    expect(getElapsedSeconds(recovered, at(13))).toBe(2400);
+    expect(recovered.autoPausedAt).toBe(at(9, 40));
   });
 
   it('drops sessions shorter than a minute', () => {
