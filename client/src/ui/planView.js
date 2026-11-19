@@ -9,7 +9,7 @@ import { loadPlans, savePlans } from '../services/planService.js';
 import { getMonthGrid, layoutWeek } from '../plan/calendar.js';
 import {
   RANGE_COLORS, REPEAT_PRESETS, addPlan, togglePlan, removePlan, planProgress,
-  addRepeat, toggleRepeatDone, stopRepeat, itemsForDate,
+  addRepeat, toggleRepeatDone, stopRepeat, itemsForDate, setMemo, memoFor,
   addRange, updateRange, toggleRange, removeRange, rangesOnDate, rangeDayInfo
 } from '../plan/planList.js';
 
@@ -109,6 +109,8 @@ function renderCalendar() {
 
       const head = el('span', 'cal-cell-head');
       head.append(el('span', 'cal-num', String(day.getDate())));
+      const hasMemo = Boolean(memoFor(plans, date));
+      if (hasMemo) head.append(memoIcon());
       if (date === examDate) head.append(el('span', 'cal-tag', '수능'));
       else if (date === customDate) head.append(el('span', 'cal-tag', '목표'));
       for (const mock of mocks[date] || []) head.append(el('span', 'cal-tag mock', mock.short));
@@ -126,7 +128,8 @@ function renderCalendar() {
       cell.setAttribute('aria-label', [
         formatKoreanDate(day),
         dayRanges ? `기간 계획 ${dayRanges}개` : '',
-        items.length ? `할 일 ${items.length}개` : ''
+        items.length ? `할 일 ${items.length}개` : '',
+        hasMemo ? '메모 있음' : ''
       ].filter(Boolean).join(', '));
       row.append(cell);
     });
@@ -212,11 +215,82 @@ function todoItem(item, removable) {
 
 function renderDay() {
   $('plan-date').textContent = formatKoreanDate(parseDate(selected));
+  renderMemo();
   $('day-ranges').replaceChildren(...rangesOnDate(plans.ranges, selected).map((r) => rangeItem(r, selected, true)));
 
   const items = itemsForDate(plans, selected);
   $('plan-empty').hidden = items.length > 0;
   $('plan-list').replaceChildren(...items.map((item) => todoItem(item, true)));
+}
+
+/* ---------- 날짜별 메모 ---------- */
+
+const MEMO_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg>';
+
+function memoIcon() {
+  const icon = el('span', 'cal-memo');
+  icon.innerHTML = MEMO_SVG; // 고정된 아이콘 모양 (사용자 글 아님)
+  return icon;
+}
+
+let memoDate = null; // 지금 메모를 고치고 있는 날짜 (없으면 null)
+let memoTimer = null;
+
+function renderMemo() {
+  // 다른 날을 고르면 쓰던 메모를 저장하고 편집을 닫는다.
+  if (memoDate && memoDate !== selected) saveMemoNow(true);
+  const memo = memoFor(plans, selected);
+  const editing = memoDate === selected;
+  $('memo-view').hidden = !memo || editing;
+  $('memo-view').textContent = memo;
+  $('memo-editor').hidden = !editing;
+  $('memo-btn').hidden = editing;
+  $('memo-btn').classList.toggle('has-memo', Boolean(memo));
+  $('memo-btn').setAttribute('aria-expanded', String(editing));
+}
+
+function openMemo() {
+  memoDate = selected;
+  $('memo-input').value = memoFor(plans, selected);
+  $('memo-status').textContent = '';
+  renderMemo();
+  const input = $('memo-input');
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+}
+
+// 쓰는 동안 잠깐 멈추면 저장한다.
+function scheduleMemoSave() {
+  clearTimeout(memoTimer);
+  $('memo-status').textContent = '';
+  memoTimer = setTimeout(() => saveMemoNow(false), 600);
+}
+
+function saveMemoNow(close) {
+  clearTimeout(memoTimer);
+  if (!memoDate) return;
+  const date = memoDate;
+  if (close) memoDate = null;
+  const text = $('memo-input').value;
+  if (text.replace(/\s+$/, '') !== memoFor(plans, date)) {
+    commit(setMemo(plans, date, text));
+    if (!close) $('memo-status').textContent = '저장됨';
+  } else if (close) {
+    render();
+  }
+}
+
+function initMemo() {
+  $('memo-btn').addEventListener('click', openMemo);
+  $('memo-view').addEventListener('click', openMemo);
+  $('memo-input').addEventListener('input', scheduleMemoSave);
+  $('memo-done').addEventListener('click', () => saveMemoNow(true));
+  $('memo-delete').addEventListener('click', () => {
+    if (!memoFor(plans, memoDate) && !$('memo-input').value.trim()) return saveMemoNow(true);
+    if (!confirm('이 날의 메모를 지울까요?')) return;
+    $('memo-input').value = '';
+    saveMemoNow(true);
+  });
 }
 
 /* ---------- 홈 화면의 오늘 계획 ---------- */
@@ -315,6 +389,7 @@ function moveMonth(n) {
 }
 
 export function initPlanView() {
+  initMemo();
   initHomeCard();
   $('cal-prev').addEventListener('click', () => (isCollapsed() ? moveWeek(-1) : moveMonth(-1)));
   $('cal-next').addEventListener('click', () => (isCollapsed() ? moveWeek(1) : moveMonth(1)));

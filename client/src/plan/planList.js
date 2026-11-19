@@ -4,7 +4,8 @@
 //   days:       { 'YYYY-MM-DD': [{ id, text, done }] },        // 날짜별 할 일
 //   ranges:     [{ id, title, start, end, color, done }],      // 기간 계획 (start~end, 양 끝 포함)
 //   repeats:    [{ id, text, days: [0~6], start, end }],       // 반복 할 일 (요일마다, end는 없으면 null)
-//   repeatDone: { 'YYYY-MM-DD': [repeatId] }                   // 반복 할 일을 끝낸 날
+//   repeatDone: { 'YYYY-MM-DD': [repeatId] },                  // 반복 할 일을 끝낸 날
+//   memos:      { 'YYYY-MM-DD': '메모 글' }                     // 날짜별 메모
 // }
 
 import { parseDate, daysBetween } from '../utils/date.js';
@@ -20,7 +21,7 @@ const isDateText = (v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)
 
 // 이전 형식({ 날짜: [할 일] })도 그대로 읽는다.
 export function normalizePlans(raw) {
-  const empty = { days: {}, ranges: [], repeats: [], repeatDone: {} };
+  const empty = { days: {}, ranges: [], repeats: [], repeatDone: {}, memos: {} };
   if (!raw || typeof raw !== 'object') return empty;
   if (!('days' in raw) && !('ranges' in raw) && !('repeats' in raw)) return { ...empty, days: raw };
   const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
@@ -28,7 +29,10 @@ export function normalizePlans(raw) {
     days: isObject(raw.days) ? raw.days : {},
     ranges: Array.isArray(raw.ranges) ? raw.ranges.filter((r) => isDateText(r.start) && isDateText(r.end)) : [],
     repeats: Array.isArray(raw.repeats) ? raw.repeats.filter((r) => isDateText(r.start) && Array.isArray(r.days)) : [],
-    repeatDone: isObject(raw.repeatDone) ? raw.repeatDone : {}
+    repeatDone: isObject(raw.repeatDone) ? raw.repeatDone : {},
+    memos: isObject(raw.memos)
+      ? Object.fromEntries(Object.entries(raw.memos).filter(([d, t]) => isDateText(d) && typeof t === 'string' && t.trim()))
+      : {}
   };
 }
 
@@ -124,6 +128,21 @@ export function itemsForDate(plans, date) {
   const todos = (plans.days[date] || []).map((t) => ({ ...t, repeat: false }));
   return [...repeats, ...todos];
 }
+
+/* ---------- 날짜별 메모 ---------- */
+
+export const MAX_MEMO_LENGTH = 2000;
+
+// 빈 메모(공백뿐)는 지운다.
+export function setMemo(plans, date, text) {
+  const value = String(text ?? '').replace(/\s+$/, '').slice(0, MAX_MEMO_LENGTH);
+  const memos = { ...plans.memos };
+  if (value.trim()) memos[date] = value;
+  else delete memos[date];
+  return { ...plans, memos };
+}
+
+export const memoFor = (plans, date) => plans.memos?.[date] || '';
 
 export function planProgress(items = []) {
   const done = items.filter((p) => p.done).length;

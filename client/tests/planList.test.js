@@ -24,7 +24,7 @@ describe('daily plans', () => {
 
   it('reads the old storage format', () => {
     const old = { '2026-11-19': [{ id: 'a', text: 'x', done: false }] };
-    expect(normalizePlans(old)).toEqual({ days: old, ranges: [], repeats: [], repeatDone: {} });
+    expect(normalizePlans(old)).toEqual({ days: old, ranges: [], repeats: [], repeatDone: {}, memos: {} });
   });
 });
 
@@ -105,5 +105,23 @@ describe('repeating plans', () => {
     expect(describeDays([0, 6])).toBe('주말');
     expect(describeDays([5, 1, 3])).toBe('월·수·금');
     expect(describeDays([0, 2])).toBe('화·일');
+  });
+});
+
+import { setMemo, memoFor, MAX_MEMO_LENGTH } from '../src/plan/planList.js';
+
+describe('memos', () => {
+  it('saves, trims trailing space, and deletes empty memos', () => {
+    let plans = setMemo(normalizePlans(null), '2026-11-19', '수학 기출 오답 정리\n  내일 다시 보기  \n\n');
+    expect(memoFor(plans, '2026-11-19')).toBe('수학 기출 오답 정리\n  내일 다시 보기');
+    expect(memoFor(plans, '2026-11-20')).toBe('');
+    plans = setMemo(plans, '2026-11-19', '   \n ');
+    expect(plans.memos).toEqual({});
+    expect(setMemo(normalizePlans(null), '2026-11-19', 'x'.repeat(3000)).memos['2026-11-19']).toHaveLength(MAX_MEMO_LENGTH);
+  });
+
+  it('drops invalid memos when reading saved data', () => {
+    expect(normalizePlans({ days: {}, memos: { '2026-11-19': '메모', bad: 'x', '2026-11-20': '  ', '2026-11-21': 3 } }).memos)
+      .toEqual({ '2026-11-19': '메모' });
   });
 });

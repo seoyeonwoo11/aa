@@ -356,3 +356,64 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 }
 .cal-cell { position: relative; z-index: 1; } /* 칸(선택 테두리)이 선보다 위 */
 .cal-bar { z-index: 2; }                       /* 기간 막대가 가장 위 */
+
+/* ---------- 달력: 날짜 숫자는 왼쪽 위, 메모가 있으면 숫자 옆에 메모장 그림 ---------- */
+
+.cal-cell { padding: 3px 4px; }
+.cal-cell-head { justify-content: flex-start; gap: 1px; }
+.cal-memo { display: inline-grid; place-items: center; flex: none; width: 14px; height: 14px; color: var(--muted); }
+.cal-memo svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cal-cell.selected .cal-memo { color: var(--primary); }
+@media (min-width: 700px) {
+  .cal-memo { width: 16px; height: 16px; }
+  .cal-memo svg { width: 14px; height: 14px; }
+}
+
+/* ---------- 선택한 날의 메모 ---------- */
+
+.day-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.memo-btn { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.memo-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.memo-btn.has-memo { color: var(--primary); border-color: var(--primary); }
+
+.memo-view {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  background: var(--estimated-bg);
+  border: 0;
+  border-left: 3px solid var(--estimated-text);
+  border-radius: 10px;
+  cursor: pointer;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.memo-view[hidden] { display: none; }
+
+.memo-editor { margin-top: 12px; display: grid; gap: 8px; }
+.memo-editor textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  resize: vertical;
+}
+.memo-actions { display: flex; align-items: center; gap: 8px; }
+.memo-status { flex: 1; font-size: 0.8rem; color: var(--muted); }
+.memo-done { width: auto; min-height: 36px; padding: 0 16px; }
