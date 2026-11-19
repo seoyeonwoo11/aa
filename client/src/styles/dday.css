@@ -74,7 +74,7 @@
   border-radius: 999px;
   overflow: hidden;
 }
-#progress-fill {
+.progress-bar > div {
   height: 100%;
   width: 0;
   background: linear-gradient(90deg, var(--primary), var(--accent));

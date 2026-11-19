@@ -1,0 +1,97 @@
+/* 공부 모드 */
+
+.study-card { text-align: center; }
+
+.chips {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+@media (min-width: 560px) {
+  .chips { grid-template-columns: repeat(6, 1fr); }
+}
+.chip {
+  min-height: 38px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.chip[aria-checked="true"] { color: #fff; background: var(--primary); border-color: var(--primary); }
+.chip:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.study-timer {
+  margin: 22px 0 0;
+  font-size: clamp(3rem, 15vw, 4.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.study-timer.active { color: var(--primary); }
+
+.study-status { margin: 6px 0 0; color: var(--muted); font-weight: 600; }
+
+.study-actions {
+  margin-top: 18px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+}
+
+.big-number { font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+
+#goal-fill { background: var(--primary); }
+
+.subject-totals {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.subject-totals li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-radius: 10px;
+  font-size: 0.92rem;
+}
+.subject-totals:empty { display: none; }
+
+.week-chart {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  height: 160px;
+}
+.week-col {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 4px;
+  text-align: center;
+  min-width: 0;
+}
+.week-value { font-size: 0.7rem; color: var(--muted); min-height: 1em; }
+.week-track {
+  display: flex;
+  align-items: flex-end;
+  background: var(--bg);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.week-bar {
+  width: 100%;
+  background: #a9b8ee;
+  border-radius: 8px 8px 0 0;
+  transition: height 0.3s ease;
+}
+.week-bar.today { background: var(--primary); }
+.week-label { font-size: 0.78rem; color: var(--muted); }

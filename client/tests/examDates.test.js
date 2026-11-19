@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseDate, toDateText } from '../src/utils/date.js';
-import { getExam, estimateExamDate, findUpcomingAcademicYear, getSelectableYears, YEARS_AHEAD } from '../src/exam/examDates.js';
+import { getExam, estimateExamDate, findUpcomingAcademicYear, getDefaultAcademicYear, getSelectableYears, YEARS_AHEAD } from '../src/exam/examDates.js';
 
 describe('exam dates', () => {
   it('uses official dates when announced', () => {
@@ -23,6 +23,14 @@ describe('exam dates', () => {
   it(`offers the upcoming exam through ${YEARS_AHEAD} years later`, () => {
     const years = getSelectableYears(parseDate('2026-11-20'));
     expect(years[0]).toBe(2028);
+    expect(years.at(-1)).toBe(2028 + YEARS_AHEAD);
+  });
+
+  it('defaults to next year\'s exam on exam day', () => {
+    expect(getDefaultAcademicYear(parseDate('2026-11-19'))).toBe(2028);
+    expect(getDefaultAcademicYear(parseDate('2026-11-18'))).toBe(2027);
+    const years = getSelectableYears(parseDate('2026-11-19'));
+    expect(years[0]).toBe(2027);
     expect(years.at(-1)).toBe(2028 + YEARS_AHEAD);
   });
 });

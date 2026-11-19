@@ -1,13 +1,4 @@
-/* 로그인 화면과 상단 사용자 표시 */
-
-.user-bar {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.92rem;
-}
+/* 로그인 화면 */
 
 .tabs {
   display: grid;

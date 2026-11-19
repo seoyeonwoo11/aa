@@ -2,18 +2,15 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f6fb">
   <title>수능 D-Day 계산기</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 <body>
   <main class="app">
     <header class="app-header">
-      <h1>수능 D-Day 계산기</h1>
-      <div id="user-bar" class="user-bar" hidden>
-        <span><strong id="user-name"></strong>님</span>
-        <button id="logout-btn" type="button" class="text-btn small">로그아웃</button>
-      </div>
+      <h1 id="page-title">수능 D-Day 계산기</h1>
     </header>
 
     <section id="auth-screen" class="card auth-card">
@@ -41,53 +38,149 @@
     </section>
 
     <div id="app-content" hidden>
-      <section class="card main-card" aria-live="polite">
-        <div class="exam-meta">
-          <span id="exam-label"></span>
-          <span id="exam-badge" class="badge"></span>
-        </div>
-        <p id="dday" class="dday"></p>
-        <p id="exam-date" class="exam-date"></p>
+      <!-- 홈: D-Day -->
+      <section id="panel-home" class="tab-panel" hidden>
+        <div class="card main-card" aria-live="polite">
+          <div class="exam-meta">
+            <span id="exam-label"></span>
+            <span id="exam-badge" class="badge"></span>
+          </div>
+          <p id="dday" class="dday"></p>
+          <p id="exam-date" class="exam-date"></p>
 
-        <div class="countdown" aria-label="시험 시작까지 남은 시간">
-          <div><span id="cd-days">0</span><small>일</small></div>
-          <div><span id="cd-hours">00</span><small>시간</small></div>
-          <div><span id="cd-minutes">00</span><small>분</small></div>
-          <div><span id="cd-seconds">00</span><small>초</small></div>
+          <div class="countdown" aria-label="시험 시작까지 남은 시간">
+            <div><span id="cd-days">0</span><small>일</small></div>
+            <div><span id="cd-hours">00</span><small>시간</small></div>
+            <div><span id="cd-minutes">00</span><small>분</small></div>
+            <div><span id="cd-seconds">00</span><small>초</small></div>
+          </div>
+          <p class="hint">1교시 08:40 기준</p>
         </div>
-        <p class="hint">1교시 08:40 기준</p>
+
+        <div class="card">
+          <div class="stat-grid">
+            <div><span id="stat-weeks" class="stat-value">0주</span><span class="stat-label">남은 주</span></div>
+            <div><span id="stat-weekends" class="stat-value">0번</span><span class="stat-label">남은 주말</span></div>
+            <div><span id="stat-months" class="stat-value">0개월</span><span class="stat-label">남은 개월</span></div>
+          </div>
+          <div id="progress-section">
+            <div class="progress-head">
+              <span>지난 수능 이후 진행률</span>
+              <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar"><div id="progress-fill"></div></div>
+          </div>
+        </div>
       </section>
 
-      <section class="card">
-        <div class="stat-grid">
-          <div><span id="stat-weeks" class="stat-value">0주</span><span class="stat-label">남은 주</span></div>
-          <div><span id="stat-weekends" class="stat-value">0번</span><span class="stat-label">남은 주말</span></div>
-          <div><span id="stat-months" class="stat-value">0개월</span><span class="stat-label">남은 개월</span></div>
-        </div>
-        <div id="progress-section">
-          <div class="progress-head">
-            <span>지난 수능 이후 진행률</span>
-            <span id="progress-text">0%</span>
+      <!-- 공부 모드 -->
+      <section id="panel-study" class="tab-panel" hidden>
+        <div class="card study-card">
+          <div id="subject-chips" class="chips" role="radiogroup" aria-label="과목"></div>
+          <p id="study-timer" class="study-timer" aria-live="off">00:00:00</p>
+          <p id="study-status" class="study-status"></p>
+          <div class="study-actions">
+            <button id="study-start" type="button" class="primary-btn">시작</button>
+            <button id="study-pause" type="button" class="secondary-btn" hidden>일시정지</button>
+            <button id="study-stop" type="button" class="secondary-btn" hidden>종료하고 기록</button>
           </div>
-          <div class="progress-bar"><div id="progress-fill"></div></div>
+          <p id="study-notice" class="hint" role="status"></p>
+        </div>
+
+        <div class="card">
+          <div class="row-between">
+            <h2>오늘 공부</h2>
+            <strong id="today-total" class="big-number">0분</strong>
+          </div>
+          <div class="progress-bar"><div id="goal-fill"></div></div>
+          <p id="goal-text" class="hint"></p>
+          <ul id="subject-totals" class="subject-totals"></ul>
+        </div>
+
+        <div class="card">
+          <h2>최근 7일</h2>
+          <div id="week-chart" class="week-chart"></div>
         </div>
       </section>
 
-      <section class="card">
-        <label class="field">
-          <span>수능 학년도</span>
-          <select id="exam-select"></select>
-        </label>
-        <label class="field">
-          <span>날짜 직접 입력</span>
-          <div class="field-row">
-            <input id="custom-date" type="date">
-            <button id="clear-custom" type="button" class="text-btn">지우기</button>
+      <!-- 계획 -->
+      <section id="panel-plan" class="tab-panel" hidden>
+        <div class="card">
+          <div class="date-nav">
+            <button id="plan-prev" type="button" class="icon-btn" aria-label="이전 날">‹</button>
+            <div class="date-nav-center">
+              <strong id="plan-date"></strong>
+              <span><span id="plan-relative"></span> <span id="plan-dday" class="dday-chip"></span></span>
+            </div>
+            <button id="plan-next" type="button" class="icon-btn" aria-label="다음 날">›</button>
           </div>
-        </label>
+          <button id="plan-today" type="button" class="text-btn small plan-today" hidden>오늘로 돌아가기</button>
+
+          <form id="plan-form" class="plan-form">
+            <input id="plan-input" type="text" maxlength="100" placeholder="할 일 추가" autocomplete="off" aria-label="할 일">
+            <button type="submit" class="primary-btn">추가</button>
+          </form>
+
+          <p id="plan-progress" class="plan-progress"></p>
+          <ul id="plan-list" class="plan-list"></ul>
+          <p id="plan-empty" class="empty">아직 계획이 없어요.</p>
+        </div>
+      </section>
+
+      <!-- 설정 -->
+      <section id="panel-settings" class="tab-panel" hidden>
+        <div class="card">
+          <h2>목표 시험</h2>
+          <label class="field">
+            <span>수능 학년도</span>
+            <select id="exam-select"></select>
+          </label>
+          <label class="field">
+            <span>날짜 직접 입력</span>
+            <div class="field-row">
+              <input id="custom-date" type="date">
+              <button id="clear-custom" type="button" class="text-btn">지우기</button>
+            </div>
+          </label>
+        </div>
+
+        <div class="card">
+          <h2>공부</h2>
+          <label class="field">
+            <span>하루 목표 공부 시간</span>
+            <select id="goal-select"></select>
+          </label>
+        </div>
+
+        <div class="card account-row">
+          <div>
+            <span class="stat-label">로그인 계정</span>
+            <strong id="user-name"></strong>
+          </div>
+          <button id="logout-btn" type="button" class="text-btn small">로그아웃</button>
+        </div>
       </section>
     </div>
   </main>
+
+  <nav id="nav-bar" class="nav-bar" aria-label="탭" hidden>
+    <button type="button" class="nav-item" data-tab="home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+      <span>홈</span>
+    </button>
+    <button type="button" class="nav-item" data-tab="study">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
+      <span>공부 모드</span>
+    </button>
+    <button type="button" class="nav-item" data-tab="plan">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="m8 9 1.5 1.5L12 8M8 15l1.5 1.5L12 14M14.5 9.5H17M14.5 15.5H17"/></svg>
+      <span>계획</span>
+    </button>
+    <button type="button" class="nav-item" data-tab="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      <span>설정</span>
+    </button>
+  </nav>
 
   <script type="module" src="/src/main.js"></script>
 </body>

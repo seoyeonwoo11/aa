@@ -1,0 +1,74 @@
+/* 계획 */
+
+.date-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.date-nav-center {
+  flex: 1;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.date-nav-center strong { font-size: 1.05rem; color: var(--text); }
+
+.dday-chip {
+  padding: 1px 8px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.plan-today { display: block; margin: 10px auto 0; }
+
+.plan-form {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+.plan-form .primary-btn { width: auto; padding: 0 20px; flex-shrink: 0; }
+
+.plan-progress { margin: 14px 0 0; font-size: 0.88rem; color: var(--muted); }
+.plan-progress:empty { display: none; }
+
+.plan-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.plan-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 12px;
+  background: var(--bg);
+  border-radius: 12px;
+}
+.plan-item label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  min-width: 0;
+  cursor: pointer;
+}
+.plan-item span { overflow-wrap: anywhere; }
+.plan-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--primary);
+}
+.plan-item.done span { color: var(--muted); text-decoration: line-through; }
+.remove-btn { border: 0; color: var(--muted); font-size: 1.3rem; }
+
+.empty { margin: 18px 0 4px; text-align: center; color: var(--muted); font-size: 0.92rem; }

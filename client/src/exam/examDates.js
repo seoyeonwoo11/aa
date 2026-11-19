@@ -35,9 +35,17 @@ export function findUpcomingAcademicYear(today) {
   return year;
 }
 
+// 기본으로 보여줄 수능: 오늘이 시험 날이면 다음 해 수능, 아니면 다가오는 수능
+export function getDefaultAcademicYear(today) {
+  const year = findUpcomingAcademicYear(today);
+  return getExam(year).date.getTime() === today.getTime() ? year + 1 : year;
+}
+
+// 다가오는 수능(오늘 시험 포함)부터 기본 수능의 10년 뒤까지
 export function getSelectableYears(today) {
   const first = findUpcomingAcademicYear(today);
-  return Array.from({ length: YEARS_AHEAD + 1 }, (_, i) => first + i);
+  const last = getDefaultAcademicYear(today) + YEARS_AHEAD;
+  return Array.from({ length: last - first + 1 }, (_, i) => first + i);
 }
 
 export function getExamStart(date) {
