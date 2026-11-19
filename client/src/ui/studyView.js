@@ -49,7 +49,13 @@ function showAutoPauseNotice() {
   const at = data?.running?.autoPausedAt;
   if (!at) return;
   const away = Math.max(0, Math.round((Date.now() - at) / 1000));
-  $('study-notice').textContent = `앱을 나가서 일시정지했어요.${away >= 60 ? ` (${formatDuration(away)} 동안 자리 비움)` : ''}`;
+  setNotice(`앱을 나가서 일시정지했어요.${away >= 60 ? ` (${formatDuration(away)} 동안 자리 비움)` : ''}`);
+}
+
+// 안내 문구는 공부 탭과 집중 화면에 같이 보여준다.
+function setNotice(text) {
+  $('study-notice').textContent = text;
+  $('focus-notice').textContent = text;
 }
 
 function renderChips() {
@@ -71,6 +77,18 @@ function renderTimer() {
   $('study-pause').hidden = !isRunning();
   $('autopause-hint').hidden = !isRunning();
   $('study-stop').hidden = !running;
+  $('study-open-focus').hidden = !running || focusOpen;
+
+  // 집중 화면
+  if (!focusOpen) return;
+  $('focus-subject').textContent = running ? running.subject : '';
+  $('focus-timer').textContent = formatClock(getElapsedSeconds(running));
+  $('focus-screen').classList.toggle('paused', !isRunning());
+  $('focus-status').textContent = isRunning() ? '공부 중' : '일시정지';
+  $('focus-pause').hidden = !isRunning();
+  $('focus-resume').hidden = isRunning();
+  const now = new Date();
+  $('focus-clock').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 }
 
 function renderToday() {
@@ -88,6 +106,8 @@ function renderToday() {
   $('today-total').textContent = formatDuration(todayTotal);
   $('goal-fill').style.width = `${percent}%`;
   $('goal-text').textContent = `목표 ${goalMinutes / 60}시간 · ${Math.floor(percent)}%`;
+  $('focus-goal-fill').style.width = `${percent}%`;
+  $('focus-goal-text').textContent = `오늘 ${formatDuration(todayTotal)} / 목표 ${goalMinutes / 60}시간`;
 
   const list = $('subject-totals');
   list.innerHTML = '';
@@ -134,6 +154,62 @@ function renderWeek() {
   });
 }
 
+/* ---------- 시작·일시정지·종료 (공부 탭과 집중 화면이 같이 씀) ---------- */
+
+async function start() {
+  data.running = startTimer(data.running, subject);
+  setNotice('');
+  keepScreenOn(true);
+  renderAll();
+  if (focusOpen) $('focus-pause').focus(); // 사라진 버튼 대신 바뀐 버튼으로
+  await persist();
+}
+
+async function pause() {
+  data.running = pauseTimer(data.running);
+  keepScreenOn(false);
+  renderAll();
+  if (focusOpen) $('focus-resume').focus();
+  await persist();
+}
+
+async function stop() {
+  const session = finishTimer(data.running);
+  if (session) data.sessions.push(session);
+  data.running = null;
+  keepScreenOn(false);
+  closeFocus();
+  setNotice(session
+    ? `${session.subject} ${formatDuration(session.seconds)} 기록했어요.`
+    : `${MIN_SESSION_SECONDS / 60}분 미만은 기록하지 않아요.`);
+  renderAll();
+  await persist();
+}
+
+/* ---------- 집중 화면: 하단 탭 없이 타이머만 크게 ---------- */
+
+let focusOpen = false;
+
+function openFocus() {
+  if (!data?.running) return;
+  focusOpen = true;
+  $('focus-screen').hidden = false;
+  document.body.classList.add('focus-open');
+  renderAll();
+  $(isRunning() ? 'focus-pause' : 'focus-resume').focus();
+  // 지원하는 기기(안드로이드·PC)에서는 브라우저 주소창까지 숨긴 전체 화면으로
+  document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => {});
+}
+
+function closeFocus() {
+  if (!focusOpen) return;
+  focusOpen = false;
+  $('focus-screen').hidden = true;
+  document.body.classList.remove('focus-open');
+  if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+  if (data) renderAll();
+}
+
 function renderAll() {
   renderChips();
   renderTimer();
@@ -158,31 +234,22 @@ export function initStudyView() {
     chips.appendChild(chip);
   }
 
-  $('study-start').addEventListener('click', async () => {
-    data.running = startTimer(data.running, subject);
-    $('study-notice').textContent = '';
-    keepScreenOn(true);
-    renderAll();
-    await persist();
+  // 시작하면 집중 화면으로 들어간다.
+  $('study-start').addEventListener('click', () => {
+    start();
+    openFocus();
   });
+  $('study-pause').addEventListener('click', pause);
+  $('study-stop').addEventListener('click', stop);
+  $('study-open-focus').addEventListener('click', openFocus);
 
-  $('study-pause').addEventListener('click', async () => {
-    data.running = pauseTimer(data.running);
-    keepScreenOn(false);
-    renderAll();
-    await persist();
-  });
-
-  $('study-stop').addEventListener('click', async () => {
-    const session = finishTimer(data.running);
-    if (session) data.sessions.push(session);
-    $('study-notice').textContent = session
-      ? `${session.subject} ${formatDuration(session.seconds)} 기록했어요.`
-      : `${MIN_SESSION_SECONDS / 60}분 미만은 기록하지 않아요.`;
-    data.running = null;
-    keepScreenOn(false);
-    renderAll();
-    await persist();
+  // 집중 화면 버튼
+  $('focus-resume').addEventListener('click', start);
+  $('focus-pause').addEventListener('click', pause);
+  $('focus-stop').addEventListener('click', stop);
+  $('focus-minimize').addEventListener('click', closeFocus);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && focusOpen) closeFocus();
   });
 
   // 다른 앱에 갔다 오면 화면 켜짐을 다시 요청한다.
@@ -215,7 +282,7 @@ export async function showStudy(id, settings) {
     data.running = recoverTimer(data.running);
     await persist();
   }
-  $('study-notice').textContent = '';
+  setNotice('');
   showAutoPauseNotice();
   renderAll();
 }
@@ -243,6 +310,7 @@ export function getStudySessions() {
 
 export function clearStudy() {
   autoPause(); // 로그아웃하면 진행 중인 타이머를 멈춘다.
+  closeFocus();
   keepScreenOn(false);
   userId = null;
   data = null;

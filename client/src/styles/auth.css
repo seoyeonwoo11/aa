@@ -4,7 +4,7 @@ body:not(.has-nav) {
   min-height: 100vh;
   min-height: 100dvh;
   background:
-    radial-gradient(120% 60% at 50% 0%, #dfe7ff 0%, rgba(223, 231, 255, 0) 70%),
+    radial-gradient(120% 60% at 50% 0%, var(--auth-glow) 0%, transparent 70%),
     var(--bg);
 }
 body:not(.has-nav) .app-header {
@@ -46,8 +46,8 @@ body:not(.has-nav) .app-header {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--primary);
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid #d5ddf7;
+  background: var(--auth-chip-bg);
+  border: 1px solid var(--auth-chip-border);
   border-radius: 999px;
 }
 .auth-dday:empty { display: none; }
@@ -72,7 +72,7 @@ body:not(.has-nav) .app-header {
   border-radius: 9px;
   cursor: pointer;
 }
-.tab.active { background: var(--card); color: var(--primary); box-shadow: 0 1px 4px rgba(29, 36, 51, 0.1); }
+.tab.active { background: var(--card); color: var(--primary); box-shadow: 0 1px 4px var(--shadow-strong); }
 
 .auth-heading { margin: 0 0 4px; font-size: 1.15rem; }
 .auth-help { margin: 0 0 16px; font-size: 0.88rem; color: var(--muted); }

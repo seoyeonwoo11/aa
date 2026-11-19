@@ -1,6 +1,7 @@
 /* 색상 변수, 레이아웃, 카드, 폼, 버튼 같은 공통 스타일 */
 
 :root {
+  color-scheme: light;
   --bg: #f4f6fb;
   --card: #ffffff;
   --text: #1d2433;
@@ -9,6 +10,127 @@
   --primary-soft: #e6ecff;
   --accent: #ff6b4a;
   --border: #e3e7f0;
+  --input-bg: #ffffff;
+  --on-primary: #ffffff;
+  --danger: #d6392f;
+  --success: #2f9e44;
+  --sun: #d6336c;
+  --sat: #3457d5;
+  --mock: #ae3ec9;
+  --mock-soft: #f8f0fc;
+  --estimated-bg: #fff1d6;
+  --estimated-text: #a86200;
+  --divider: #e3e7f0;
+  --shadow: rgba(29, 36, 51, 0.05);
+  --shadow-strong: rgba(29, 36, 51, 0.12);
+  --nav-bg: rgba(255, 255, 255, 0.94);
+  --auth-glow: #dfe7ff;
+  --auth-chip-bg: rgba(255, 255, 255, 0.75);
+  --auth-chip-border: #d5ddf7;
+  /* 차트 */
+  --chart-1: #2a78d6;
+  --chart-hover: rgba(42, 120, 214, 0.08);
+  --grid-line: #e9ecf2;
+  --axis: #c3c2b7;
+  --goal-line: #52514e;
+  --meter-track: #d9e4fb;
+  --week-bar: #a9b8ee;
+  /* 과목 색 (색약 구분 검사 통과 순서) */
+  --subject-1: #2a78d6;
+  --subject-2: #eb6834;
+  --subject-3: #1baf7a;
+  --subject-4: #eda100;
+  --subject-5: #e87ba4;
+  --subject-6: #008300;
+  --subject-4-text: #0b0b0b;
+}
+
+/* 어두운 화면: 기기 설정을 따르거나(설정에서 '자동') 직접 '어둡게'를 고른 경우 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0e1117;
+    --card: #171b23;
+    --text: #e6e9f0;
+    --muted: #9aa3b5;
+    --primary: #5b7cfa;
+    --primary-soft: #1f2842;
+    --accent: #ff7a5c;
+    --border: #2a3040;
+    --input-bg: #11151c;
+    --on-primary: #ffffff;
+    --danger: #ff6b6b;
+    --success: #4cc27a;
+    --sun: #ff6b9a;
+    --sat: #7b95ff;
+    --mock: #c77ddf;
+    --mock-soft: #2c1f36;
+    --estimated-bg: #3a2c10;
+    --estimated-text: #f2b84b;
+    --divider: #262c38;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow-strong: rgba(0, 0, 0, 0.45);
+    --nav-bg: rgba(23, 27, 35, 0.94);
+    --auth-glow: #1c2440;
+    --auth-chip-bg: rgba(23, 27, 35, 0.75);
+    --auth-chip-border: #2f3a5c;
+    --chart-1: #3987e5;
+    --chart-hover: rgba(57, 135, 229, 0.12);
+    --grid-line: #252b37;
+    --axis: #3a4252;
+    --goal-line: #c3c2b7;
+    --meter-track: #26304a;
+    --week-bar: #3d4f86;
+    --subject-1: #3987e5;
+    --subject-2: #d95926;
+    --subject-3: #199e70;
+    --subject-4: #c98500;
+    --subject-5: #d55181;
+    --subject-6: #0ca30c;
+    --subject-4-text: #ffffff;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e1117;
+  --card: #171b23;
+  --text: #e6e9f0;
+  --muted: #9aa3b5;
+  --primary: #5b7cfa;
+  --primary-soft: #1f2842;
+  --accent: #ff7a5c;
+  --border: #2a3040;
+  --input-bg: #11151c;
+  --on-primary: #ffffff;
+  --danger: #ff6b6b;
+  --success: #4cc27a;
+  --sun: #ff6b9a;
+  --sat: #7b95ff;
+  --mock: #c77ddf;
+  --mock-soft: #2c1f36;
+  --estimated-bg: #3a2c10;
+  --estimated-text: #f2b84b;
+  --divider: #262c38;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-strong: rgba(0, 0, 0, 0.45);
+  --nav-bg: rgba(23, 27, 35, 0.94);
+  --auth-glow: #1c2440;
+  --auth-chip-bg: rgba(23, 27, 35, 0.75);
+  --auth-chip-border: #2f3a5c;
+  --chart-1: #3987e5;
+  --chart-hover: rgba(57, 135, 229, 0.12);
+  --grid-line: #252b37;
+  --axis: #3a4252;
+  --goal-line: #c3c2b7;
+  --meter-track: #26304a;
+  --week-bar: #3d4f86;
+  --subject-1: #3987e5;
+  --subject-2: #d95926;
+  --subject-3: #199e70;
+  --subject-4: #c98500;
+  --subject-5: #d55181;
+  --subject-6: #0ca30c;
+  --subject-4-text: #ffffff;
 }
 
 * { box-sizing: border-box; }
@@ -37,7 +159,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 20px;
-  box-shadow: 0 4px 16px rgba(29, 36, 51, 0.05);
+  box-shadow: 0 4px 16px var(--shadow);
 }
 
 .card h2 { margin: 0 0 14px; font-size: 1.05rem; }
@@ -55,7 +177,7 @@ select, input[type="date"] {
   padding: 8px 12px;
   font: inherit;
   color: var(--text);
-  background: #fff;
+  background: var(--input-bg);
   border: 1px solid var(--border);
   border-radius: 12px;
 }
@@ -84,20 +206,20 @@ input[type="text"], input[type="password"], input[type="email"] {
   padding: 8px 12px;
   font: inherit;
   color: var(--text);
-  background: #fff;
+  background: var(--input-bg);
   border: 1px solid var(--border);
   border-radius: 12px;
 }
 input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
 
-.error { min-height: 1.4em; margin: 0 0 8px; color: #d6392f; font-size: 0.88rem; }
+.error { min-height: 1.4em; margin: 0 0 8px; color: var(--danger); font-size: 0.88rem; }
 
 .primary-btn {
   width: 100%;
   min-height: 48px;
   font: inherit;
   font-weight: 700;
-  color: #fff;
+  color: var(--on-primary);
   background: var(--primary);
   border: 0;
   border-radius: 12px;
@@ -172,3 +294,7 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 1
   .mock-form { grid-template-columns: minmax(0, 1fr) auto; }
   .mock-form #mock-name { grid-column: 1 / -1; }
 }
+
+/* 설정: 화면 모드 */
+.theme-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.theme-label { font-weight: 700; }

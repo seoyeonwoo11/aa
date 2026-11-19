@@ -5,6 +5,7 @@ import { startOfDay, parseDate, formatKoreanDate } from '../utils/date.js';
 import { getExam, getSelectableYears } from '../exam/examDates.js';
 import { getMockExams, isDateText } from '../exam/mockExams.js';
 import { GOAL_OPTIONS } from '../settings/settings.js';
+import { getThemePref, setThemePref } from './theme.js';
 
 let settings = null;
 let onChange = () => {};
@@ -158,6 +159,18 @@ export function initSettingsView({ onChange: handleChange, onLogout }) {
     renderMocks();
     $('mock-list').querySelector(`[data-id="${id}"]`)?.scrollIntoView({ block: 'nearest' });
   });
+
+  // 화면 모드 (이 기기에만 저장)
+  const renderTheme = () => document.querySelectorAll('#theme-switch [data-theme-pref]').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.themePref === getThemePref()));
+  });
+  document.querySelectorAll('#theme-switch [data-theme-pref]').forEach((b) => {
+    b.addEventListener('click', () => {
+      setThemePref(b.dataset.themePref);
+      renderTheme();
+    });
+  });
+  renderTheme();
 
   $('logout-btn').addEventListener('click', onLogout);
 }

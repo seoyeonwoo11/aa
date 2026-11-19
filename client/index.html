@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#f4f6fb">
+  <script>
+    // 저장된 화면 모드를 그리기 전에 적용 (깜빡임 방지)
+    try {
+      var t = JSON.parse(localStorage.getItem('haruSuneung:theme'));
+      if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
   <title>하루수능</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
@@ -118,6 +125,7 @@
             <button id="study-pause" type="button" class="secondary-btn" hidden>일시정지</button>
             <button id="study-stop" type="button" class="secondary-btn" hidden>종료하고 기록</button>
           </div>
+          <button id="study-open-focus" type="button" class="text-btn small open-focus" hidden>집중 화면으로</button>
           <p id="study-notice" class="hint" role="status"></p>
           <p id="autopause-hint" class="hint" hidden>앱을 나가면 자동으로 일시정지돼요.</p>
         </div>
@@ -299,6 +307,15 @@
           <p id="mock-error" class="error" role="alert"></p>
         </div>
 
+        <div class="card theme-row">
+          <span class="theme-label">화면</span>
+          <div id="theme-switch" class="segmented" role="group" aria-label="화면 모드">
+            <button type="button" data-theme-pref="system" aria-pressed="true">자동</button>
+            <button type="button" data-theme-pref="light" aria-pressed="false">밝게</button>
+            <button type="button" data-theme-pref="dark" aria-pressed="false">어둡게</button>
+          </div>
+        </div>
+
         <div class="card account-row">
           <div>
             <span class="stat-label">로그인 계정</span>
@@ -332,6 +349,31 @@
       <span>설정</span>
     </button>
   </nav>
+
+  <!-- 공부 집중 화면: 시작하면 하단 탭 없이 타이머만 크게 -->
+  <div id="focus-screen" class="focus-screen" role="dialog" aria-modal="true" aria-label="공부 집중 화면" hidden>
+    <div class="focus-top">
+      <button id="focus-minimize" type="button" class="focus-icon-btn" aria-label="작게 보기 (타이머는 계속 흘러요)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <span id="focus-clock" class="focus-clock"></span>
+    </div>
+    <div class="focus-center">
+      <p id="focus-subject" class="focus-subject"></p>
+      <p id="focus-timer" class="focus-timer" aria-live="off">00:00:00</p>
+      <p id="focus-status" class="focus-status"></p>
+      <div class="focus-goal">
+        <div class="focus-goal-bar"><div id="focus-goal-fill"></div></div>
+        <span id="focus-goal-text"></span>
+      </div>
+      <p id="focus-notice" class="focus-notice" role="status"></p>
+    </div>
+    <div class="focus-actions">
+      <button id="focus-pause" type="button" class="focus-btn">일시정지</button>
+      <button id="focus-resume" type="button" class="focus-btn primary" hidden>계속</button>
+      <button id="focus-stop" type="button" class="focus-btn">종료하고 기록</button>
+    </div>
+  </div>
 
   <script type="module" src="/src/main.js"></script>
 </body>

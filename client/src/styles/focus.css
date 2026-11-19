@@ -1,0 +1,99 @@
+/* 공부 집중 화면: 테마와 상관없이 항상 어둡고 차분하게 */
+
+body.focus-open { overflow: hidden; }
+body.focus-open .nav-bar { visibility: hidden; }
+
+.focus-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: calc(16px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
+  color: #e8ecf6;
+  background:
+    radial-gradient(90% 60% at 50% 35%, rgba(91, 124, 250, 0.22), transparent 70%),
+    #0b0f1a;
+  animation: focus-in 0.25s ease;
+}
+.focus-screen[hidden] { display: none; }
+@keyframes focus-in { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .focus-screen { animation: none; } }
+
+.focus-top { display: flex; align-items: center; justify-content: space-between; }
+.focus-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #c7cfe2;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  cursor: pointer;
+}
+.focus-icon-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.focus-clock { font-size: 1rem; font-weight: 600; color: #9aa6c2; font-variant-numeric: tabular-nums; }
+
+.focus-center {
+  align-self: center;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.focus-subject {
+  margin: 0;
+  padding: 4px 16px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #c9d4ff;
+  background: rgba(91, 124, 250, 0.18);
+  border-radius: 999px;
+}
+.focus-timer {
+  margin: 0;
+  font-size: clamp(3.5rem, 19vw, 9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+.focus-screen.paused .focus-timer { color: #8a94ad; }
+.focus-status { margin: 0; font-size: 1rem; font-weight: 600; color: #9aa6c2; }
+.focus-screen.paused .focus-status { color: #f2b84b; }
+
+.focus-goal { margin-top: 18px; width: min(360px, 80vw); display: grid; gap: 8px; font-size: 0.9rem; color: #9aa6c2; }
+.focus-goal-bar { height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 999px; overflow: hidden; }
+#focus-goal-fill { height: 100%; width: 0; background: #5b7cfa; border-radius: inherit; transition: width 0.4s ease; }
+.focus-notice { min-height: 1.4em; margin: 6px 0 0; font-size: 0.9rem; color: #f2b84b; }
+
+.focus-actions {
+  width: min(520px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 10px;
+}
+.focus-btn {
+  min-height: 56px;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e8ecf6;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  cursor: pointer;
+}
+.focus-btn.primary { color: #fff; background: #5b7cfa; border-color: #5b7cfa; }
+.focus-btn[hidden] { display: none; }
+@media (hover: hover) {
+  .focus-btn:hover, .focus-icon-btn:hover { filter: brightness(1.2); }
+}
+.focus-btn:focus-visible, .focus-icon-btn:focus-visible { outline: 2px solid #9db0ff; outline-offset: 2px; }
+
+/* 공부 탭의 '집중 화면으로' 버튼 */
+.open-focus { display: block; margin: 10px auto 0; }

@@ -1,6 +1,7 @@
 // 앱 진입점: 로그인 상태에 따라 화면을 연결하고, 설정이 바뀌면 각 탭에 알린다.
 
 import './styles/main.css';
+import { initTheme } from './ui/theme.js';
 import { $ } from './ui/dom.js';
 import { getCurrentUser, logOut, onAuthChange, isRecoveryLink } from './services/authService.js';
 import { loadSettings, saveSettings } from './services/settingsService.js';
@@ -69,6 +70,7 @@ function updateSettings(next) {
   setPlanSettings(settings);
 }
 
+initTheme();
 initAuthView({
   onSuccess: (user) => {
     recovering = false;

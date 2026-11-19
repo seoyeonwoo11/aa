@@ -22,7 +22,7 @@
   border-radius: 999px;
   cursor: pointer;
 }
-.chip[aria-checked="true"] { color: #fff; background: var(--primary); border-color: var(--primary); }
+.chip[aria-checked="true"] { color: var(--on-primary); background: var(--primary); border-color: var(--primary); }
 .chip:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .study-timer {
@@ -89,7 +89,7 @@
 }
 .week-bar {
   width: 100%;
-  background: #a9b8ee;
+  background: var(--week-bar);
   border-radius: 8px 8px 0 0;
   transition: height 0.3s ease;
 }

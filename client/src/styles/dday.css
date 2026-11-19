@@ -17,7 +17,7 @@
   padding: 2px 10px;
   font-size: 0.75rem;
 }
-.badge.estimated { background: #fff1d6; color: #a86200; }
+.badge.estimated { background: var(--estimated-bg); color: var(--estimated-text); }
 
 .dday {
   margin: 8px 0 0;
@@ -89,7 +89,7 @@
   padding: 2px 10px;
   font-size: 0.82rem;
   font-weight: 700;
-  color: #ae3ec9;
-  background: #f8f0fc;
+  color: var(--mock);
+  background: var(--mock-soft);
   border-radius: 999px;
 }

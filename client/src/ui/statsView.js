@@ -6,16 +6,17 @@ import { formatDuration } from '../study/studyLog.js';
 import { summarize, shiftPeriod } from '../stats/stats.js';
 
 // 과목 색: 과목마다 고정 (순서를 바꾸거나 빠진 과목이 있어도 색이 바뀌지 않게)
-// 색약 검사(인접 색 구분)를 통과한 순서. 노랑 위 글자만 검정.
+// 실제 색은 CSS 변수(밝은/어두운 화면별, 색약 구분 검사 통과)에 있다.
 export const SUBJECT_COLORS = {
-  국어: '#2a78d6',
-  수학: '#eb6834',
-  영어: '#1baf7a',
-  탐구: '#eda100',
-  한국사: '#e87ba4',
-  기타: '#008300'
+  국어: 'var(--subject-1)',
+  수학: 'var(--subject-2)',
+  영어: 'var(--subject-3)',
+  탐구: 'var(--subject-4)',
+  한국사: 'var(--subject-5)',
+  기타: 'var(--subject-6)'
 };
-const DARK_TEXT_ON = new Set(['#eda100']);
+// 칸 안 글자색: 밝은 화면의 노랑(탐구) 위에서만 검정, 나머지는 흰색
+const SUBJECT_TEXT = { 탐구: 'var(--subject-4-text)' };
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 let kind = 'week';
@@ -126,11 +127,11 @@ function renderSubjects(r) {
 
   bar.setAttribute('aria-label', r.subjects.map((s) => `${s.subject} ${Math.round(s.share * 100)}%`).join(', '));
   for (const s of r.subjects) {
-    const color = SUBJECT_COLORS[s.subject] || '#898781';
+    const color = SUBJECT_COLORS[s.subject] || 'var(--muted)';
     const part = el('div', 'seg');
     part.style.flexGrow = String(s.share);
     part.style.background = color;
-    part.style.color = DARK_TEXT_ON.has(color) ? '#0b0b0b' : '#ffffff';
+    part.style.color = SUBJECT_TEXT[s.subject] || '#ffffff';
     part.dataset.share = `${Math.round(s.share * 100)}%`;
     bar.append(part);
 
