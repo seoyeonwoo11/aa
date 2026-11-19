@@ -2,9 +2,8 @@
 
 import { $ } from './dom.js';
 import { readJSON, writeJSON } from '../storage/localStore.js';
-import { startOfDay, toDateText, parseDate, daysBetween, formatKoreanDate } from '../utils/date.js';
+import { toDateText, parseDate, formatKoreanDate } from '../utils/date.js';
 import { getTarget } from '../exam/target.js';
-import { formatDday } from '../exam/dday.js';
 import { loadPlans, savePlans } from '../services/planService.js';
 import { getMonthGrid, layoutWeek } from '../plan/calendar.js';
 import {
@@ -148,12 +147,7 @@ function renderCalendar() {
 
 function renderDay() {
   const day = parseDate(selected);
-  const diffFromToday = daysBetween(startOfDay(new Date()), day);
   $('plan-date').textContent = formatKoreanDate(day);
-  $('plan-relative').textContent =
-    diffFromToday === 0 ? '오늘' : diffFromToday === 1 ? '내일' : diffFromToday === -1 ? '어제' : '';
-  const target = getTarget(settings);
-  $('plan-dday').textContent = `${settings.customDate ? '목표일' : '수능'} ${formatDday(daysBetween(day, target.date))}`;
 
   // 이 날이 포함된 기간 계획
   const rangeList = $('day-ranges');

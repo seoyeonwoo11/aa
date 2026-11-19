@@ -209,22 +209,7 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 
 /* ---------- 선택한 날 ---------- */
 
-.day-head {
-  display: grid;
-  gap: 2px;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-.day-head strong { font-size: 1.1rem; color: var(--text); }
-
-.dday-chip {
-  padding: 1px 8px;
-  color: var(--primary);
-  background: var(--primary-soft);
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.78rem;
-}
+.day-head strong { font-size: 1.1rem; }
 
 .day-ranges {
   list-style: none;
