@@ -50,6 +50,14 @@ export function togglePlan(plans, date, id) {
   return { ...plans, days: { ...plans.days, [date]: items } };
 }
 
+// 할 일 이름 고치기 (빈 이름이면 그대로 둔다)
+export function renamePlan(plans, date, id, text) {
+  const trimmed = String(text ?? '').trim().slice(0, MAX_PLAN_LENGTH);
+  if (!trimmed) return plans;
+  const items = (plans.days[date] || []).map((p) => (p.id === id ? { ...p, text: trimmed } : p));
+  return { ...plans, days: { ...plans.days, [date]: items } };
+}
+
 export function removePlan(plans, date, id) {
   const rest = (plans.days[date] || []).filter((p) => p.id !== id);
   const days = { ...plans.days, [date]: rest };
@@ -91,6 +99,34 @@ export function toggleRepeatDone(plans, date, id) {
   const repeatDone = { ...plans.repeatDone, [date]: next };
   if (!next.length) delete repeatDone[date];
   return { ...plans, repeatDone };
+}
+
+// 반복 할 일 고치기 (date: 고치는 날)
+// - 이름만 바꾸면: 반복 전체의 이름이 바뀐다.
+// - 요일을 바꾸면: date부터 새 요일로 반복하고, 그 전날까지는 예전 요일 그대로 둔다(지난 기록 보존).
+export function editRepeat(plans, id, { text, days }, date) {
+  const rule = plans.repeats.find((r) => r.id === id);
+  if (!rule) return plans;
+  const trimmed = String(text ?? '').trim().slice(0, MAX_PLAN_LENGTH) || rule.text;
+  const cleanDays = [...new Set(days ?? rule.days)].filter((d) => Number.isInteger(d) && d >= 0 && d <= 6).sort();
+  if (!cleanDays.length) return plans;
+  const sameDays = cleanDays.join(',') === [...rule.days].sort().join(',');
+
+  if (sameDays || date <= rule.start) {
+    return { ...plans, repeats: plans.repeats.map((r) => (r.id === id ? { ...r, text: trimmed, days: cleanDays } : r)) };
+  }
+
+  // date부터 새 반복으로 나누고, date 이후의 완료 기록은 새 반복으로 옮긴다.
+  const next = { id: newId(), text: trimmed, days: cleanDays, start: date, end: rule.end };
+  const repeatDone = {};
+  for (const [d, ids] of Object.entries(plans.repeatDone)) {
+    repeatDone[d] = d >= date ? ids.map((x) => (x === id ? next.id : x)) : ids;
+  }
+  return {
+    ...plans,
+    repeats: [...plans.repeats.map((r) => (r.id === id ? { ...r, end: dayBefore(date) } : r)), next],
+    repeatDone
+  };
 }
 
 // date부터 반복을 그만한다. 시작일부터 그만두면 반복 자체를 지운다.

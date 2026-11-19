@@ -8,7 +8,7 @@ import { mockExamsByDate } from '../exam/mockExams.js';
 import { loadPlans, savePlans } from '../services/planService.js';
 import { getMonthGrid, layoutWeek } from '../plan/calendar.js';
 import {
-  RANGE_COLORS, REPEAT_PRESETS, addPlan, togglePlan, removePlan, planProgress,
+  RANGE_COLORS, REPEAT_PRESETS, addPlan, togglePlan, removePlan, renamePlan, editRepeat, planProgress,
   addRepeat, toggleRepeatDone, stopRepeat, itemsForDate, setMemo, memoFor,
   addRange, updateRange, toggleRange, removeRange, rangesOnDate, rangeDayInfo
 } from '../plan/planList.js';
@@ -192,7 +192,51 @@ function rangeItem(range, date, editable) {
 }
 
 // 할 일 한 줄. removable이면 삭제 버튼을 붙인다. 반복 할 일에는 반복 요일 표시.
+const PENCIL_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></svg>';
+const WEEKDAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+
+let editingItem = null; // 계획 탭에서 고치고 있는 할 일 { id, repeat }
+
+// 수정 중인 할 일: 이름 입력칸 (+ 반복이면 요일) + 저장·취소
+function todoEditor(item) {
+  const li = el('li', 'plan-item editing');
+  li.dataset.id = item.id;
+  if (item.repeat) li.dataset.repeat = '1';
+  const input = el('input', 'edit-input');
+  input.type = 'text';
+  input.maxLength = 100;
+  input.value = item.text;
+  input.setAttribute('aria-label', '할 일 이름');
+  li.append(input);
+  if (item.repeat) {
+    const rule = plans.repeats.find((r) => r.id === item.id);
+    const days = el('div', 'day-chips edit-days');
+    days.setAttribute('role', 'group');
+    days.setAttribute('aria-label', '반복 요일');
+    [1, 2, 3, 4, 5, 6, 0].forEach((d) => {
+      const chip = el('button', `day-chip${d === 0 ? ' sun' : d === 6 ? ' sat' : ''}`, WEEKDAY_NAMES[d]);
+      chip.type = 'button';
+      chip.dataset.action = 'edit-day';
+      chip.dataset.day = String(d);
+      chip.setAttribute('aria-pressed', String(rule?.days.includes(d)));
+      days.append(chip);
+    });
+    li.append(days);
+  }
+  const actions = el('div', 'edit-actions');
+  const cancel = el('button', 'text-btn small', '취소');
+  cancel.type = 'button';
+  cancel.dataset.action = 'edit-cancel';
+  const save = el('button', 'primary-btn edit-save', '저장');
+  save.type = 'button';
+  save.dataset.action = 'edit-save';
+  actions.append(cancel, save);
+  li.append(actions);
+  return li;
+}
+
 function todoItem(item, removable) {
+  if (removable && editingItem?.id === item.id) return todoEditor(item);
   const li = el('li', `plan-item${item.done ? ' done' : ''}${item.repeat ? ' repeat' : ''}`);
   li.dataset.id = item.id;
   if (item.repeat) li.dataset.repeat = '1';
@@ -205,6 +249,12 @@ function todoItem(item, removable) {
   if (item.repeat) label.append(el('span', 'repeat-tag', `↻ ${item.repeatLabel}`));
   li.append(label);
   if (removable) {
+    const edit = el('button', 'icon-btn edit-btn');
+    edit.type = 'button';
+    edit.dataset.action = 'edit';
+    edit.innerHTML = PENCIL_SVG; // 고정된 아이콘 모양 (사용자 글 아님)
+    edit.setAttribute('aria-label', `${item.text} 고치기`);
+    li.append(edit);
     const remove = el('button', 'icon-btn remove-btn', '×');
     remove.type = 'button';
     remove.dataset.action = 'remove';
@@ -216,7 +266,11 @@ function todoItem(item, removable) {
 
 /* ---------- 선택한 날의 상세 ---------- */
 
+let editingDate = null;
+
 function renderDay() {
+  if (editingItem && editingDate !== selected) editingItem = null; // 다른 날로 가면 고치던 것 취소
+  editingDate = selected;
   $('plan-date').textContent = formatKoreanDate(parseDate(selected));
   renderMemo();
   $('day-ranges').replaceChildren(...rangesOnDate(plans.ranges, selected).map((r) => rangeItem(r, selected, true)));
@@ -303,9 +357,12 @@ function renderHome() {
   const today = toDateText(new Date());
   const ranges = rangesOnDate(plans.ranges, today);
   const items = itemsForDate(plans, today);
+  const memo = memoFor(plans, today);
+  $('home-memo').hidden = !memo;
+  $('home-memo-text').textContent = memo;
   $('home-ranges').replaceChildren(...ranges.map((r) => rangeItem(r, today, false)));
   $('home-plan-list').replaceChildren(...items.map((item) => todoItem(item, false)));
-  $('home-plan-empty').hidden = ranges.length + items.length > 0;
+  $('home-plan-empty').hidden = ranges.length + items.length > 0 || Boolean(memo);
 }
 
 /* ---------- 기간 계획 편집 ---------- */
@@ -505,10 +562,18 @@ export function initPlanView() {
   });
 
   $('plan-list').addEventListener('click', (event) => {
-    const action = event.target.dataset.action;
+    const button = event.target.closest('[data-action]');
+    const action = button?.dataset.action;
     const row = event.target.closest('.plan-item');
     if (!row || !action) return;
     const { id, repeat } = row.dataset;
+    if (action === 'edit') return startEdit(id, Boolean(repeat));
+    if (action === 'edit-cancel') return cancelEdit();
+    if (action === 'edit-save') return saveEdit(row);
+    if (action === 'edit-day') {
+      button.setAttribute('aria-pressed', String(button.getAttribute('aria-pressed') !== 'true'));
+      return;
+    }
     if (action === 'toggle') commit(toggleItem(selected, id, Boolean(repeat)));
     if (action === 'remove') {
       if (!repeat) return commit(removePlan(plans, selected, id));
@@ -518,7 +583,47 @@ export function initPlanView() {
     }
   });
 
+  // 수정 중: Enter 저장, Esc 취소
+  $('plan-list').addEventListener('keydown', (event) => {
+    if (!event.target.classList.contains('edit-input')) return;
+    if (event.key === 'Enter' && !event.isComposing) {
+      event.preventDefault();
+      saveEdit(event.target.closest('.plan-item'));
+    }
+    if (event.key === 'Escape') cancelEdit();
+  });
+
   initRepeatPicker();
+}
+
+function startEdit(id, isRepeat) {
+  editingItem = { id, repeat: isRepeat };
+  renderDay();
+  const input = $('plan-list').querySelector('.editing .edit-input');
+  input?.focus();
+  input?.select();
+}
+
+function cancelEdit() {
+  editingItem = null;
+  renderDay();
+}
+
+function saveEdit(row) {
+  const text = row.querySelector('.edit-input').value;
+  const { id, repeat } = row.dataset;
+  editingItem = null;
+  if (!text.trim()) return renderDay(); // 빈 이름이면 고치지 않음
+  if (repeat) {
+    const days = [...row.querySelectorAll('[data-action="edit-day"][aria-pressed="true"]')].map((b) => Number(b.dataset.day));
+    if (!days.length) {
+      alert('반복할 요일을 하나 이상 골라 주세요.');
+      editingItem = { id, repeat: true };
+      return;
+    }
+    return commit(editRepeat(plans, id, { text, days }, selected));
+  }
+  commit(renamePlan(plans, selected, id, text));
 }
 
 function toggleItem(date, id, isRepeat) {
@@ -581,6 +686,15 @@ function initRepeatPicker() {
 // 홈 화면의 오늘 계획: 체크와 추가만 하고, 자세한 편집은 계획 탭에서 한다.
 function initHomeCard() {
   const today = () => toDateText(new Date());
+
+  // 오늘 메모를 누르면 계획 탭에서 바로 고칠 수 있게 연다.
+  $('home-memo').addEventListener('click', () => {
+    selected = today();
+    showMonthOf(selected);
+    location.hash = 'plan';
+    openMemo();
+    setTimeout(() => $('memo-input').focus(), 50); // 탭이 보이고 나서
+  });
 
   $('home-plan-more').addEventListener('click', () => {
     selected = today();

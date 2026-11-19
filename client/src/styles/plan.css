@@ -431,3 +431,36 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 .memo-actions { display: flex; align-items: center; gap: 8px; }
 .memo-status { flex: 1; font-size: 0.8rem; color: var(--muted); }
 .memo-done { width: auto; min-height: 36px; padding: 0 16px; }
+
+/* ---------- 홈의 오늘 메모 ---------- */
+.today-plan-card .card-scroll > .home-memo { margin-top: 12px; }
+.home-memo { display: flex; gap: 8px; align-items: flex-start; }
+.home-memo[hidden] { display: none; }
+.home-memo svg { width: 16px; height: 16px; flex: none; margin-top: 3px; }
+.home-memo span { min-width: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; }
+
+/* ---------- 할 일 고치기 ---------- */
+.edit-btn { border: 0; color: var(--muted); display: grid; place-items: center; }
+.edit-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.plan-item .edit-btn + .remove-btn { margin-left: -6px; }
+
+.plan-item.editing {
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background: var(--primary-soft);
+}
+.edit-input {
+  flex: 1 1 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 6px 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+}
+.edit-days { flex: 1 1 100%; }
+.edit-actions { flex: 1 1 100%; display: flex; justify-content: flex-end; gap: 6px; }
+.edit-save { width: auto; min-height: 36px; padding: 0 16px; }

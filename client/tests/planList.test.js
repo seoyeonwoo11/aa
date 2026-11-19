@@ -125,3 +125,46 @@ describe('memos', () => {
       .toEqual({ '2026-11-19': '메모' });
   });
 });
+
+import { renamePlan, editRepeat } from '../src/plan/planList.js';
+
+describe('editing plans', () => {
+  it('renames a to-do and ignores empty names', () => {
+    let plans = addPlan(normalizePlans(null), '2026-11-19', '수학 기출');
+    const id = plans.days['2026-11-19'][0].id;
+    plans = renamePlan(plans, '2026-11-19', id, '  수학 기출 2015학년도 ');
+    expect(plans.days['2026-11-19'][0]).toMatchObject({ text: '수학 기출 2015학년도', done: false });
+    expect(renamePlan(plans, '2026-11-19', id, '   ')).toBe(plans);
+  });
+
+  it('renames a repeat everywhere', () => {
+    let plans = addRepeat(normalizePlans(null), { text: '영단어', days: REPEAT_PRESETS.weekdays, start: '2026-11-16' });
+    const id = plans.repeats[0].id;
+    plans = editRepeat(plans, id, { text: '영단어 100개', days: REPEAT_PRESETS.weekdays }, '2026-11-20');
+    expect(plans.repeats).toHaveLength(1);
+    expect(itemsForDate(plans, '2026-11-16')[0].text).toBe('영단어 100개');
+  });
+
+  it('changes weekdays from the edited day on, keeping the past', () => {
+    let plans = addRepeat(normalizePlans(null), { text: '영단어', days: REPEAT_PRESETS.weekdays, start: '2026-11-16' });
+    const id = plans.repeats[0].id;
+    plans = toggleRepeatDone(plans, '2026-11-17', id); // 화: 지난 기록
+    plans = toggleRepeatDone(plans, '2026-11-25', id); // 수: 앞으로의 기록
+    plans = editRepeat(plans, id, { text: '영단어', days: [1, 3, 5] }, '2026-11-20');
+    expect(plans.repeats).toHaveLength(2);
+    expect(repeatsOnDate(plans.repeats, '2026-11-17')).toHaveLength(1);  // 지난 화요일은 그대로
+    expect(repeatsOnDate(plans.repeats, '2026-11-24')).toHaveLength(0);  // 다음 주 화요일은 빠짐
+    expect(repeatsOnDate(plans.repeats, '2026-11-25')).toHaveLength(1);  // 수요일은 그대로
+    expect(itemsForDate(plans, '2026-11-17')[0].done).toBe(true);
+    expect(itemsForDate(plans, '2026-11-25')[0].done).toBe(true);        // 완료 기록이 새 반복으로 옮겨짐
+  });
+
+  it('edits in place when changed on the first day, and refuses empty weekdays', () => {
+    let plans = addRepeat(normalizePlans(null), { text: '영단어', days: REPEAT_PRESETS.daily, start: '2026-11-16' });
+    const id = plans.repeats[0].id;
+    expect(editRepeat(plans, id, { text: '영단어', days: [] }, '2026-11-20')).toBe(plans);
+    plans = editRepeat(plans, id, { text: '영단어', days: [0, 6] }, '2026-11-16');
+    expect(plans.repeats).toHaveLength(1);
+    expect(plans.repeats[0].days).toEqual([0, 6]);
+  });
+});
