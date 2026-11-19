@@ -5,7 +5,8 @@ import { toDateText } from '../utils/date.js';
 import { loadStudy, saveStudy } from '../services/studyService.js';
 import { SUBJECT_COLORS } from './statsView.js';
 import {
-  SUBJECTS, MIN_SESSION_SECONDS, getElapsedSeconds, startTimer, pauseTimer, autoPauseTimer, recoverTimer, finishTimer,
+  SUBJECTS, MIN_SESSION_SECONDS, getElapsedSeconds, getTotalSeconds, startTimer, pauseTimer, autoPauseTimer, recoverTimer, finishTimer,
+  switchSubject, runSummary,
   totalsForDate, lastDaysTotals, formatClock, formatDuration
 } from '../study/studyLog.js';
 
@@ -58,18 +59,51 @@ function setNotice(text) {
   $('focus-notice').textContent = text;
 }
 
+// 과목 버튼: 공부 중에도 눌러서 과목을 바꿀 수 있다. (공부 탭과 집중 화면 둘 다)
 function renderChips() {
-  const locked = Boolean(data?.running);
   const active = data?.running?.subject ?? subject;
-  document.querySelectorAll('#subject-chips .chip').forEach((chip) => {
+  document.querySelectorAll('#subject-chips .chip, #focus-subjects .chip').forEach((chip) => {
     chip.setAttribute('aria-checked', String(chip.dataset.subject === active));
-    chip.disabled = locked && chip.dataset.subject !== active;
   });
+}
+
+function pickSubject(name) {
+  if (!data) return;
+  if (!data.running) {
+    subject = name;
+    renderChips();
+    return;
+  }
+  changeSubject(name);
+}
+
+// '수학으로', '영어로'처럼 받침에 맞는 조사 (받침이 없거나 ㄹ이면 '로')
+function withRo(word) {
+  const code = word.charCodeAt(word.length - 1) - 0xac00;
+  if (code < 0 || code > 11171) return `${word}(으)로`;
+  const jong = code % 28;
+  return `${word}${jong === 0 || jong === 8 ? '로' : '으로'}`;
+}
+
+// 공부 도중 과목 바꾸기: 그때까지의 시간은 원래 과목으로 기록하고 새 과목으로 이어서 센다.
+async function changeSubject(name) {
+  setFocusSubjectsOpen(false);
+  if (data.running.subject === name) return;
+  const before = data.running.subject;
+  const { running, session } = switchSubject(data.running, name);
+  if (session) data.sessions.push(session);
+  data.running = running;
+  subject = name;
+  setNotice(session
+    ? `${before} ${formatDuration(session.seconds)} 기록하고 ${withRo(name)} 바꿨어요.`
+    : `${withRo(name)} 바꿨어요.`);
+  renderAll();
+  await persist();
 }
 
 function renderTimer() {
   const running = data.running;
-  $('study-timer').textContent = formatClock(getElapsedSeconds(running));
+  $('study-timer').textContent = formatClock(getTotalSeconds(running)); // 과목을 바꿔도 이어서
   $('study-timer').classList.toggle('active', isRunning());
   $('study-status').textContent = !running ? '과목을 고르고 시작하세요' : isRunning() ? `${running.subject} 공부 중` : `${running.subject} 일시정지`;
   $('study-start').hidden = isRunning();
@@ -81,8 +115,8 @@ function renderTimer() {
 
   // 집중 화면
   if (!focusOpen) return;
-  $('focus-subject').textContent = running ? running.subject : '';
-  $('focus-timer').textContent = formatClock(getElapsedSeconds(running));
+  $('focus-subject-name').textContent = running ? running.subject : '';
+  $('focus-timer').textContent = formatClock(getTotalSeconds(running));
   $('focus-screen').classList.toggle('paused', !isRunning());
   $('focus-status').textContent = isRunning() ? '공부 중' : '일시정지';
   $('focus-pause').hidden = !isRunning();
@@ -176,11 +210,12 @@ async function pause() {
 async function stop() {
   const session = finishTimer(data.running);
   if (session) data.sessions.push(session);
+  const parts = runSummary(data.running, session); // 과목을 바꿨다면 과목마다
   data.running = null;
   keepScreenOn(false);
   closeFocus();
-  setNotice(session
-    ? `${session.subject} ${formatDuration(session.seconds)} 기록했어요.`
+  setNotice(parts.length
+    ? `${parts.map((p) => `${p.subject} ${formatDuration(p.seconds)}`).join(', ')} 기록했어요.`
     : `${MIN_SESSION_SECONDS / 60}분 미만은 기록하지 않아요.`);
   renderAll();
   await persist();
@@ -203,6 +238,7 @@ function openFocus() {
 
 function closeFocus() {
   if (!focusOpen) return;
+  setFocusSubjectsOpen(false);
   focusOpen = false;
   $('focus-screen').hidden = true;
   document.body.classList.remove('focus-open');
@@ -217,22 +253,27 @@ function renderAll() {
   renderWeek();
 }
 
+function setFocusSubjectsOpen(open) {
+  $('focus-subjects').hidden = !open;
+  $('focus-subject').setAttribute('aria-expanded', String(open));
+}
+
 export function initStudyView() {
-  const chips = $('subject-chips');
-  for (const name of SUBJECTS) {
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'chip';
-    chip.role = 'radio';
-    chip.dataset.subject = name;
-    chip.textContent = name;
-    chip.addEventListener('click', () => {
-      if (data?.running) return;
-      subject = name;
-      renderChips();
-    });
-    chips.appendChild(chip);
+  for (const containerId of ['subject-chips', 'focus-subjects']) {
+    const container = $(containerId);
+    for (const name of SUBJECTS) {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.role = 'radio';
+      chip.dataset.subject = name;
+      chip.textContent = name;
+      chip.addEventListener('click', () => pickSubject(name));
+      container.appendChild(chip);
+    }
   }
+  // 집중 화면: 과목 이름을 누르면 과목 고르기가 열린다.
+  $('focus-subject').addEventListener('click', () => setFocusSubjectsOpen($('focus-subjects').hidden));
 
   // 시작하면 집중 화면으로 들어간다.
   $('study-start').addEventListener('click', () => {

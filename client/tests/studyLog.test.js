@@ -65,3 +65,47 @@ describe('study totals', () => {
     expect(formatDuration(59)).toBe('0분');
   });
 });
+
+import { switchSubject, getTotalSeconds, runSummary } from '../src/study/studyLog.js';
+
+describe('switching subject mid-study', () => {
+  const at2 = (h, m = 0, sec = 0) => new Date(2026, 10, 19, h, m, sec).getTime();
+
+  it('records the time so far and keeps counting the total', () => {
+    let r = startTimer(null, '국어', at2(9));
+    const first = switchSubject(r, '영어', at2(9, 30));
+    expect(first.session).toEqual({ date: '2026-11-19', subject: '국어', seconds: 1800 });
+    r = first.running;
+    expect(r).toMatchObject({ subject: '영어', carried: 1800, elapsedBefore: 0 });
+    expect(getElapsedSeconds(r, at2(9, 50))).toBe(1200);
+    expect(getTotalSeconds(r, at2(9, 50))).toBe(3000);
+
+    const second = switchSubject(r, '국어', at2(9, 50));
+    r = second.running;
+    const last = finishTimer(r, at2(10, 10));
+    expect(last).toEqual({ date: '2026-11-19', subject: '국어', seconds: 1200 });
+    expect(runSummary(r, last)).toEqual([{ subject: '국어', seconds: 3000 }, { subject: '영어', seconds: 1200 }]);
+  });
+
+  it('just relabels when switched within the first minute', () => {
+    const r = startTimer(null, '국어', at2(9));
+    const { running, session } = switchSubject(r, '수학', at2(9, 0, 40));
+    expect(session).toBeNull();
+    expect(running.subject).toBe('수학');
+    expect(getElapsedSeconds(running, at2(9, 1))).toBe(60);
+  });
+
+  it('keeps a paused timer paused after switching', () => {
+    const r = pauseTimer(startTimer(null, '국어', at2(9)), at2(9, 20));
+    const { running, session } = switchSubject(r, '영어', at2(9, 25));
+    expect(session.seconds).toBe(1200);
+    expect(running.startedAt).toBeNull();
+    expect(getTotalSeconds(running, at2(9, 40))).toBe(1200);
+  });
+
+  it('does nothing when choosing the same subject or without a timer', () => {
+    const r = startTimer(null, '국어', at2(9));
+    expect(switchSubject(r, '국어', at2(9, 30))).toEqual({ running: r, session: null });
+    expect(switchSubject(null, '국어')).toEqual({ running: null, session: null });
+  });
+});

@@ -383,7 +383,11 @@
       <span id="focus-clock" class="focus-clock"></span>
     </div>
     <div class="focus-center">
-      <p id="focus-subject" class="focus-subject"></p>
+      <button id="focus-subject" type="button" class="focus-subject" aria-expanded="false" aria-controls="focus-subjects" aria-label="과목 바꾸기">
+        <span id="focus-subject-name"></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div id="focus-subjects" class="focus-subjects" role="radiogroup" aria-label="과목" hidden></div>
       <p id="focus-timer" class="focus-timer" aria-live="off">00:00:00</p>
       <p id="focus-status" class="focus-status"></p>
       <div class="focus-goal">
