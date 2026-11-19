@@ -1,6 +1,7 @@
 // 계획 탭: 월 달력 + 기간 계획 + 날짜별 상세 계획(할 일)
 
 import { $ } from './dom.js';
+import { readJSON, writeJSON } from '../storage/localStore.js';
 import { startOfDay, toDateText, parseDate, daysBetween, formatKoreanDate } from '../utils/date.js';
 import { getTarget } from '../exam/target.js';
 import { formatDday } from '../exam/dday.js';
@@ -12,6 +13,11 @@ import {
 } from '../plan/planList.js';
 
 const MAX_LANES = 3; // 한 칸에 보이는 기간 계획 막대 수 (넘치면 +n)
+const EXPANDED_KEY = 'suneungDday:calendarExpanded';
+
+// 휴대폰에서는 달력을 선택한 주 한 줄로 접어 두고, 필요할 때 한 달로 펼친다.
+const compactQuery = window.matchMedia('(max-width: 699px)');
+let expanded = readJSON(EXPANDED_KEY, false) === true;
 
 let userId = null;
 let plans = { days: {}, ranges: [] };
@@ -22,6 +28,17 @@ let month = { year: 0, month: 0 }; // 달력에 보이는 달
 // 기간 계획 편집 상태: null이면 닫힘
 // { id: 수정 중인 계획 id 또는 null, start, end, color, picking: 'start' | 'end' }
 let editing = null;
+
+// 지금 달력이 한 주만 보이는 상태인지 (기간 계획을 고를 때는 항상 한 달)
+const isCollapsed = () => compactQuery.matches && !expanded && !editing;
+
+function setExpanded(next) {
+  if (expanded === next) return;
+  expanded = next;
+  writeJSON(EXPANDED_KEY, expanded);
+  if (!expanded) showMonthOf(selected); // 접을 때는 선택한 날이 있는 주로
+  render();
+}
 
 async function commit(next) {
   plans = next;
@@ -56,9 +73,20 @@ function renderCalendar() {
   const grid = $('cal-grid');
   grid.innerHTML = '';
   grid.classList.toggle('picking', Boolean(editing));
+  grid.classList.toggle('collapsed', isCollapsed());
+
+  const collapsed = isCollapsed();
+  $('cal-prev').setAttribute('aria-label', collapsed ? '이전 주' : '이전 달');
+  $('cal-next').setAttribute('aria-label', collapsed ? '다음 주' : '다음 달');
+  $('cal-toggle').hidden = !compactQuery.matches || Boolean(editing);
+  $('cal-toggle').setAttribute('aria-expanded', String(!collapsed));
+  $('cal-toggle-text').textContent = collapsed ? '한 달 보기' : '접기';
 
   for (const week of weeks) {
+    const wrap = el('div', 'cal-week-wrap');
+    if (week.some((d) => toDateText(d) === selected)) wrap.classList.add('current');
     const row = el('div', 'cal-week');
+    wrap.append(row);
     const segments = layoutWeek(plans.ranges, week);
 
     week.forEach((day, i) => {
@@ -112,7 +140,7 @@ function renderCalendar() {
       bar.setAttribute('aria-hidden', 'true');
       row.append(bar);
     }
-    grid.append(row);
+    grid.append(wrap);
   }
 }
 
@@ -247,6 +275,14 @@ function showMonthOf(dateText) {
   month = { year: d.getFullYear(), month: d.getMonth() };
 }
 
+// 접힌 상태에서는 화살표가 한 주씩 움직인다. (선택한 날도 같은 요일로 이동)
+function moveWeek(n) {
+  const d = parseDate(selected);
+  selected = toDateText(new Date(d.getFullYear(), d.getMonth(), d.getDate() + n * 7));
+  showMonthOf(selected);
+  render();
+}
+
 function moveMonth(n) {
   const d = new Date(month.year, month.month + n, 1);
   month = { year: d.getFullYear(), month: d.getMonth() };
@@ -254,8 +290,34 @@ function moveMonth(n) {
 }
 
 export function initPlanView() {
-  $('cal-prev').addEventListener('click', () => moveMonth(-1));
-  $('cal-next').addEventListener('click', () => moveMonth(1));
+  $('cal-prev').addEventListener('click', () => (isCollapsed() ? moveWeek(-1) : moveMonth(-1)));
+  $('cal-next').addEventListener('click', () => (isCollapsed() ? moveWeek(1) : moveMonth(1)));
+
+  // 손잡이: 누르면 펼치기/접기, 아래로 끌면 펼치고 위로 끌면 접는다.
+  const toggle = $('cal-toggle');
+  let dragStartY = null;
+  let dragged = false;
+  toggle.addEventListener('pointerdown', (e) => {
+    dragStartY = e.clientY;
+    dragged = false;
+    toggle.setPointerCapture(e.pointerId);
+  });
+  toggle.addEventListener('pointermove', (e) => {
+    if (dragStartY === null) return;
+    const dy = e.clientY - dragStartY;
+    if (Math.abs(dy) < 24) return;
+    dragged = true;
+    dragStartY = null;
+    setExpanded(dy > 0);
+  });
+  const endDrag = () => { dragStartY = null; };
+  toggle.addEventListener('pointerup', endDrag);
+  toggle.addEventListener('pointercancel', endDrag);
+  toggle.addEventListener('click', () => {
+    if (dragged) { dragged = false; return; }
+    setExpanded(isCollapsed()); // 접혀 있으면 펼치고, 펼쳐져 있으면 접는다
+  });
+  compactQuery.addEventListener('change', () => render());
   $('cal-today').addEventListener('click', () => {
     selected = toDateText(new Date());
     showMonthOf(selected);
@@ -273,7 +335,7 @@ export function initPlanView() {
     selected = date;
     if (cell.classList.contains('outside')) showMonthOf(date);
     render();
-    if (window.matchMedia('(max-width: 959px)').matches) {
+    if (!isCollapsed() && window.matchMedia('(max-width: 959px)').matches) {
       $('day-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
