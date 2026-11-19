@@ -344,3 +344,16 @@ body[data-tab="plan"] .app { max-width: 1080px; }
   color: #fff;
   background: #ae3ec9;
 }
+
+/* 날과 날 사이 구분선: 짧고 얇은 실선 (일요일 왼쪽에는 없음) */
+.cal-cell { position: relative; }
+.cal-cell:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  left: 0; /* 칸의 왼쪽 경계 */
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: #e3e7f0;
+  pointer-events: none;
+}
