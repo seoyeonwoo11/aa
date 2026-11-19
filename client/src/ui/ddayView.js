@@ -1,9 +1,10 @@
 // 홈 탭: D-Day 카드, 카운트다운, 남은 기간
 
 import { $, pad2 } from './dom.js';
-import { toDateText, formatKoreanDate } from '../utils/date.js';
+import { toDateText, formatKoreanDate, parseDate, daysBetween } from '../utils/date.js';
 import { getTarget } from '../exam/target.js';
 import { formatDday, getSummary, getCountdown } from '../exam/dday.js';
+import { nextMockExam } from '../exam/mockExams.js';
 
 let settings = null;
 let lastDay = null;
@@ -16,6 +17,15 @@ function renderSummary() {
   $('exam-badge').textContent = target.badge;
   $('exam-badge').className = `badge${target.badge === '예상' ? ' estimated' : ''}`;
   $('exam-date').textContent = formatKoreanDate(target.date);
+
+  // 다음 모의고사
+  const now = new Date();
+  const mock = nextMockExam(settings, toDateText(now));
+  $('next-mock').hidden = !mock;
+  if (mock) {
+    const mockDate = parseDate(mock.date);
+    $('next-mock').textContent = `${mock.name} ${formatDday(daysBetween(now, mockDate))} · ${mockDate.getMonth() + 1}월 ${mockDate.getDate()}일`;
+  }
 
   $('dday').textContent = formatDday(summary.diff);
   $('dday').classList.toggle('today', summary.diff === 0);

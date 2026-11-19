@@ -64,6 +64,27 @@ export async function logIn(email, password) {
   return toUser(data.user);
 }
 
+// 비밀번호 재설정 메일 보내기. 메일의 링크를 누르면 앱으로 돌아와 새 비밀번호 화면이 열린다.
+export async function requestPasswordReset(email) {
+  if (!EMAIL_PATTERN.test(email)) throw new Error('이메일 주소를 정확히 입력해 주세요.');
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${location.origin}${location.pathname}` });
+  if (error) throw toKoreanError(error);
+}
+
+// 재설정 링크로 들어온 상태에서 새 비밀번호 저장
+export async function updatePassword(password) {
+  if (password.length < MIN_PASSWORD_LENGTH) throw new Error(`비밀번호는 ${MIN_PASSWORD_LENGTH}자 이상 입력해 주세요.`);
+  const { data, error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    if (error.code === 'same_password') throw new Error('예전과 다른 비밀번호를 입력해 주세요.');
+    throw toKoreanError(error);
+  }
+  return toUser(data.user);
+}
+
+// 주소에 비밀번호 재설정 링크 정보가 있는지 (Supabase가 처리하기 전에 확인)
+export const isRecoveryLink = () => /type=recovery/.test(location.hash) || /type=recovery/.test(location.search);
+
 export async function logOut() {
   try {
     await supabase.auth.signOut();

@@ -3,6 +3,7 @@
 import { $ } from './dom.js';
 import { toDateText } from '../utils/date.js';
 import { loadStudy, saveStudy } from '../services/studyService.js';
+import { SUBJECT_COLORS } from './statsView.js';
 import {
   SUBJECTS, MIN_SESSION_SECONDS, getElapsedSeconds, startTimer, pauseTimer, autoPauseTimer, recoverTimer, finishTimer,
   totalsForDate, lastDaysTotals, formatClock, formatDuration
@@ -96,6 +97,10 @@ function renderToday() {
     const label = document.createElement('span');
     const value = document.createElement('strong');
     label.textContent = name;
+    const swatch = document.createElement('span');
+    swatch.className = 'swatch';
+    swatch.style.background = SUBJECT_COLORS[name];
+    label.prepend(swatch);
     value.textContent = formatDuration(bySubject[name]);
     li.append(label, value);
     list.appendChild(li);
@@ -226,6 +231,14 @@ export function setStudySettings(settings) {
 // 탭을 열 때마다 날짜가 바뀌었을 수 있으니 다시 그린다.
 export function refreshStudy() {
   if (data) renderAll();
+}
+
+// 통계용: 저장된 기록 + 지금 진행 중인 타이머(오늘 몫)
+export function getStudySessions() {
+  if (!data) return [];
+  const live = data.running ? getElapsedSeconds(data.running) : 0;
+  if (!live) return data.sessions;
+  return [...data.sessions, { date: toDateText(new Date()), subject: data.running.subject, seconds: live }];
 }
 
 export function clearStudy() {

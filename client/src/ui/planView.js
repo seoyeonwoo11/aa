@@ -4,10 +4,12 @@ import { $ } from './dom.js';
 import { readJSON, writeJSON } from '../storage/localStore.js';
 import { toDateText, parseDate, formatKoreanDate } from '../utils/date.js';
 import { getTarget } from '../exam/target.js';
+import { mockExamsByDate } from '../exam/mockExams.js';
 import { loadPlans, savePlans } from '../services/planService.js';
 import { getMonthGrid, layoutWeek } from '../plan/calendar.js';
 import {
-  RANGE_COLORS, addPlan, togglePlan, removePlan, planProgress,
+  RANGE_COLORS, REPEAT_PRESETS, addPlan, togglePlan, removePlan, planProgress,
+  addRepeat, toggleRepeatDone, stopRepeat, itemsForDate,
   addRange, updateRange, toggleRange, removeRange, rangesOnDate, rangeDayInfo
 } from '../plan/planList.js';
 
@@ -63,6 +65,7 @@ function renderCalendar() {
   const today = toDateText(new Date());
   const examDate = settings && !settings.customDate ? toDateText(getTarget(settings).date) : null;
   const customDate = settings?.customDate || null;
+  const mocks = settings ? mockExamsByDate(settings) : {};
   const weeks = getMonthGrid(month.year, month.month);
   const preview = editing?.start && editing?.end
     ? [editing.start, editing.end].sort()
@@ -90,7 +93,7 @@ function renderCalendar() {
 
     week.forEach((day, i) => {
       const date = toDateText(day);
-      const items = plans.days[date] || [];
+      const items = itemsForDate(plans, date);
       const hidden = segments.filter((s) => s.lane >= MAX_LANES && s.from <= i && i <= s.to).length;
 
       const cell = el('button', 'cal-cell');
@@ -108,6 +111,7 @@ function renderCalendar() {
       head.append(el('span', 'cal-num', String(day.getDate())));
       if (date === examDate) head.append(el('span', 'cal-tag', '수능'));
       else if (date === customDate) head.append(el('span', 'cal-tag', '목표'));
+      for (const mock of mocks[date] || []) head.append(el('span', 'cal-tag mock', mock.short));
       cell.append(head);
 
       const foot = el('span', 'cal-cell-foot');
@@ -171,22 +175,24 @@ function rangeItem(range, date, editable) {
   return li;
 }
 
-// 할 일 한 줄. removable이면 삭제 버튼을 붙인다.
+// 할 일 한 줄. removable이면 삭제 버튼을 붙인다. 반복 할 일에는 반복 요일 표시.
 function todoItem(item, removable) {
-  const li = el('li', `plan-item${item.done ? ' done' : ''}`);
+  const li = el('li', `plan-item${item.done ? ' done' : ''}${item.repeat ? ' repeat' : ''}`);
   li.dataset.id = item.id;
+  if (item.repeat) li.dataset.repeat = '1';
   const label = el('label');
   const check = el('input');
   check.type = 'checkbox';
   check.checked = item.done;
   check.dataset.action = 'toggle';
-  label.append(check, el('span', '', item.text));
+  label.append(check, el('span', 'plan-text', item.text));
+  if (item.repeat) label.append(el('span', 'repeat-tag', `↻ ${item.repeatLabel}`));
   li.append(label);
   if (removable) {
     const remove = el('button', 'icon-btn remove-btn', '×');
     remove.type = 'button';
     remove.dataset.action = 'remove';
-    remove.setAttribute('aria-label', `${item.text} 삭제`);
+    remove.setAttribute('aria-label', item.repeat ? `${item.text} 반복 그만하기` : `${item.text} 삭제`);
     li.append(remove);
   }
   return li;
@@ -198,7 +204,7 @@ function renderDay() {
   $('plan-date').textContent = formatKoreanDate(parseDate(selected));
   $('day-ranges').replaceChildren(...rangesOnDate(plans.ranges, selected).map((r) => rangeItem(r, selected, true)));
 
-  const items = plans.days[selected] || [];
+  const items = itemsForDate(plans, selected);
   $('plan-empty').hidden = items.length > 0;
   $('plan-list').replaceChildren(...items.map((item) => todoItem(item, true)));
 }
@@ -208,7 +214,7 @@ function renderDay() {
 function renderHome() {
   const today = toDateText(new Date());
   const ranges = rangesOnDate(plans.ranges, today);
-  const items = plans.days[today] || [];
+  const items = itemsForDate(plans, today);
   $('home-ranges').replaceChildren(...ranges.map((r) => rangeItem(r, today, false)));
   $('home-plan-list').replaceChildren(...items.map((item) => todoItem(item, false)));
   $('home-plan-empty').hidden = ranges.length + items.length > 0;
@@ -403,18 +409,89 @@ export function initPlanView() {
     event.preventDefault();
     const input = $('plan-input');
     if (!input.value.trim()) return;
-    commit(addPlan(plans, selected, input.value));
+    if (repeatDays.length) {
+      commit(addRepeat(plans, { text: input.value, days: repeatDays, start: selected }));
+      setRepeatDays([]);
+      setRepeatOpen(false);
+    } else {
+      commit(addPlan(plans, selected, input.value));
+    }
     input.value = '';
     input.focus();
   });
 
   $('plan-list').addEventListener('click', (event) => {
     const action = event.target.dataset.action;
-    const id = event.target.closest('.plan-item')?.dataset.id;
-    if (!id || !action) return;
-    if (action === 'toggle') commit(togglePlan(plans, selected, id));
-    if (action === 'remove') commit(removePlan(plans, selected, id));
+    const row = event.target.closest('.plan-item');
+    if (!row || !action) return;
+    const { id, repeat } = row.dataset;
+    if (action === 'toggle') commit(toggleItem(selected, id, Boolean(repeat)));
+    if (action === 'remove') {
+      if (!repeat) return commit(removePlan(plans, selected, id));
+      const rule = plans.repeats.find((r) => r.id === id);
+      const when = formatKoreanDate(parseDate(selected));
+      if (rule && confirm(`'${rule.text}' 반복을 ${when}부터 그만할까요?`)) commit(stopRepeat(plans, id, selected));
+    }
   });
+
+  initRepeatPicker();
+}
+
+function toggleItem(date, id, isRepeat) {
+  return isRepeat ? toggleRepeatDone(plans, date, id) : togglePlan(plans, date, id);
+}
+
+/* ---------- 반복 요일 고르기 (할 일 추가 칸 옆 ↻ 버튼) ---------- */
+
+let repeatDays = [];
+
+function setRepeatOpen(open) {
+  $('repeat-panel').hidden = !open;
+  $('repeat-toggle').setAttribute('aria-expanded', String(open));
+}
+
+function setRepeatDays(days) {
+  repeatDays = [...new Set(days)].sort();
+  const key = repeatDays.join(',');
+  document.querySelectorAll('#repeat-days .day-chip').forEach((chip) => {
+    chip.setAttribute('aria-pressed', String(repeatDays.includes(Number(chip.dataset.day))));
+  });
+  document.querySelectorAll('#repeat-presets .day-chip').forEach((chip) => {
+    chip.setAttribute('aria-pressed', String(REPEAT_PRESETS[chip.dataset.preset].join(',') === key));
+  });
+  $('repeat-toggle').classList.toggle('active', repeatDays.length > 0);
+  $('plan-input').placeholder = repeatDays.length ? '반복할 일 추가' : '이 날 할 일 추가';
+}
+
+function initRepeatPicker() {
+  const names = ['일', '월', '화', '수', '목', '금', '토'];
+  const presets = { daily: '매일', weekdays: '평일', weekend: '주말' };
+  for (const [key, label] of Object.entries(presets)) {
+    const chip = el('button', 'day-chip', label);
+    chip.type = 'button';
+    chip.dataset.preset = key;
+    chip.addEventListener('click', () => {
+      const same = REPEAT_PRESETS[key].join(',') === repeatDays.join(',');
+      setRepeatDays(same ? [] : REPEAT_PRESETS[key]);
+    });
+    $('repeat-presets').append(chip);
+  }
+  [1, 2, 3, 4, 5, 6, 0].forEach((day) => {
+    const chip = el('button', `day-chip${day === 0 ? ' sun' : day === 6 ? ' sat' : ''}`, names[day]);
+    chip.type = 'button';
+    chip.dataset.day = String(day);
+    chip.addEventListener('click', () => {
+      setRepeatDays(repeatDays.includes(day) ? repeatDays.filter((d) => d !== day) : [...repeatDays, day]);
+    });
+    $('repeat-days').append(chip);
+  });
+  $('repeat-toggle').addEventListener('click', () => {
+    const open = $('repeat-panel').hidden;
+    setRepeatOpen(open);
+    if (open && !repeatDays.length) setRepeatDays(REPEAT_PRESETS.daily);
+    if (!open) setRepeatDays([]);
+  });
+  setRepeatDays([]);
 }
 
 // 홈 화면의 오늘 계획: 체크와 추가만 하고, 자세한 편집은 계획 탭에서 한다.
@@ -434,8 +511,8 @@ function initHomeCard() {
   });
 
   $('home-plan-list').addEventListener('click', (event) => {
-    const id = event.target.closest('.plan-item')?.dataset.id;
-    if (id && event.target.dataset.action === 'toggle') commit(togglePlan(plans, today(), id));
+    const row = event.target.closest('.plan-item');
+    if (row && event.target.dataset.action === 'toggle') commit(toggleItem(today(), row.dataset.id, Boolean(row.dataset.repeat)));
   });
 
   $('home-plan-form').addEventListener('submit', (event) => {
@@ -465,6 +542,11 @@ export async function showPlans(id, nextSettings) {
 export function setPlanSettings(nextSettings) {
   settings = nextSettings;
   if (userId) render();
+}
+
+// 통계용
+export function getPlans() {
+  return plans;
 }
 
 export function clearPlans() {

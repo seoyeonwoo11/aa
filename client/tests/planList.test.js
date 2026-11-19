@@ -24,7 +24,7 @@ describe('daily plans', () => {
 
   it('reads the old storage format', () => {
     const old = { '2026-11-19': [{ id: 'a', text: 'x', done: false }] };
-    expect(normalizePlans(old)).toEqual({ days: old, ranges: [] });
+    expect(normalizePlans(old)).toEqual({ days: old, ranges: [], repeats: [], repeatDone: {} });
   });
 });
 
@@ -55,5 +55,55 @@ describe('range plans', () => {
     expect(plans.ranges[0]).toMatchObject({ title: '국어 비문학', end: '2026-12-01', done: true });
     plans = removeRange(plans, id);
     expect(plans.ranges.map((r) => r.title)).toEqual(['수학']);
+  });
+});
+
+import { addRepeat, repeatsOnDate, toggleRepeatDone, stopRepeat, describeDays, itemsForDate, REPEAT_PRESETS } from '../src/plan/planList.js';
+
+describe('repeating plans', () => {
+  // 2026-11-16(월) ~ 2026-11-22(일)
+  it('shows a repeat only on its weekdays from its start date', () => {
+    let plans = addRepeat(normalizePlans(null), { text: ' 영단어 100개 ', days: REPEAT_PRESETS.weekdays, start: '2026-11-17' });
+    expect(repeatsOnDate(plans.repeats, '2026-11-16')).toHaveLength(0); // 시작 전
+    expect(repeatsOnDate(plans.repeats, '2026-11-18')).toHaveLength(1); // 수
+    expect(repeatsOnDate(plans.repeats, '2026-11-21')).toHaveLength(0); // 토
+    plans = addRepeat(plans, { text: '', days: [1], start: '2026-11-17' });
+    plans = addRepeat(plans, { text: 'x', days: [], start: '2026-11-17' });
+    expect(plans.repeats).toHaveLength(1);
+    expect(plans.repeats[0].text).toBe('영단어 100개');
+  });
+
+  it('tracks completion per day and merges with that day\'s to-dos', () => {
+    let plans = addRepeat(normalizePlans(null), { text: '영단어', days: REPEAT_PRESETS.daily, start: '2026-11-16' });
+    plans = addPlan(plans, '2026-11-18', '수학 기출');
+    const id = plans.repeats[0].id;
+    plans = toggleRepeatDone(plans, '2026-11-18', id);
+    const items = itemsForDate(plans, '2026-11-18');
+    expect(items.map((i) => [i.text, i.done, i.repeat])).toEqual([['영단어', true, true], ['수학 기출', false, false]]);
+    expect(itemsForDate(plans, '2026-11-19')[0].done).toBe(false);
+    expect(planProgress(items)).toEqual({ done: 1, total: 2 });
+    plans = toggleRepeatDone(plans, '2026-11-18', id);
+    expect(plans.repeatDone).toEqual({});
+  });
+
+  it('stops a repeat from a date, or removes it when stopped on its start', () => {
+    let plans = addRepeat(normalizePlans(null), { text: '영단어', days: REPEAT_PRESETS.daily, start: '2026-11-16' });
+    const id = plans.repeats[0].id;
+    plans = toggleRepeatDone(plans, '2026-11-16', id);
+    const stopped = stopRepeat(plans, id, '2026-11-20');
+    expect(stopped.repeats[0].end).toBe('2026-11-19');
+    expect(repeatsOnDate(stopped.repeats, '2026-11-19')).toHaveLength(1);
+    expect(repeatsOnDate(stopped.repeats, '2026-11-20')).toHaveLength(0);
+    const removed = stopRepeat(plans, id, '2026-11-16');
+    expect(removed.repeats).toEqual([]);
+    expect(removed.repeatDone).toEqual({});
+  });
+
+  it('describes weekday sets', () => {
+    expect(describeDays(REPEAT_PRESETS.daily)).toBe('매일');
+    expect(describeDays([5, 1, 2, 3, 4])).toBe('평일');
+    expect(describeDays([0, 6])).toBe('주말');
+    expect(describeDays([5, 1, 3])).toBe('월·수·금');
+    expect(describeDays([0, 2])).toBe('화·일');
   });
 });

@@ -26,18 +26,26 @@ body.has-nav .tab-panel:not(.plan-panel) {
   flex-direction: column;
   gap: 12px;
 }
+
+/* 정말 작은 화면에서 최소 높이로도 안 들어가면 탭 안에서 스크롤 (카드 그림자가 잘리지 않게 여백) */
+body.has-nav .tab-panel {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 -8px;
+  padding: 0 8px 4px;
+}
 body.has-nav .tab-panel > .card:not(.fill-card) { flex: none; }
 
 /* 남은 높이를 채우는 카드: 머리글·입력칸은 고정, 가운데 목록만 스크롤 */
 body.has-nav .fill-card {
   flex: 1 1 0;
-  min-height: 150px;
+  min-height: auto; /* 머리글 + 목록 최소 높이 + 입력칸보다 작아지지 않게 */
   display: flex;
   flex-direction: column;
 }
 .card-scroll {
   flex: 1;
-  min-height: 0;
+  min-height: 84px;
   overflow-y: auto;
   overscroll-behavior: contain;
   margin: 0 -4px;
@@ -90,9 +98,8 @@ body.has-nav .plan-panel {
   min-width: 0;
   grid-template-columns: minmax(0, 1fr);
   gap: 12px;
-  grid-template-rows: minmax(150px, 1fr) auto auto;
+  grid-template-rows: minmax(auto, 1fr) auto auto; /* 그날 카드는 내용보다 작아지지 않게, 넘치면 탭 안에서 스크롤 */
 }
-body.has-nav .plan-panel > .day-card { min-height: 0; }
 body.has-nav .range-add { margin-top: 8px; min-height: 42px; }
 
 @media (min-width: 960px) {
@@ -144,3 +151,8 @@ body.has-nav .plan-panel.editing {
 @media (max-width: 959px) {
   body.has-nav .plan-panel.editing > .day-card { display: none; }
 }
+
+/* 설정 탭: 모의고사 목록은 최소 두 줄은 보이게, 그래도 넘치면 설정 탭 안에서 스크롤 */
+.mock-card .card-scroll { min-height: 96px; }
+body.has-nav #panel-settings .field { margin-bottom: 10px; }
+body.has-nav #panel-settings .field:last-child { margin-bottom: 0; }

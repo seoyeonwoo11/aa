@@ -296,3 +296,51 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 .today-plan-card .day-ranges { margin-top: 12px; }
 .today-plan-card .plan-list:empty { display: none; }
 .today-plan-card .empty { margin: 14px 0 0; }
+
+/* ---------- 반복 할 일 ---------- */
+
+.plan-item label { flex-wrap: wrap; row-gap: 0; }
+.plan-text { min-width: 0; }
+.repeat-tag {
+  padding: 1px 7px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.plan-item.done .repeat-tag { opacity: 0.6; }
+
+.repeat-toggle { width: 46px; height: 46px; display: grid; place-items: center; }
+.repeat-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.repeat-toggle.active { color: #fff; background: var(--primary); border-color: var(--primary); }
+
+.repeat-panel { margin-top: 8px; display: grid; gap: 6px; flex: none; }
+.day-chips { display: flex; gap: 6px; }
+.day-chip {
+  flex: 1;
+  min-height: 34px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.day-chip.sun { color: #d6336c; }
+.day-chip.sat { color: #3457d5; }
+.day-chip[aria-pressed="true"] { color: #fff; background: var(--primary); border-color: var(--primary); }
+
+/* 달력의 모의고사 표시 */
+.cal-cell-head { overflow: hidden; }
+.cal-tag.mock {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+  background: #ae3ec9;
+}

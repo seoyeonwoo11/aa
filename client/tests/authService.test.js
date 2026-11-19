@@ -60,3 +60,24 @@ describe('authService', () => {
     expect(toKoreanError(new TypeError('Failed to fetch')).message).toContain('인터넷');
   });
 });
+
+describe('password reset', async () => {
+  const { requestPasswordReset, updatePassword } = await import('../src/services/authService.js');
+  auth.resetPasswordForEmail = vi.fn();
+  auth.updateUser = vi.fn();
+
+  it('sends a reset email that returns to the app', async () => {
+    auth.resetPasswordForEmail.mockResolvedValue({ error: null });
+    await requestPasswordReset('kim@example.com');
+    expect(auth.resetPasswordForEmail).toHaveBeenCalledWith('kim@example.com', { redirectTo: 'https://example.github.io/aa/' });
+    await expect(requestPasswordReset('nope')).rejects.toThrow('이메일 주소');
+  });
+
+  it('updates the password', async () => {
+    auth.updateUser.mockResolvedValue({ data: { user }, error: null });
+    await expect(updatePassword('newpass1')).resolves.toEqual({ id: 'u1', email: 'kim@example.com' });
+    await expect(updatePassword('123')).rejects.toThrow('6자 이상');
+    auth.updateUser.mockResolvedValue({ data: {}, error: { code: 'same_password', message: 'New password should be different' } });
+    await expect(updatePassword('newpass1')).rejects.toThrow('예전과 다른');
+  });
+});

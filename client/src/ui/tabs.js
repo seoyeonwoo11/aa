@@ -6,6 +6,7 @@ export const TABS = {
   home: '홈',
   study: '공부 모드',
   plan: '계획',
+  stats: '통계',
   settings: '설정'
 };
 
