@@ -79,7 +79,7 @@ function renderCalendar() {
   $('cal-next').setAttribute('aria-label', collapsed ? '다음 주' : '다음 달');
   $('cal-toggle').hidden = !compactQuery.matches || Boolean(editing);
   $('cal-toggle').setAttribute('aria-expanded', String(!collapsed));
-  $('cal-toggle-text').textContent = collapsed ? '한 달 보기' : '접기';
+  $('cal-toggle').setAttribute('aria-label', collapsed ? '한 달 보기' : '접기');
 
   for (const week of weeks) {
     const wrap = el('div', 'cal-week-wrap');
@@ -143,62 +143,77 @@ function renderCalendar() {
   }
 }
 
-/* ---------- 선택한 날의 상세 ---------- */
+/* ---------- 목록 그리기 (계획 탭과 홈 화면이 함께 씀) ---------- */
 
-function renderDay() {
-  const day = parseDate(selected);
-  $('plan-date').textContent = formatKoreanDate(day);
+// 기간 계획 한 줄. editable이면 눌러서 수정할 수 있다.
+function rangeItem(range, date, editable) {
+  const { day: n, total } = rangeDayInfo(range, date);
+  const li = el('li', `range-item${range.done ? ' done' : ''}`);
+  li.dataset.id = range.id;
+  li.style.setProperty('--bar', range.color);
 
-  // 이 날이 포함된 기간 계획
-  const rangeList = $('day-ranges');
-  rangeList.innerHTML = '';
-  for (const range of rangesOnDate(plans.ranges, selected)) {
-    const { day: n, total } = rangeDayInfo(range, selected);
-    const li = el('li', `range-item${range.done ? ' done' : ''}`);
-    li.dataset.id = range.id;
-    li.style.setProperty('--bar', range.color);
+  const check = el('input');
+  check.type = 'checkbox';
+  check.checked = range.done;
+  check.dataset.action = 'toggle-range';
+  check.setAttribute('aria-label', `${range.title} 완료`);
 
-    const check = el('input');
-    check.type = 'checkbox';
-    check.checked = range.done;
-    check.dataset.action = 'toggle-range';
-    check.setAttribute('aria-label', `${range.title} 완료`);
-
-    const body = el('button', 'range-body');
+  const body = el(editable ? 'button' : 'div', 'range-body');
+  if (editable) {
     body.type = 'button';
     body.dataset.action = 'edit-range';
-    body.append(
-      el('span', 'range-title', range.title),
-      el('span', 'range-meta', `${shortDate(range.start)} ~ ${shortDate(range.end)} · ${n}/${total}일째`)
-    );
-    li.append(el('span', 'range-color'), check, body);
-    rangeList.append(li);
   }
+  body.append(
+    el('span', 'range-title', range.title),
+    el('span', 'range-meta', `${shortDate(range.start)} ~ ${shortDate(range.end)} · ${n}/${total}일째`)
+  );
+  li.append(el('span', 'range-color'), check, body);
+  return li;
+}
 
-  // 이 날의 할 일
-  const items = plans.days[selected] || [];
-  const { done, total } = planProgress(items);
-  $('plan-progress').textContent = total ? `할 일 ${done} / ${total} 완료` : '';
-  $('plan-empty').hidden = total > 0;
-
-  const list = $('plan-list');
-  list.innerHTML = '';
-  for (const item of items) {
-    const li = el('li', `plan-item${item.done ? ' done' : ''}`);
-    li.dataset.id = item.id;
-    const label = el('label');
-    const check = el('input');
-    check.type = 'checkbox';
-    check.checked = item.done;
-    check.dataset.action = 'toggle';
-    label.append(check, el('span', '', item.text));
+// 할 일 한 줄. removable이면 삭제 버튼을 붙인다.
+function todoItem(item, removable) {
+  const li = el('li', `plan-item${item.done ? ' done' : ''}`);
+  li.dataset.id = item.id;
+  const label = el('label');
+  const check = el('input');
+  check.type = 'checkbox';
+  check.checked = item.done;
+  check.dataset.action = 'toggle';
+  label.append(check, el('span', '', item.text));
+  li.append(label);
+  if (removable) {
     const remove = el('button', 'icon-btn remove-btn', '×');
     remove.type = 'button';
     remove.dataset.action = 'remove';
     remove.setAttribute('aria-label', `${item.text} 삭제`);
-    li.append(label, remove);
-    list.append(li);
+    li.append(remove);
   }
+  return li;
+}
+
+/* ---------- 선택한 날의 상세 ---------- */
+
+function renderDay() {
+  $('plan-date').textContent = formatKoreanDate(parseDate(selected));
+  $('day-ranges').replaceChildren(...rangesOnDate(plans.ranges, selected).map((r) => rangeItem(r, selected, true)));
+
+  const items = plans.days[selected] || [];
+  const { done, total } = planProgress(items);
+  $('plan-progress').textContent = total ? `할 일 ${done} / ${total} 완료` : '';
+  $('plan-empty').hidden = total > 0;
+  $('plan-list').replaceChildren(...items.map((item) => todoItem(item, true)));
+}
+
+/* ---------- 홈 화면의 오늘 계획 ---------- */
+
+function renderHome() {
+  const today = toDateText(new Date());
+  const ranges = rangesOnDate(plans.ranges, today);
+  const items = plans.days[today] || [];
+  $('home-ranges').replaceChildren(...ranges.map((r) => rangeItem(r, today, false)));
+  $('home-plan-list').replaceChildren(...items.map((item) => todoItem(item, false)));
+  $('home-plan-empty').hidden = ranges.length + items.length > 0;
 }
 
 /* ---------- 기간 계획 편집 ---------- */
@@ -262,6 +277,7 @@ function render() {
   renderCalendar();
   renderRangeForm();
   renderDay();
+  renderHome();
 }
 
 function showMonthOf(dateText) {
@@ -284,6 +300,7 @@ function moveMonth(n) {
 }
 
 export function initPlanView() {
+  initHomeCard();
   $('cal-prev').addEventListener('click', () => (isCollapsed() ? moveWeek(-1) : moveMonth(-1)));
   $('cal-next').addEventListener('click', () => (isCollapsed() ? moveWeek(1) : moveMonth(1)));
 
@@ -399,6 +416,41 @@ export function initPlanView() {
     if (action === 'toggle') commit(togglePlan(plans, selected, id));
     if (action === 'remove') commit(removePlan(plans, selected, id));
   });
+}
+
+// 홈 화면의 오늘 계획: 체크와 추가만 하고, 자세한 편집은 계획 탭에서 한다.
+function initHomeCard() {
+  const today = () => toDateText(new Date());
+
+  $('home-plan-more').addEventListener('click', () => {
+    selected = today();
+    showMonthOf(selected);
+    render();
+    location.hash = 'plan';
+  });
+
+  $('home-ranges').addEventListener('click', (event) => {
+    const id = event.target.closest('.range-item')?.dataset.id;
+    if (id && event.target.dataset.action === 'toggle-range') commit(toggleRange(plans, id));
+  });
+
+  $('home-plan-list').addEventListener('click', (event) => {
+    const id = event.target.closest('.plan-item')?.dataset.id;
+    if (id && event.target.dataset.action === 'toggle') commit(togglePlan(plans, today(), id));
+  });
+
+  $('home-plan-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const input = $('home-plan-input');
+    if (!input.value.trim()) return;
+    commit(addPlan(plans, today(), input.value));
+    input.value = '';
+  });
+}
+
+// 탭을 열 때마다 다시 그린다. (자정이 지나 '오늘'이 바뀌었을 수 있음)
+export function refreshPlans() {
+  if (userId) render();
 }
 
 export async function showPlans(id, nextSettings) {

@@ -9,7 +9,7 @@ import { initAuthView, showAuthView, hideAuthView } from './ui/authView.js';
 import { initTabs, showTab, getTabFromHash, setTabsVisible } from './ui/tabs.js';
 import { initDdayView, setDdaySettings, clearDdayView } from './ui/ddayView.js';
 import { initStudyView, showStudy, setStudySettings, refreshStudy, clearStudy } from './ui/studyView.js';
-import { initPlanView, showPlans, setPlanSettings, clearPlans } from './ui/planView.js';
+import { initPlanView, showPlans, setPlanSettings, refreshPlans, clearPlans } from './ui/planView.js';
 import { initSettingsView, showSettings } from './ui/settingsView.js';
 
 let currentUser = null;
@@ -54,6 +54,7 @@ initAuthView({ onSuccess: enterApp });
 initTabs({
   onTabChange: (tab) => {
     if (tab === 'study') refreshStudy();
+    if (tab === 'home' || tab === 'plan') refreshPlans();
     if (tab === 'settings') showSettings(settings, currentUser);
   }
 });

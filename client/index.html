@@ -57,6 +57,20 @@
           <p class="hint">1교시 08:40 기준</p>
         </div>
 
+        <div class="card today-plan-card">
+          <div class="row-between">
+            <h2>오늘 계획</h2>
+            <button id="home-plan-more" type="button" class="text-btn small">계획 보기</button>
+          </div>
+          <ul id="home-ranges" class="day-ranges"></ul>
+          <ul id="home-plan-list" class="plan-list"></ul>
+          <p id="home-plan-empty" class="empty">오늘 계획이 없어요.</p>
+          <form id="home-plan-form" class="plan-form">
+            <input id="home-plan-input" type="text" maxlength="100" placeholder="오늘 할 일 추가" autocomplete="off" aria-label="오늘 할 일">
+            <button type="submit" class="primary-btn">추가</button>
+          </form>
+        </div>
+
         <div class="card">
           <div class="stat-grid">
             <div><span id="stat-weeks" class="stat-value">0주</span><span class="stat-label">남은 주</span></div>
@@ -106,6 +120,23 @@
 
       <!-- 계획 -->
       <section id="panel-plan" class="tab-panel plan-panel" hidden>
+        <!-- 선택한 날의 상세 계획 -->
+        <div id="day-card" class="card day-card">
+          <div class="day-head">
+            <strong id="plan-date"></strong>
+          </div>
+
+          <ul id="day-ranges" class="day-ranges"></ul>
+
+          <form id="plan-form" class="plan-form">
+            <input id="plan-input" type="text" maxlength="100" placeholder="이 날 할 일 추가" autocomplete="off" aria-label="할 일">
+            <button type="submit" class="primary-btn">추가</button>
+          </form>
+
+          <p id="plan-progress" class="plan-progress"></p>
+          <ul id="plan-list" class="plan-list"></ul>
+          <p id="plan-empty" class="empty">이 날 할 일이 없어요.</p>
+        </div>
         <div class="card calendar-card">
           <div class="cal-header">
             <button id="cal-prev" type="button" class="icon-btn" aria-label="이전 달">‹</button>
@@ -119,60 +150,40 @@
           <div id="cal-grid" class="cal-grid"></div>
           <button id="cal-toggle" type="button" class="cal-toggle" aria-controls="cal-grid" hidden>
             <span class="grabber" aria-hidden="true"></span>
-            <span id="cal-toggle-text"></span>
           </button>
           <button id="range-add" type="button" class="secondary-btn range-add">+ 기간 계획 추가</button>
         </div>
 
-        <div class="plan-side">
-          <!-- 기간 계획 추가·수정 -->
-          <form id="range-form" class="card range-form" hidden novalidate>
-            <h2 id="range-form-title">기간 계획 추가</h2>
+        <!-- 기간 계획 추가·수정 -->
+        <form id="range-form" class="card range-form" hidden novalidate>
+          <h2 id="range-form-title">기간 계획 추가</h2>
+          <label class="field">
+            <span>계획 이름</span>
+            <input id="range-title" type="text" maxlength="100" placeholder="예: 수학 기출 1회독" autocomplete="off">
+          </label>
+          <div class="range-dates">
             <label class="field">
-              <span>계획 이름</span>
-              <input id="range-title" type="text" maxlength="100" placeholder="예: 수학 기출 1회독" autocomplete="off">
+              <span>시작일</span>
+              <input id="range-start" type="date">
             </label>
-            <div class="range-dates">
-              <label class="field">
-                <span>시작일</span>
-                <input id="range-start" type="date">
-              </label>
-              <label class="field">
-                <span>종료일</span>
-                <input id="range-end" type="date">
-              </label>
-            </div>
-            <p id="range-pick-hint" class="hint pick-hint"></p>
-            <div class="field">
-              <span>색</span>
-              <div id="range-colors" class="color-options" role="radiogroup" aria-label="색"></div>
-            </div>
-            <p id="range-error" class="error" role="alert"></p>
-            <div class="form-actions">
-              <button id="range-delete" type="button" class="text-btn danger" hidden>삭제</button>
-              <button id="range-cancel" type="button" class="secondary-btn">취소</button>
-              <button type="submit" class="primary-btn">저장</button>
-            </div>
-          </form>
-
-          <!-- 선택한 날의 상세 계획 -->
-          <div id="day-card" class="card day-card">
-            <div class="day-head">
-              <strong id="plan-date"></strong>
-            </div>
-
-            <ul id="day-ranges" class="day-ranges"></ul>
-
-            <form id="plan-form" class="plan-form">
-              <input id="plan-input" type="text" maxlength="100" placeholder="이 날 할 일 추가" autocomplete="off" aria-label="할 일">
-              <button type="submit" class="primary-btn">추가</button>
-            </form>
-
-            <p id="plan-progress" class="plan-progress"></p>
-            <ul id="plan-list" class="plan-list"></ul>
-            <p id="plan-empty" class="empty">이 날 할 일이 없어요.</p>
+            <label class="field">
+              <span>종료일</span>
+              <input id="range-end" type="date">
+            </label>
           </div>
-        </div>
+          <p id="range-pick-hint" class="hint pick-hint"></p>
+          <div class="field">
+            <span>색</span>
+            <div id="range-colors" class="color-options" role="radiogroup" aria-label="색"></div>
+          </div>
+          <p id="range-error" class="error" role="alert"></p>
+          <div class="form-actions">
+            <button id="range-delete" type="button" class="text-btn danger" hidden>삭제</button>
+            <button id="range-cancel" type="button" class="secondary-btn">취소</button>
+            <button type="submit" class="primary-btn">저장</button>
+          </div>
+        </form>
+
       </section>
 
       <!-- 설정 -->

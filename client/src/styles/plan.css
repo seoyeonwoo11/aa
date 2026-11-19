@@ -2,14 +2,19 @@
 
 /* 태블릿·PC에서는 계획 탭을 넓게 쓴다 */
 body[data-tab="plan"] .app { max-width: 1080px; }
-.plan-side { display: grid; gap: 16px; align-content: start; }
+.plan-panel { grid-template-areas: "day" "cal" "form"; }
+.plan-panel > .day-card { grid-area: day; }
+.plan-panel > .calendar-card { grid-area: cal; }
+.plan-panel > .range-form { grid-area: form; }
 
+/* 가로 태블릿·PC: 왼쪽 달력, 오른쪽 선택한 날과 기간 계획 폼 */
 @media (min-width: 960px) {
   .plan-panel {
     grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+    grid-template-areas: "cal day" "cal form";
+    grid-template-rows: auto 1fr;
     align-items: start;
   }
-  .plan-side { position: sticky; top: 16px; }
 }
 
 /* ---------- 달력 ---------- */
@@ -66,17 +71,10 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 
 .cal-toggle {
   width: 100%;
-  min-height: 44px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 6px 0 2px;
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--muted);
+  min-height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
   background: none;
   border: 0;
   cursor: pointer;
@@ -170,7 +168,7 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 .cal-grid.picking .cal-cell { cursor: crosshair; }
 
 .range-add { margin-top: 12px; }
-.cal-toggle:not([hidden]) + .range-add { margin-top: 4px; }
+.cal-toggle:not([hidden]) + .range-add { margin-top: 2px; }
 
 @media (min-width: 700px) {
   .calendar-card { padding: 20px; }
@@ -294,3 +292,9 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 .remove-btn { border: 0; color: var(--muted); font-size: 1.3rem; }
 
 .empty { margin: 18px 0 4px; text-align: center; color: var(--muted); font-size: 0.92rem; }
+
+/* ---------- 홈 화면의 오늘 계획 ---------- */
+
+.today-plan-card .day-ranges { margin-top: 12px; }
+.today-plan-card .plan-list:empty { display: none; }
+.today-plan-card .empty { margin: 14px 0 0; }
