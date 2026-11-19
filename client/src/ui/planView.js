@@ -199,9 +199,7 @@ function renderDay() {
   $('day-ranges').replaceChildren(...rangesOnDate(plans.ranges, selected).map((r) => rangeItem(r, selected, true)));
 
   const items = plans.days[selected] || [];
-  const { done, total } = planProgress(items);
-  $('plan-progress').textContent = total ? `할 일 ${done} / ${total} 완료` : '';
-  $('plan-empty').hidden = total > 0;
+  $('plan-empty').hidden = items.length > 0;
   $('plan-list').replaceChildren(...items.map((item) => todoItem(item, true)));
 }
 

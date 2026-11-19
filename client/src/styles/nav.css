@@ -1,7 +1,18 @@
 /* 하단 탭 바 */
 
 body.has-nav .app {
+  padding-top: calc(16px + env(safe-area-inset-top));
   padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+
+/* 로그인 후에는 화면 제목을 숨긴다. (하단 탭이 위치를 알려 주고, 화면 읽기 프로그램용으로만 남김) */
+body.has-nav .app-header {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .nav-bar {

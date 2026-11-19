@@ -254,9 +254,6 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 }
 .plan-form .primary-btn { width: auto; padding: 0 20px; flex-shrink: 0; }
 
-.plan-progress { margin: 14px 0 0; font-size: 0.88rem; color: var(--muted); }
-.plan-progress:empty { display: none; }
-
 .plan-list {
   list-style: none;
   margin: 10px 0 0;
