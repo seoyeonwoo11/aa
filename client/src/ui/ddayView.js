@@ -3,7 +3,7 @@
 import { $, pad2 } from './dom.js';
 import { parseDate, startOfDay, toDateText, formatKoreanDate } from '../utils/date.js';
 import { getExam, getSelectableYears } from '../exam/examDates.js';
-import { formatDday, getDdayMessage, getSummary, getCountdown } from '../exam/dday.js';
+import { formatDday, getSummary, getCountdown } from '../exam/dday.js';
 
 let state = null;
 let onChange = () => {};
@@ -59,7 +59,6 @@ function renderSummary() {
 
   $('dday').textContent = formatDday(summary.diff);
   $('dday').classList.toggle('today', summary.diff === 0);
-  $('dday-message').textContent = getDdayMessage(summary.diff);
 
   $('stat-weeks').textContent = `${summary.weeks}주`;
   $('stat-weekends').textContent = `${summary.weekends}번`;

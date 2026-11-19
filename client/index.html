@@ -9,10 +9,9 @@
 <body>
   <main class="app">
     <header class="app-header">
-      <p class="eyebrow">대학수학능력시험</p>
       <h1>수능 D-Day 계산기</h1>
       <div id="user-bar" class="user-bar" hidden>
-        <span><strong id="user-name"></strong>님, 오늘도 화이팅!</span>
+        <span><strong id="user-name"></strong>님</span>
         <button id="logout-btn" type="button" class="text-btn small">로그아웃</button>
       </div>
     </header>
@@ -38,18 +37,17 @@
         <p id="auth-error" class="error" role="alert"></p>
         <button id="auth-submit" type="submit" class="primary-btn">로그인</button>
       </form>
-      <p class="hint">계정과 설정은 이 브라우저에만 저장됩니다. 다른 기기에서는 다시 가입해야 해요.</p>
+      <p class="hint">계정은 이 브라우저에만 저장돼요.</p>
     </section>
 
     <div id="app-content" hidden>
       <section class="card main-card" aria-live="polite">
         <div class="exam-meta">
-          <span id="exam-label">2028학년도 수능</span>
-          <span id="exam-badge" class="badge">예상</span>
+          <span id="exam-label"></span>
+          <span id="exam-badge" class="badge"></span>
         </div>
-        <p id="dday" class="dday">D-0</p>
+        <p id="dday" class="dday"></p>
         <p id="exam-date" class="exam-date"></p>
-        <p id="dday-message" class="message"></p>
 
         <div class="countdown" aria-label="시험 시작까지 남은 시간">
           <div><span id="cd-days">0</span><small>일</small></div>
@@ -57,11 +55,10 @@
           <div><span id="cd-minutes">00</span><small>분</small></div>
           <div><span id="cd-seconds">00</span><small>초</small></div>
         </div>
-        <p class="hint">1교시 시작(오전 8시 40분) 기준</p>
+        <p class="hint">1교시 08:40 기준</p>
       </section>
 
       <section class="card">
-        <h2>남은 기간 한눈에 보기</h2>
         <div class="stat-grid">
           <div><span id="stat-weeks" class="stat-value">0주</span><span class="stat-label">남은 주</span></div>
           <div><span id="stat-weekends" class="stat-value">0번</span><span class="stat-label">남은 주말</span></div>
@@ -77,19 +74,17 @@
       </section>
 
       <section class="card">
-        <h2>목표 시험 선택</h2>
         <label class="field">
           <span>수능 학년도</span>
           <select id="exam-select"></select>
         </label>
         <label class="field">
-          <span>날짜 직접 입력 (모의고사·목표일 등)</span>
+          <span>날짜 직접 입력</span>
           <div class="field-row">
             <input id="custom-date" type="date">
             <button id="clear-custom" type="button" class="text-btn">지우기</button>
           </div>
         </label>
-        <p class="hint">'예상' 표시된 날짜는 교육부 공식 발표 전 추정일입니다. 발표 후 날짜가 다르면 직접 입력해 주세요.</p>
       </section>
     </div>
   </main>

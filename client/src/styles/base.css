@@ -32,14 +32,6 @@ body {
 .app-header { text-align: center; }
 .app-header h1 { margin: 4px 0 0; font-size: 1.6rem; }
 
-.eyebrow {
-  margin: 0;
-  color: var(--primary);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -53,6 +45,7 @@ body {
 .hint { margin: 10px 0 0; color: var(--muted); font-size: 0.82rem; }
 
 .field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
 .field > span { font-size: 0.9rem; font-weight: 600; }
 .field-row { display: flex; gap: 8px; }
 

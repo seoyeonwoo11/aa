@@ -30,7 +30,6 @@
 .dday.today { color: var(--accent); }
 
 .exam-date { margin: 6px 0 0; color: var(--muted); }
-.message { margin: 10px 0 0; font-weight: 600; }
 
 .countdown {
   margin-top: 18px;
