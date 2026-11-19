@@ -2,6 +2,7 @@
 
 import './styles/main.css';
 import { initTheme } from './ui/theme.js';
+import { initInstall } from './ui/installView.js';
 import { $ } from './ui/dom.js';
 import { getCurrentUser, logOut, onAuthChange, isRecoveryLink } from './services/authService.js';
 import { loadSettings, saveSettings } from './services/settingsService.js';
@@ -71,6 +72,7 @@ function updateSettings(next) {
 }
 
 initTheme();
+initInstall();
 initAuthView({
   onSuccess: (user) => {
     recovering = false;

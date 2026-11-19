@@ -13,6 +13,12 @@
   </script>
   <title>하루수능</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="하루수능">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body>
   <main class="app">
@@ -314,6 +320,15 @@
             <button type="submit" class="primary-btn">추가</button>
           </form>
           <p id="mock-error" class="error" role="alert"></p>
+        </div>
+
+        <div id="install-card" class="card install-card" hidden>
+          <img class="install-icon" src="/apple-touch-icon.png" alt="" width="44" height="44">
+          <div class="install-text">
+            <strong>앱으로 설치</strong>
+            <span id="install-hint"></span>
+          </div>
+          <button id="install-btn" type="button" class="primary-btn install-btn" hidden>설치</button>
         </div>
 
         <div class="card theme-row">

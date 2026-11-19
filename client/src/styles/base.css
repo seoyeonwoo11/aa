@@ -298,3 +298,10 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 1
 /* 설정: 화면 모드 */
 .theme-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .theme-label { font-weight: 700; }
+
+/* 설정: 앱으로 설치 */
+.install-card { display: flex; align-items: center; gap: 12px; }
+.install-icon { width: 44px; height: 44px; border-radius: 11px; flex: none; }
+.install-text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.install-text span { font-size: 0.8rem; color: var(--muted); }
+.install-btn { width: auto; min-height: 40px; padding: 0 18px; flex: none; }
