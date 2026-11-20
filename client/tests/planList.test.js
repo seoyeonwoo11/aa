@@ -168,3 +168,49 @@ describe('editing plans', () => {
     expect(plans.repeats[0].days).toEqual([0, 6]);
   });
 });
+
+import { addRange as addR, updateRange as updR, rangesOnDate as onDate, rangeDayInfo as dayInfo, normalizePlans as norm } from '../src/plan/planList.js';
+import { layoutWeek as layout } from '../src/plan/calendar.js';
+
+describe('기간 계획 요일', () => {
+  const base = norm({});
+  // 2026-11-16(월) ~ 2026-11-29(일), 월·수·금
+  const mwf = addR(base, { title: '수학', start: '2026-11-16', end: '2026-11-29', color: '#3457d5', days: [1, 3, 5] });
+  const range = mwf.ranges[0];
+
+  it('고른 요일에만 나온다', () => {
+    expect(range.days).toEqual([1, 3, 5]);
+    expect(onDate(mwf.ranges, '2026-11-16')).toHaveLength(1); // 월
+    expect(onDate(mwf.ranges, '2026-11-17')).toHaveLength(0); // 화
+    expect(onDate(mwf.ranges, '2026-11-20')).toHaveLength(1); // 금
+  });
+
+  it('고른 요일만 센다: 6회 중 몇 회째', () => {
+    expect(dayInfo(range, '2026-11-20')).toEqual({ day: 3, total: 6 });
+    expect(dayInfo(range, '2026-11-27')).toEqual({ day: 6, total: 6 });
+  });
+
+  it('매일(7일 모두)이면 요일을 저장하지 않고, 고쳐서 매일로 바꾸면 요일이 지워진다', () => {
+    const daily = addR(base, { title: 'a', start: '2026-11-16', end: '2026-11-20', days: [0, 1, 2, 3, 4, 5, 6] });
+    expect('days' in daily.ranges[0]).toBe(false);
+    const back = updR(mwf, range.id, { title: '수학', start: range.start, end: range.end, color: range.color, days: [0, 1, 2, 3, 4, 5, 6] });
+    expect('days' in back.ranges[0]).toBe(false);
+    expect(dayInfo(back.ranges[0], '2026-11-20')).toEqual({ day: 5, total: 14 });
+  });
+
+  it('요일이 없거나 기간 안에 그 요일이 없으면 저장하지 않는다', () => {
+    expect(() => addR(base, { title: 'a', start: '2026-11-16', end: '2026-11-20', days: [] })).toThrow('요일을');
+    expect(() => addR(base, { title: 'a', start: '2026-11-16', end: '2026-11-17', days: [5] })).toThrow('기간 안에');
+  });
+
+  it('달력 막대는 이어지는 요일마다 따로, 같은 줄에 그린다', () => {
+    const week = Array.from({ length: 7 }, (_, i) => new Date(2026, 10, 15 + i)); // 11/15(일)~11/21(토)
+    const segs = layout(mwf.ranges, week).map((s) => [s.lane, s.from, s.to, s.contLeft, s.contRight]);
+    expect(segs).toEqual([[0, 1, 1, false, false], [0, 3, 3, false, false], [0, 5, 5, false, false]]);
+    const weekdays = addR(base, { title: 'b', start: '2026-11-01', end: '2026-11-30', days: [1, 2, 3, 4, 5] });
+    expect(layout(weekdays.ranges, week).map((s) => [s.from, s.to])).toEqual([[1, 5]]);
+    const weekend = addR(base, { title: 'c', start: '2026-11-01', end: '2026-11-30', days: [0, 6] });
+    const w = layout(weekend.ranges, week);
+    expect(w.map((s) => [s.from, s.to, s.contLeft, s.contRight])).toEqual([[0, 0, true, false], [6, 6, false, true]]); // 토→일은 주를 넘어 이어진다
+  });
+});

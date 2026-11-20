@@ -11,7 +11,7 @@ import { holidayName } from '../plan/holidays.js';
 import {
   RANGE_COLORS, REPEAT_PRESETS, addPlan, togglePlan, removePlan, renamePlan, editRepeat, planProgress,
   addRepeat, toggleRepeatDone, stopRepeat, itemsForDate, setMemo, memoFor,
-  addRange, updateRange, toggleRange, removeRange, rangesOnDate, rangeDayInfo
+  addRange, updateRange, toggleRange, removeRange, rangesOnDate, rangeDayInfo, describeDays
 } from '../plan/planList.js';
 
 const MAX_LANES = 3; // 한 칸에 보이는 기간 계획 막대 수 (넘치면 +n)
@@ -111,7 +111,9 @@ function renderCalendar() {
       }
       if (date === today) cell.classList.add('today');
       if (date === selected && !editing) cell.classList.add('selected');
-      if (preview && preview[0] <= date && date <= preview[1]) cell.classList.add('in-range');
+      if (preview && preview[0] <= date && date <= preview[1] && (!editing?.days || editing.days.includes(day.getDay()))) {
+        cell.classList.add('in-range');
+      }
 
       const head = el('span', 'cal-cell-head');
       head.append(el('span', 'cal-num', String(day.getDate())));
@@ -162,8 +164,8 @@ function renderCalendar() {
       bar.style.gridColumn = `${seg.from + 1} / ${seg.to + 2}`;
       bar.style.gridRow = String(seg.lane + 2);
       bar.style.setProperty('--bar', range.color);
-      if (toDateText(week[seg.from]) !== range.start) bar.classList.add('cont-left');
-      if (toDateText(week[seg.to]) !== range.end) bar.classList.add('cont-right');
+      if (seg.contLeft) bar.classList.add('cont-left');
+      if (seg.contRight) bar.classList.add('cont-right');
       bar.setAttribute('aria-hidden', 'true');
       row.append(bar);
     }
@@ -193,7 +195,9 @@ function rangeItem(range, date, editable) {
   }
   body.append(
     el('span', 'range-title', range.title),
-    el('span', 'range-meta', `${shortDate(range.start)} ~ ${shortDate(range.end)}, ${total}일 중 ${n}일째`)
+    el('span', 'range-meta', range.days
+      ? `${shortDate(range.start)} ~ ${shortDate(range.end)} ${describeDays(range.days)}, ${total}회 중 ${n}회째`
+      : `${shortDate(range.start)} ~ ${shortDate(range.end)}, ${total}일 중 ${n}일째`)
   );
   li.append(el('span', 'range-color'), check, body);
   return li;
@@ -395,12 +399,45 @@ function renderRangeForm() {
   document.querySelectorAll('#range-colors .color-option').forEach((btn) => {
     btn.setAttribute('aria-checked', String(btn.dataset.color === editing.color));
   });
+  const key = [...editing.days].sort().join(',');
+  document.querySelectorAll('#range-days .day-chip').forEach((chip) => {
+    chip.setAttribute('aria-pressed', String(editing.days.includes(Number(chip.dataset.day))));
+  });
+  document.querySelectorAll('#range-presets .day-chip').forEach((chip) => {
+    chip.setAttribute('aria-pressed', String(REPEAT_PRESETS[chip.dataset.preset].join(',') === key));
+  });
+}
+
+// 기간 계획 요일 고르기: 매일·평일·주말 빠른 선택과 요일별 선택
+function initRangeDays() {
+  const names = ['일', '월', '화', '수', '목', '금', '토'];
+  for (const [key, label] of Object.entries({ daily: '매일', weekdays: '평일', weekend: '주말' })) {
+    const chip = el('button', 'day-chip', label);
+    chip.type = 'button';
+    chip.dataset.preset = key;
+    chip.addEventListener('click', () => {
+      editing.days = [...REPEAT_PRESETS[key]];
+      renderRangeForm();
+    });
+    $('range-presets').append(chip);
+  }
+  [1, 2, 3, 4, 5, 6, 0].forEach((day) => {
+    const chip = el('button', `day-chip${day === 0 ? ' sun' : day === 6 ? ' sat' : ''}`, names[day]);
+    chip.type = 'button';
+    chip.dataset.day = String(day);
+    chip.setAttribute('aria-label', `${names[day]}요일`);
+    chip.addEventListener('click', () => {
+      editing.days = editing.days.includes(day) ? editing.days.filter((d) => d !== day) : [...editing.days, day];
+      renderRangeForm();
+    });
+    $('range-days').append(chip);
+  });
 }
 
 function openRangeForm(range) {
   editing = range
-    ? { id: range.id, start: range.start, end: range.end, color: range.color, picking: 'start' }
-    : { id: null, start: '', end: '', color: RANGE_COLORS[plans.ranges.length % RANGE_COLORS.length], picking: 'start' };
+    ? { id: range.id, start: range.start, end: range.end, color: range.color, days: [...(range.days || REPEAT_PRESETS.daily)], picking: 'start' }
+    : { id: null, start: '', end: '', color: RANGE_COLORS[plans.ranges.length % RANGE_COLORS.length], days: [...REPEAT_PRESETS.daily], picking: 'start' };
   $('range-title').value = range?.title ?? '';
   $('range-error').textContent = '';
   render();
@@ -523,6 +560,7 @@ export function initPlanView() {
     $('range-colors').append(btn);
   }
 
+  initRangeDays();
   $('range-add').addEventListener('click', () => openRangeForm(null));
   $('range-cancel').addEventListener('click', closeRangeForm);
   $('range-start').addEventListener('change', (e) => { editing.start = e.target.value; editing.picking = 'end'; render(); });
@@ -530,7 +568,7 @@ export function initPlanView() {
 
   $('range-form').addEventListener('submit', (event) => {
     event.preventDefault();
-    const data = { title: $('range-title').value, start: editing.start, end: editing.end, color: editing.color };
+    const data = { title: $('range-title').value, start: editing.start, end: editing.end, color: editing.color, days: editing.days };
     try {
       const next = editing.id ? updateRange(plans, editing.id, data) : addRange(plans, data);
       editing = null;

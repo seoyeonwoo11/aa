@@ -184,6 +184,9 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 .range-dates { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .range-dates input { min-width: 0; }
 .range-dates .field { margin-bottom: 0; }
+.range-days-field { margin-top: 12px; }
+.range-days-field .day-chips { flex-wrap: wrap; }
+.range-days-field .day-chips + .day-chips { margin-top: 6px; }
 .pick-hint { margin: 8px 0 14px; color: var(--primary); font-weight: 600; }
 
 .color-options { display: flex; gap: 10px; }

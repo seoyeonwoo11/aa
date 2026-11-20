@@ -2,7 +2,7 @@
 //
 // plans = {
 //   days:       { 'YYYY-MM-DD': [{ id, text, done }] },        // 날짜별 할 일
-//   ranges:     [{ id, title, start, end, color, done }],      // 기간 계획 (start~end, 양 끝 포함)
+//   ranges:     [{ id, title, start, end, color, done, days? }], // 기간 계획 (start~end, 양 끝 포함, days가 있으면 그 요일만)
 //   repeats:    [{ id, text, days: [0~6], start, end }],       // 반복 할 일 (요일마다, end는 없으면 null)
 //   repeatDone: { 'YYYY-MM-DD': [repeatId] },                  // 반복 할 일을 끝낸 날
 //   memos:      { 'YYYY-MM-DD': '메모 글' }                     // 날짜별 메모
@@ -27,7 +27,9 @@ export function normalizePlans(raw) {
   const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
   return {
     days: isObject(raw.days) ? raw.days : {},
-    ranges: Array.isArray(raw.ranges) ? raw.ranges.filter((r) => isDateText(r.start) && isDateText(r.end)) : [],
+    ranges: Array.isArray(raw.ranges)
+      ? raw.ranges.filter((r) => isDateText(r.start) && isDateText(r.end)).map(withCleanDays)
+      : [],
     repeats: Array.isArray(raw.repeats) ? raw.repeats.filter((r) => isDateText(r.start) && Array.isArray(r.days)) : [],
     repeatDone: isObject(raw.repeatDone) ? raw.repeatDone : {},
     memos: isObject(raw.memos)
@@ -187,20 +189,37 @@ export function planProgress(items = []) {
 
 /* ---------- 기간 계획 ---------- */
 
-function cleanRange({ title, start, end, color }) {
+// 기간 계획 요일: 0(일)~6(토). 비었거나 7일 모두면 '매일'로 보고 days를 두지 않는다.
+function cleanDays(days) {
+  if (!Array.isArray(days)) return null;
+  const clean = [...new Set(days)].filter((d) => Number.isInteger(d) && d >= 0 && d <= 6).sort();
+  return clean.length && clean.length < 7 ? clean : null;
+}
+
+function withCleanDays(range) {
+  const { days, ...rest } = range;
+  const clean = cleanDays(days);
+  return clean ? { ...rest, days: clean } : rest;
+}
+
+function cleanRange({ title, start, end, color, days }) {
   const text = String(title ?? '').trim().slice(0, MAX_PLAN_LENGTH);
   if (!text) throw new Error('계획 이름을 입력해 주세요.');
   if (!isDateText(start) || !isDateText(end)) throw new Error('시작일과 종료일을 골라 주세요.');
+  if (Array.isArray(days) && days.length === 0) throw new Error('요일을 하나 이상 골라 주세요.');
   const [s, e] = start <= end ? [start, end] : [end, start];
-  return { title: text, start: s, end: e, color: RANGE_COLORS.includes(color) ? color : RANGE_COLORS[0] };
+  const clean = cleanDays(days);
+  const range = { title: text, start: s, end: e, color: RANGE_COLORS.includes(color) ? color : RANGE_COLORS[0], days: clean };
+  if (clean && activeDates(range).length === 0) throw new Error('고른 요일이 기간 안에 없어요.');
+  return range;
 }
 
 export function addRange(plans, range) {
-  return { ...plans, ranges: [...plans.ranges, { id: newId(), done: false, ...cleanRange(range) }] };
+  return { ...plans, ranges: [...plans.ranges, withCleanDays({ id: newId(), done: false, ...cleanRange(range) })] };
 }
 
 export function updateRange(plans, id, range) {
-  return { ...plans, ranges: plans.ranges.map((r) => (r.id === id ? { ...r, ...cleanRange(range) } : r)) };
+  return { ...plans, ranges: plans.ranges.map((r) => (r.id === id ? withCleanDays({ ...r, ...cleanRange(range) }) : r)) };
 }
 
 export function toggleRange(plans, id) {
@@ -211,19 +230,40 @@ export function removeRange(plans, id) {
   return { ...plans, ranges: plans.ranges.filter((r) => r.id !== id) };
 }
 
-// date를 포함하는 기간 계획 (시작이 빠른 순, 같으면 긴 순)
+// 그 날이 기간 안이고, 요일을 정했다면 그 요일인지
+export function rangeActiveOn(range, date) {
+  if (date < range.start || date > range.end) return false;
+  return !range.days || range.days.includes(parseDate(date).getDay());
+}
+
+// 기간 안에서 계획이 있는 날짜 목록
+function activeDates(range) {
+  const out = [];
+  const end = parseDate(range.end);
+  for (const d = parseDate(range.start); d <= end; d.setDate(d.getDate() + 1)) {
+    if (!range.days || range.days.includes(d.getDay())) out.push(new Date(d));
+  }
+  return out;
+}
+
+// date에 해당하는 기간 계획 (시작이 빠른 순, 같으면 긴 순)
 export function rangesOnDate(ranges, date) {
-  return ranges.filter((r) => r.start <= date && date <= r.end).sort(compareRanges);
+  return ranges.filter((r) => rangeActiveOn(r, date)).sort(compareRanges);
 }
 
 export function compareRanges(a, b) {
   return a.start.localeCompare(b.start) || b.end.localeCompare(a.end) || a.id.localeCompare(b.id);
 }
 
-// 기간 중 며칠째인지: { day: 3, total: 10 }
+// 기간 중 며칠째인지: { day: 3, total: 10 }. 요일을 정한 계획은 그 요일만 센다(예: 12회 중 3회째).
 export function rangeDayInfo(range, date) {
-  return {
-    day: daysBetween(parseDate(range.start), parseDate(date)) + 1,
-    total: daysBetween(parseDate(range.start), parseDate(range.end)) + 1
-  };
+  if (!range.days) {
+    return {
+      day: daysBetween(parseDate(range.start), parseDate(date)) + 1,
+      total: daysBetween(parseDate(range.start), parseDate(range.end)) + 1
+    };
+  }
+  const dates = activeDates(range);
+  const target = parseDate(date).getTime();
+  return { day: dates.filter((d) => d.getTime() <= target).length, total: dates.length };
 }
