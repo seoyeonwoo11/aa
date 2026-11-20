@@ -1,0 +1,274 @@
+/* 하루수능 디자인: OMR 답안지 + 필기 노트
+   - 종이 위에 OMR 적색으로 인쇄된 칸과 선(인쇄된 부분에만 빨강)
+   - 남색 사인펜: 버튼, 칠한 동그라미(체크·D-Day 마킹), 고른 과목
+   - 하늘색 형광펜: 고른 날짜, 지금 탭 — 공부할 때 형광펜 긋듯이 (메모는 노란 포스트잇)
+   - 기억에 남는 한 가지: D-Day를 수험번호 마킹란처럼 칠한 모양. 나머지는 조용하게
+   - 그림자 없는 종이, 구조는 선으로 */
+
+body { font-family: var(--font-ui); }
+
+/* ---------- 글꼴: 제목·숫자는 시험지 같은 함렛, 나머지는 IBM Plex Sans KR ---------- */
+.card h2,
+.auth-title,
+.cal-title,
+#plan-date,
+.range-form h2,
+.auth-heading,
+.focus-subject {
+  font-family: var(--font-paper);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- 종이: 그림자 없이 얇은 선 ---------- */
+.card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+/* ---------- 버튼: 사인펜(검정) / 테두리 / 빨간 글자 ---------- */
+.primary-btn {
+  color: var(--on-primary);
+  background: var(--primary);
+  border-radius: 8px;
+  font-weight: 600;
+}
+@media (hover: hover) { .primary-btn:hover { filter: none; background: color-mix(in srgb, var(--primary) 82%, var(--card)); } }
+.secondary-btn {
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--text) 30%, var(--card));
+  border-radius: 8px;
+  font-weight: 600;
+}
+@media (hover: hover) { .secondary-btn:hover { filter: none; background: var(--primary-soft); } }
+.text-btn { color: var(--primary); border-color: var(--border); border-radius: 8px; }
+@media (hover: hover) { .text-btn:hover { background: var(--primary-soft); } }
+.text-btn.danger { color: var(--danger); }
+.icon-btn { border-radius: 8px; }
+
+/* ---------- 입력칸: 포커스는 OMR 적색 ---------- */
+input[type="text"], input[type="password"], input[type="email"], input[type="date"], select, textarea {
+  border-radius: 8px;
+}
+input:focus, select:focus, textarea:focus, .edit-input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+:focus-visible { outline-color: var(--primary); }
+
+/* ---------- 체크: OMR 동그라미에 사인펜 마킹 ---------- */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 15px !important;
+  height: 21px !important;
+  margin: 0;
+  border: 1.5px solid var(--red);
+  border-radius: 50%;
+  background: var(--card);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+input[type="checkbox"]:checked { background: var(--primary); border-color: var(--primary); }
+input[type="checkbox"]:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ---------- 고르는 버튼: 칠하면 검정 ---------- */
+.chip, .day-chip {
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+.chip[aria-checked="true"], .day-chip[aria-pressed="true"] {
+  color: var(--on-primary);
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.tabs, .segmented { background: var(--primary-soft); border-radius: 10px; }
+.tab, .segmented button { border-radius: 8px; }
+.tab.active, .segmented button[aria-pressed="true"] {
+  color: var(--text);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.badge { color: var(--text); background: var(--primary-soft); border-radius: 6px; }
+
+/* ---------- 진행 막대: 빨간 사인 하나 ---------- */
+.progress-bar { background: var(--primary-soft); }
+.progress-bar > div, #goal-fill, .meter > div { background: var(--primary); }
+
+/* ---------- 홈: D-Day 답안지 ---------- */
+.main-card {
+  border: 3px double var(--rule);
+  border-radius: 12px;
+}
+.exam-meta { font-weight: 600; }
+
+.dday.omr {
+  display: flex;
+  width: fit-content;
+  margin: 12px auto 0;
+  border: 1.5px solid var(--red);
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 1rem;
+  background: var(--card);
+}
+.omr-col { display: grid; grid-template-rows: auto auto; border-left: 1px solid var(--rule); }
+.omr-col:first-child { border-left: 0; }
+.omr-char {
+  min-width: 1.05em;
+  padding: 6px 8px 2px;
+  font-family: var(--font-paper);
+  font-size: clamp(2.3rem, 11vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--text);
+}
+.omr-bubbles {
+  display: grid;
+  grid-template-columns: repeat(5, 7px);
+  grid-template-rows: 10px 10px;
+  gap: 3px;
+  justify-content: center;
+  padding: 6px 6px 8px;
+  border-top: 1px solid var(--rule);
+  background: var(--red-soft);
+}
+.omr-bubbles i { display: block; border: 1px solid var(--red); border-radius: 50%; }
+.omr-bubbles i.on { background: var(--primary); border-color: var(--primary); }
+.dday.today .omr-char { color: var(--red); }
+
+/* 카운트다운: 수험표 칸처럼 한 줄 표 */
+.countdown {
+  gap: 0;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+body.has-nav .countdown { gap: 0; }
+.countdown div, body.has-nav .countdown div {
+  background: transparent;
+  border-radius: 0;
+  border-left: 1px solid var(--rule);
+}
+.countdown div:first-child { border-left: 0; }
+.countdown small { color: var(--red); }
+
+.next-mock { color: var(--mock); background: var(--mock-soft); border-radius: 6px; }
+
+/* ---------- 메모: 노란 포스트잇 ---------- */
+.memo-view { border-left-color: #ffd43b; }
+
+/* ---------- 달력: OMR 칸 선 ---------- */
+.cal-grid { border-top-color: var(--rule); }
+.cal-week { box-shadow: inset 0 -1px 0 var(--rule); }
+.cal-weekdays { color: var(--muted); }
+.cal-cell.today .cal-num { width: 22px; height: 27px; border-radius: 50%; color: var(--on-primary); background: var(--primary); }
+.cal-cell.selected { background: var(--highlight-soft); box-shadow: inset 0 0 0 1.5px var(--primary); }
+.cal-cell.in-range { background: var(--highlight-soft); }
+.cal-tag { background: var(--red); border-radius: 4px; }
+.cal-todo { color: var(--text); }
+.cal-todo.all-done { color: var(--success); }
+@media (min-width: 700px) {
+  .cal-cell.today .cal-num { width: 26px; height: 31px; }
+}
+
+/* ---------- 하단 탭 / 왼쪽 메뉴 ---------- */
+.nav-bar { border-color: var(--border); }
+.nav-item { color: var(--muted); }
+.nav-item[aria-current="page"] { color: var(--text); background: none; }
+.nav-item[aria-current="page"] svg { color: var(--primary); }
+/* 지금 탭: 이름에 형광펜을 그은 모양 */
+.nav-item[aria-current="page"] span {
+  padding: 0 3px;
+  color: var(--on-highlight);
+  background: linear-gradient(transparent 52%, var(--highlight) 52%, var(--highlight) 92%, transparent 92%);
+}
+@media (hover: hover) { .nav-item:hover { background: var(--primary-soft); } }
+@media (min-width: 1024px) {
+  .nav-item[aria-current="page"] { background: var(--primary-soft); border-radius: 12px; }
+  /* 메뉴 맨 위: 칠한 OMR 동그라미 */
+  .nav-bar::before {
+    width: 38px;
+    height: 46px;
+    border-radius: 50%;
+    font-family: var(--font-paper);
+    color: var(--on-primary);
+    background: var(--primary);
+    box-shadow: 0 0 0 3px var(--nav-bg), 0 0 0 4.5px var(--red);
+  }
+}
+
+/* ---------- 공부: 타이머 숫자는 흔들리지 않게 고정폭 ---------- */
+.study-timer, .focus-timer { font-family: var(--font-ui); font-weight: 700; letter-spacing: -0.02em; }
+.study-timer.active { color: var(--text); }
+.week-bar.today { background: var(--primary); }
+
+/* 집중 화면: 깊은 남색 밤, 하늘색 */
+.focus-screen { background: #0b1028; }
+#focus-goal-fill { background: #9cc9ff; }
+.focus-subject { color: #fff; background: transparent; border: 1px solid rgba(156, 201, 255, 0.6); }
+.focus-btn.primary { color: #0e1430; background: #9cc9ff; border-color: #9cc9ff; }
+.focus-screen .focus-subjects .chip[aria-checked="true"] { color: #0e1430; background: #9cc9ff; border-color: #9cc9ff; }
+.focus-screen.paused .focus-status { color: #9cc9ff; }
+
+/* ---------- 로그인: 칠한 동그라미 로고 ---------- */
+.auth-logo {
+  width: 54px;
+  height: 66px;
+  border-radius: 50%;
+  font-family: var(--font-paper);
+  color: var(--on-primary);
+  background: var(--primary);
+  box-shadow: 0 0 0 4px var(--bg), 0 0 0 5.5px var(--red);
+}
+.auth-title { font-weight: 750; }
+.auth-dday { color: var(--text); border-color: var(--rule); background: var(--card); border-radius: 6px; }
+.auth-message { color: var(--text); background: var(--primary-soft); }
+.link-btn { color: var(--muted); }
+
+/* ---------- 휴대폰: 한 화면에 들어가도록 촘촘하게 (태블릿·PC는 그대로) ---------- */
+@media (max-width: 759px) {
+  body { line-height: 1.45; }
+  .main-card { padding: 12px 14px; }
+  .exam-meta { font-size: 0.92rem; }
+  .dday.omr { margin-top: 8px; }
+  .omr-char { padding: 3px 7px 0; font-size: clamp(1.9rem, 9vw, 2.6rem); }
+  .omr-bubbles { grid-template-columns: repeat(5, 6px); grid-template-rows: 9px 9px; gap: 2px 3px; padding: 5px 5px 6px; }
+  body.has-nav .exam-date { margin-top: 4px; font-size: 0.85rem; }
+  body.has-nav .next-mock { margin-top: 4px; font-size: 0.78rem; }
+  body.has-nav .countdown { margin-top: 10px; }
+  body.has-nav .countdown div { padding: 4px 2px; }
+  body.has-nav .countdown span { font-size: 1.1rem; }
+  body.has-nav .countdown small { font-size: 0.68rem; }
+  /* 남은 주·주말·개월은 한 줄로 */
+  .main-card .stat-grid { margin-top: 8px; }
+  .main-card .stat-grid > div { display: flex; justify-content: center; align-items: baseline; gap: 4px; }
+  body.has-nav .main-card .stat-value { font-size: 0.95rem; }
+  body.has-nav .main-card .stat-label { font-size: 0.72rem; }
+  body.has-nav .main-card .progress-head { margin-top: 6px; }
+
+  .today-plan-card .card-scroll { min-height: 64px; }
+  .today-plan-card .row-between .text-btn { min-height: 30px; }
+
+  /* 공부 */
+  body.has-nav .study-timer { margin-top: 8px; }
+  body.has-nav .study-actions { margin-top: 8px; }
+  body.has-nav .week-chart { height: 84px; }
+  .today-study-card .card-scroll { min-height: 48px; }
+
+  /* 계획 */
+  .cal-header .icon-btn { width: 38px; height: 38px; }
+  body.has-nav .range-add { min-height: 38px; margin-top: 6px; }
+  .day-card .card-scroll { min-height: 64px; }
+  .plan-item label { min-height: 38px; }
+}
+
+/* 태블릿·PC: D-Day 답안지를 크게 */
+@media (min-width: 760px) {
+  body.has-nav #panel-home .dday.omr { margin-top: 18px; border-width: 2px; }
+  body.has-nav #panel-home .omr-char { padding: 10px 16px 4px; font-size: clamp(3.4rem, 6.5vw, 6rem); }
+  body.has-nav #panel-home .omr-bubbles { grid-template-columns: repeat(5, 11px); grid-template-rows: 15px 15px; gap: 4px 5px; padding: 10px 10px 12px; }
+  body.has-nav #panel-home .omr-bubbles i { border-width: 1.5px; }
+}

@@ -1,5 +1,9 @@
 // 앱 진입점: 로그인 상태에 따라 화면을 연결하고, 설정이 바뀌면 각 탭에 알린다.
 
+import '@fontsource-variable/hahmlet';
+import '@fontsource/ibm-plex-sans-kr/400.css';
+import '@fontsource/ibm-plex-sans-kr/600.css';
+import '@fontsource/ibm-plex-sans-kr/700.css';
 import './styles/main.css';
 import { initTheme } from './ui/theme.js';
 import { initInstall } from './ui/installView.js';

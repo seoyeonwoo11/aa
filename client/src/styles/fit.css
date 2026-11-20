@@ -44,8 +44,10 @@ body.has-nav .fill-card {
   flex-direction: column;
 }
 .card-scroll {
-  flex: 1;
+  flex: 1 1 0;
   min-height: 84px;
+  /* 목록 길이가 카드 높이를 밀어 올리지 않게: 높이는 카드가 정하고, 넘치는 목록만 안에서 스크롤 */
+  contain: size;
   overflow-y: auto;
   overscroll-behavior: contain;
   margin: 0 -4px;

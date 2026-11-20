@@ -185,7 +185,7 @@ function rangeItem(range, date, editable) {
   }
   body.append(
     el('span', 'range-title', range.title),
-    el('span', 'range-meta', `${shortDate(range.start)} ~ ${shortDate(range.end)} · ${n}/${total}일째`)
+    el('span', 'range-meta', `${shortDate(range.start)} ~ ${shortDate(range.end)}, ${total}일 중 ${n}일째`)
   );
   li.append(el('span', 'range-color'), check, body);
   return li;

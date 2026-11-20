@@ -31,7 +31,7 @@ function renderOptions() {
     const exam = getExam(year);
     const option = document.createElement('option');
     option.value = year;
-    option.textContent = `${year}학년도 · ${formatKoreanDate(exam.date)}${exam.official ? '' : ' (예상)'}`;
+    option.textContent = `${year}학년도, ${formatKoreanDate(exam.date)}${exam.official ? '' : ' 예상'}`;
     select.appendChild(option);
   }
   select.value = settings.academicYear;

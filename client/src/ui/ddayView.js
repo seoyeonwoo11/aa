@@ -9,6 +9,30 @@ import { nextMockExam } from '../exam/mockExams.js';
 let settings = null;
 let lastDay = null;
 
+// D-Day를 수험번호 OMR 칸처럼: 글자마다 한 칸, 숫자 칸 아래에는 0~9 동그라미 중 그 숫자를 사인펜으로 칠한다.
+function renderOmr(text) {
+  const box = $('dday');
+  box.setAttribute('aria-label', text);
+  box.replaceChildren(...[...text].map((ch) => {
+    const col = document.createElement('span');
+    col.className = 'omr-col';
+    const char = document.createElement('span');
+    char.className = 'omr-char';
+    char.textContent = ch;
+    const bubbles = document.createElement('span');
+    bubbles.className = 'omr-bubbles';
+    if (/\d/.test(ch)) {
+      for (let d = 0; d <= 9; d++) {
+        const bubble = document.createElement('i');
+        if (d === Number(ch)) bubble.className = 'on';
+        bubbles.append(bubble);
+      }
+    }
+    col.append(char, bubbles);
+    return col;
+  }));
+}
+
 function renderSummary() {
   const target = getTarget(settings);
   const summary = getSummary(new Date(), target.date, target.previous);
@@ -24,10 +48,10 @@ function renderSummary() {
   $('next-mock').hidden = !mock;
   if (mock) {
     const mockDate = parseDate(mock.date);
-    $('next-mock').textContent = `${mock.name} ${formatDday(daysBetween(now, mockDate))} · ${mockDate.getMonth() + 1}월 ${mockDate.getDate()}일`;
+    $('next-mock').textContent = `${mock.name}(${mockDate.getMonth() + 1}월 ${mockDate.getDate()}일)까지 ${formatDday(daysBetween(now, mockDate))}`;
   }
 
-  $('dday').textContent = formatDday(summary.diff);
+  renderOmr(formatDday(summary.diff));
   $('dday').classList.toggle('today', summary.diff === 0);
 
   $('stat-weeks').textContent = `${summary.weeks}주`;

@@ -2,39 +2,44 @@
 
 :root {
   color-scheme: light;
-  --bg: #f4f6fb;
+  /* 필기 노트: 종이, 남색 사인펜, 하늘색 형광펜, OMR 적색 인쇄 */
+  --bg: #f5f6f8;
   --card: #ffffff;
-  --text: #1d2433;
-  --muted: #6b7385;
-  --primary: #3457d5;
-  --primary-soft: #e6ecff;
-  --accent: #ff6b4a;
-  --border: #e3e7f0;
-  --input-bg: #ffffff;
+  --text: #1c2340;
+  --muted: #646b80;
+  --primary: #22306b;          /* 사인펜: 마킹, 주요 버튼 */
+  --primary-soft: #e9ecf5;
   --on-primary: #ffffff;
-  --danger: #d6392f;
-  --success: #2f9e44;
-  --sun: #d6336c;
-  --sat: #3457d5;
-  --mock: #ae3ec9;
-  --mock-soft: #f8f0fc;
-  --estimated-bg: #fff1d6;
-  --estimated-text: #a86200;
-  --divider: #e3e7f0;
-  --shadow: rgba(29, 36, 51, 0.05);
-  --shadow-strong: rgba(29, 36, 51, 0.12);
-  --nav-bg: rgba(255, 255, 255, 0.94);
-  --auth-glow: #dfe7ff;
-  --auth-chip-bg: rgba(255, 255, 255, 0.75);
-  --auth-chip-border: #d5ddf7;
+  --accent: #e2404e;           /* OMR 적색 */
+  --red: #e2404e;
+  --red-soft: #fdeef0;
+  --rule: #f2c3c8;             /* OMR 칸 선 */
+  --highlight: #9cc9ff;        /* 형광펜 */
+  --border: #e3e5ec;
+  --input-bg: #ffffff;
+  --danger: #c7283a;
+  --success: #1f8a4c;
+  --sun: #e2404e;
+  --sat: #3a5fd0;
+  --mock: #8d3fb4;
+  --mock-soft: #f5edfa;
+  --estimated-bg: #fff6cc;
+  --estimated-text: #8a6100;
+  --divider: #f6d9dc;
+  --shadow: transparent;
+  --shadow-strong: rgba(28, 35, 64, 0.14);
+  --nav-bg: rgba(255, 255, 255, 0.96);
+  --auth-glow: transparent;
+  --auth-chip-bg: #ffffff;
+  --auth-chip-border: #f2c3c8;
   /* 차트 */
-  --chart-1: #2a78d6;
-  --chart-hover: rgba(42, 120, 214, 0.08);
-  --grid-line: #e9ecf2;
-  --axis: #c3c2b7;
-  --goal-line: #52514e;
-  --meter-track: #d9e4fb;
-  --week-bar: #a9b8ee;
+  --chart-1: #22306b;
+  --chart-hover: rgba(34, 48, 107, 0.06);
+  --grid-line: #eceef3;
+  --axis: #c6cad6;
+  --goal-line: #e2404e;
+  --meter-track: #e9ecf5;
+  --week-bar: #b9c1de;
   /* 과목 색 (색약 구분 검사 통과 순서) */
   --subject-1: #2a78d6;
   --subject-2: #eb6834;
@@ -43,44 +48,54 @@
   --subject-5: #e87ba4;
   --subject-6: #008300;
   --subject-4-text: #0b0b0b;
+  /* 글꼴 */
+  --font-ui: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-paper: "Hahmlet Variable", "Hahmlet", "AppleMyungjo", "Noto Serif KR", serif;
+  --highlight-soft: #e4f0ff;
+  --on-highlight: #1c2340;
 }
 
 /* 어두운 화면: 기기 설정을 따르거나(설정에서 '자동') 직접 '어둡게'를 고른 경우 */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #0e1117;
-    --card: #171b23;
-    --text: #e6e9f0;
-    --muted: #9aa3b5;
-    --primary: #5b7cfa;
-    --primary-soft: #1f2842;
-    --accent: #ff7a5c;
-    --border: #2a3040;
-    --input-bg: #11151c;
-    --on-primary: #ffffff;
+    /* 남색 밤: 남색 바탕, 하늘색 버튼 */
+    --bg: #0e1222;
+    --card: #161b30;
+    --text: #e9ebf3;
+    --muted: #9aa1b8;
+    --primary: #9cc9ff;
+    --primary-soft: #232a45;
+    --on-primary: #0e1430;
+    --accent: #ff6574;
+    --red: #ff6574;
+    --red-soft: #2c1c26;
+    --rule: #4b2d3a;
+    --highlight: #9cc9ff;
+    --border: #2a3150;
+    --input-bg: #121729;
     --danger: #ff6b6b;
     --success: #4cc27a;
-    --sun: #ff6b9a;
-    --sat: #7b95ff;
-    --mock: #c77ddf;
-    --mock-soft: #2c1f36;
-    --estimated-bg: #3a2c10;
-    --estimated-text: #f2b84b;
-    --divider: #262c38;
-    --shadow: rgba(0, 0, 0, 0.3);
-    --shadow-strong: rgba(0, 0, 0, 0.45);
-    --nav-bg: rgba(23, 27, 35, 0.94);
-    --auth-glow: #1c2440;
-    --auth-chip-bg: rgba(23, 27, 35, 0.75);
-    --auth-chip-border: #2f3a5c;
-    --chart-1: #3987e5;
-    --chart-hover: rgba(57, 135, 229, 0.12);
-    --grid-line: #252b37;
-    --axis: #3a4252;
-    --goal-line: #c3c2b7;
-    --meter-track: #26304a;
-    --week-bar: #3d4f86;
+    --sun: #ff6574;
+    --sat: #8ea6ff;
+    --mock: #cf8df0;
+    --mock-soft: #2a2140;
+    --estimated-bg: #3a3214;
+    --estimated-text: #f2c14b;
+    --divider: #33263a;
+    --shadow: transparent;
+    --shadow-strong: rgba(0, 0, 0, 0.5);
+    --nav-bg: rgba(22, 27, 48, 0.96);
+    --auth-glow: transparent;
+    --auth-chip-bg: #161b30;
+    --auth-chip-border: #4b2d3a;
+    --chart-1: #9cc9ff;
+    --chart-hover: rgba(156, 201, 255, 0.1);
+    --grid-line: #222842;
+    --axis: #39416a;
+    --goal-line: #ff6574;
+    --meter-track: #232a45;
+    --week-bar: #3a4470;
     --subject-1: #3987e5;
     --subject-2: #d95926;
     --subject-3: #199e70;
@@ -88,42 +103,49 @@
     --subject-5: #d55181;
     --subject-6: #0ca30c;
     --subject-4-text: #ffffff;
+    --highlight-soft: #1d2c4d;
+    --on-highlight: #0e1430;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0e1117;
-  --card: #171b23;
-  --text: #e6e9f0;
-  --muted: #9aa3b5;
-  --primary: #5b7cfa;
-  --primary-soft: #1f2842;
-  --accent: #ff7a5c;
-  --border: #2a3040;
-  --input-bg: #11151c;
-  --on-primary: #ffffff;
+  /* 남색 밤: 남색 바탕, 하늘색 버튼 */
+  --bg: #0e1222;
+  --card: #161b30;
+  --text: #e9ebf3;
+  --muted: #9aa1b8;
+  --primary: #9cc9ff;
+  --primary-soft: #232a45;
+  --on-primary: #0e1430;
+  --accent: #ff6574;
+  --red: #ff6574;
+  --red-soft: #2c1c26;
+  --rule: #4b2d3a;
+  --highlight: #9cc9ff;
+  --border: #2a3150;
+  --input-bg: #121729;
   --danger: #ff6b6b;
   --success: #4cc27a;
-  --sun: #ff6b9a;
-  --sat: #7b95ff;
-  --mock: #c77ddf;
-  --mock-soft: #2c1f36;
-  --estimated-bg: #3a2c10;
-  --estimated-text: #f2b84b;
-  --divider: #262c38;
-  --shadow: rgba(0, 0, 0, 0.3);
-  --shadow-strong: rgba(0, 0, 0, 0.45);
-  --nav-bg: rgba(23, 27, 35, 0.94);
-  --auth-glow: #1c2440;
-  --auth-chip-bg: rgba(23, 27, 35, 0.75);
-  --auth-chip-border: #2f3a5c;
-  --chart-1: #3987e5;
-  --chart-hover: rgba(57, 135, 229, 0.12);
-  --grid-line: #252b37;
-  --axis: #3a4252;
-  --goal-line: #c3c2b7;
-  --meter-track: #26304a;
-  --week-bar: #3d4f86;
+  --sun: #ff6574;
+  --sat: #8ea6ff;
+  --mock: #cf8df0;
+  --mock-soft: #2a2140;
+  --estimated-bg: #3a3214;
+  --estimated-text: #f2c14b;
+  --divider: #33263a;
+  --shadow: transparent;
+  --shadow-strong: rgba(0, 0, 0, 0.5);
+  --nav-bg: rgba(22, 27, 48, 0.96);
+  --auth-glow: transparent;
+  --auth-chip-bg: #161b30;
+  --auth-chip-border: #4b2d3a;
+  --chart-1: #9cc9ff;
+  --chart-hover: rgba(156, 201, 255, 0.1);
+  --grid-line: #222842;
+  --axis: #39416a;
+  --goal-line: #ff6574;
+  --meter-track: #232a45;
+  --week-bar: #3a4470;
   --subject-1: #3987e5;
   --subject-2: #d95926;
   --subject-3: #199e70;
@@ -131,6 +153,8 @@
   --subject-5: #d55181;
   --subject-6: #0ca30c;
   --subject-4-text: #ffffff;
+  --highlight-soft: #1d2c4d;
+  --on-highlight: #0e1430;
 }
 
 * { box-sizing: border-box; }
@@ -139,7 +163,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-family: var(--font-ui);
   line-height: 1.5;
 }
 

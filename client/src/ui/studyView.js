@@ -139,7 +139,7 @@ function renderToday() {
   const percent = goalSeconds ? Math.min(100, (todayTotal / goalSeconds) * 100) : 0;
   $('today-total').textContent = formatDuration(todayTotal);
   $('goal-fill').style.width = `${percent}%`;
-  $('goal-text').textContent = `목표 ${goalMinutes / 60}시간 · ${Math.floor(percent)}%`;
+  $('goal-text').textContent = `목표 ${goalMinutes / 60}시간 중 ${Math.floor(percent)}%`;
   $('focus-goal-fill').style.width = `${percent}%`;
   $('focus-goal-text').textContent = `오늘 ${formatDuration(todayTotal)} / 목표 ${goalMinutes / 60}시간`;
 
@@ -183,7 +183,7 @@ function renderWeek() {
     label.className = 'week-label';
     label.textContent = i === days.length - 1 ? '오늘' : WEEKDAYS[day.weekday];
     col.append(value, track, label);
-    col.title = `${day.date} · ${formatDuration(day.seconds)}`;
+    col.title = `${day.date}: ${formatDuration(day.seconds)}`;
     chart.appendChild(col);
   });
 }

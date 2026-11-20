@@ -47,7 +47,7 @@ function renderTiles(r) {
   $('st-goal').textContent = `${r.goalDays}/${r.countedDays}일`;
   $('st-streak').textContent = `${r.streak}일`;
   const pct = r.todo.total ? Math.round((r.todo.done / r.todo.total) * 100) : 0;
-  $('st-todo').textContent = r.todo.total ? `${r.todo.done}/${r.todo.total} · ${pct}%` : '할 일 없음';
+  $('st-todo').textContent = r.todo.total ? `${r.todo.total}개 중 ${r.todo.done}개 (${pct}%)` : '할 일 없음';
   $('st-todo-fill').style.width = `${pct}%`;
   document.querySelectorAll('.segmented [data-kind]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.kind === kind)));
   // 아직 오지 않은 기간으로는 넘어가지 않는다
@@ -149,7 +149,7 @@ function renderSubjects(r) {
       part.append(probe);
       if (probe.offsetWidth + 12 > part.clientWidth) {
         probe.remove();
-        legend.children[i].querySelector('.seg-value').textContent += ` · ${part.dataset.share}`;
+        legend.children[i].querySelector('.seg-value').textContent += ` (${part.dataset.share})`;
       }
     });
   });
