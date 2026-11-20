@@ -19,6 +19,7 @@ import { initStudyView, showStudy, setStudySettings, refreshStudy, clearStudy, g
 import { initPlanView, showPlans, setPlanSettings, refreshPlans, clearPlans, getPlans } from './ui/planView.js';
 import { initStatsView, showStats, clearStats } from './ui/statsView.js';
 import { initSettingsView, showSettings } from './ui/settingsView.js';
+import { initSetupView, runSetup, hideSetup } from './ui/setupView.js';
 
 let currentUser = null;
 let settings = null;
@@ -29,8 +30,17 @@ function enterApp(user) {
   if (currentUser?.id === user.id) return entering;
   currentUser = user;
   entering = (async () => {
-    settings = normalizeSettings(await loadSettings(user.id));
+    const saved = await loadSettings(user.id);
+    settings = normalizeSettings(saved || {});
     hideAuthView();
+    if (!saved) {
+      // 처음 로그인: 준비하는 시험부터 고른다
+      setTabsVisible(false);
+      const chosen = await runSetup(settings);
+      if (currentUser?.id !== user.id) return; // 고르는 동안 로그아웃됨
+      settings = normalizeSettings(chosen);
+      saveSettings(user.id, settings);
+    }
 
     setDdaySettings(settings);
     showSettings(settings, user);
@@ -53,6 +63,7 @@ function resetToAuth(message) {
   clearStudy();
   clearPlans();
   clearStats();
+  hideSetup();
   if (userId) clearUserCache(userId);
   $('app-content').hidden = true;
   setTabsVisible(false);
@@ -96,6 +107,7 @@ initStudyView();
 initPlanView();
 initStatsView();
 initSettingsView({ onChange: updateSettings, onLogout: leaveApp });
+initSetupView();
 
 // 가입 확인 링크로 돌아왔을 때, 다른 탭에서 로그아웃했을 때 등
 onAuthChange((event, user) => {

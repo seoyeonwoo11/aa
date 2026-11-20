@@ -26,6 +26,43 @@
       <h1 id="page-title">하루수능</h1>
     </header>
 
+    <!-- 처음 로그인했을 때: 준비하는 시험 고르기 -->
+    <section id="setup-screen" class="auth-screen setup-screen" hidden>
+      <div class="auth-brand">
+        <div class="auth-logo" aria-hidden="true">하</div>
+        <h2 class="setup-title">어떤 시험을 준비하나요?</h2>
+        <p class="setup-sub">홈 화면 D-Day가 이 시험에 맞춰 나와요. 나중에 설정에서 바꿀 수 있어요.</p>
+      </div>
+      <form id="setup-form" class="card auth-card setup-card" novalidate>
+        <div id="setup-kinds" class="setup-kinds" role="radiogroup" aria-label="시험 종류">
+          <button type="button" role="radio" data-kind="suneung" class="setup-kind">수능</button>
+          <button type="button" role="radio" data-kind="mock" class="setup-kind">모의고사</button>
+          <button type="button" role="radio" data-kind="custom" class="setup-kind">직접 정하기</button>
+        </div>
+        <label id="setup-year-field" class="field">
+          <span>수능 학년도</span>
+          <select id="setup-year"></select>
+        </label>
+        <label id="setup-mock-field" class="field" hidden>
+          <span>시험</span>
+          <select id="setup-mock"></select>
+        </label>
+        <div id="setup-custom" class="custom-fields" hidden>
+          <label class="field">
+            <span>시험 이름</span>
+            <input id="setup-name" type="text" maxlength="30" placeholder="예: 2학기 기말고사" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>시험 날짜</span>
+            <input id="setup-date" type="date">
+          </label>
+        </div>
+        <p id="setup-preview" class="setup-preview" aria-live="polite"></p>
+        <p id="setup-error" class="error" role="alert"></p>
+        <button type="submit" class="primary-btn">시작하기</button>
+      </form>
+    </section>
+
     <section id="auth-screen" class="auth-screen">
       <div class="auth-brand">
         <div class="auth-logo" aria-hidden="true">하</div>

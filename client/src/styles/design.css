@@ -301,3 +301,43 @@ body.has-nav .countdown { gap: 0; }
 /* 묶음 안 두 칸은 여백 없이 나란히 두고, 아래 여백은 묶음이 갖는다 */
 body.has-nav #panel-settings .custom-fields .field { margin-bottom: 0; }
 body.has-nav #panel-settings .custom-fields { margin-bottom: 10px; }
+
+/* ---------- 처음 로그인: 준비하는 시험 고르기 ---------- */
+.setup-title { margin: 6px 0 0; font-family: var(--font-paper); font-size: 1.35rem; font-weight: 750; }
+.setup-sub { margin: 0; max-width: 32ch; font-size: 0.88rem; line-height: 1.5; color: var(--muted); word-break: keep-all; text-wrap: balance; }
+.setup-kinds {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.setup-kind {
+  min-height: 48px;
+  padding: 0 6px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.setup-kind[aria-checked="true"] { color: var(--on-primary); background: var(--primary); border-color: var(--primary); }
+@media (hover: hover) { .setup-kind:not([aria-checked="true"]):hover { background: var(--primary-soft); } }
+.setup-card .field:last-of-type { margin-bottom: 14px; }
+.setup-card .custom-fields .field { margin-bottom: 0; }
+.setup-preview {
+  min-height: 1.4em;
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.setup-card .primary-btn { width: 100%; margin-top: 6px; }
+.setup-card .error:empty { display: none; }
+/* 좁은 휴대폰: 종류 버튼 글자를 줄이고, 시험 이름·날짜는 위아래로 */
+@media (max-width: 360px) {
+  .setup-kind { font-size: 0.86rem; padding: 0 2px; }
+  .setup-card .custom-fields { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+}
