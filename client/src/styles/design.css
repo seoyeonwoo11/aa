@@ -188,10 +188,10 @@ body.has-nav .countdown { gap: 0; }
 @media (hover: hover) { .nav-item:hover { background: var(--primary-soft); } }
 @media (min-width: 1024px) {
   .nav-item[aria-current="page"] { background: var(--primary-soft); border-radius: 12px; }
-  /* 메뉴 맨 위: 칠한 OMR 동그라미 */
+  /* 메뉴 맨 위: 칠한 동그라미 로고 */
   .nav-bar::before {
-    width: 38px;
-    height: 46px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     font-family: var(--font-paper);
     color: var(--on-primary);
@@ -215,14 +215,15 @@ body.has-nav .countdown { gap: 0; }
 
 /* ---------- 로그인: 칠한 동그라미 로고 ---------- */
 .auth-logo {
-  width: 54px;
-  height: 66px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   font-family: var(--font-paper);
   color: var(--on-primary);
   background: var(--primary);
   box-shadow: 0 0 0 4px var(--bg), 0 0 0 5.5px var(--red);
 }
+@media (max-height: 700px) { .auth-logo { width: 48px; height: 48px; } }
 .auth-title { font-weight: 750; }
 .auth-dday { color: var(--text); border-color: var(--rule); background: var(--card); border-radius: 6px; }
 .auth-message { color: var(--text); background: var(--primary-soft); }
