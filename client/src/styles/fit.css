@@ -153,6 +153,15 @@ body.has-nav .plan-panel.editing {
 @media (max-width: 959px) {
   body.has-nav .plan-panel.editing > .day-card { display: none; }
 }
+/* 휴대폰: 그날 계획 대신 달력이 맨 위, 폼은 바로 아래 (날짜를 누르면서 폼을 채운다. 화면이 폼으로 튀지 않게) */
+@media (max-width: 759px) {
+  body.has-nav .plan-panel.editing { grid-template-areas: "cal" "form"; }
+  /* 날짜만 고르면 되므로 달력 줄을 낮게: 기간 막대는 얇은 선, 할 일 수는 숨김 */
+  body.has-nav .plan-panel.editing .cal-week { --lane: 5px; grid-template-rows: 28px repeat(3, var(--lane)) 4px; row-gap: 2px; }
+  body.has-nav .plan-panel.editing .cal-bar { font-size: 0; }
+  body.has-nav .plan-panel.editing .cal-cell-foot { display: none; }
+  body.has-nav .plan-panel.editing .calendar-card { padding-top: 10px; padding-bottom: 10px; }
+}
 
 /* 설정 탭: 모의고사 목록은 최소 두 줄은 보이게, 그래도 넘치면 설정 탭 안에서 스크롤 */
 .mock-card .card-scroll { min-height: 96px; }

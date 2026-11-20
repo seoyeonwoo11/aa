@@ -444,8 +444,9 @@ function openRangeForm(range) {
   $('range-title').value = range?.title ?? '';
   $('range-error').textContent = '';
   render();
-  $('range-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  if (!range) $('range-title').focus({ preventScroll: true });
+  $('panel-plan').scrollTop = 0; // 폼은 화면 안에 열린다: 휴대폰은 맨 위(달력 바로 위), 태블릿·PC는 오른쪽 칸
+  // 휴대폰은 키보드가 올라와 달력을 가리므로 이름 칸을 바로 고르지 않는다
+  if (!range && !window.matchMedia('(max-width: 759px)').matches) $('range-title').focus({ preventScroll: true });
 }
 
 function closeRangeForm() {
