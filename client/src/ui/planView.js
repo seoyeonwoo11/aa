@@ -7,6 +7,7 @@ import { getTarget } from '../exam/target.js';
 import { mockExamsByDate } from '../exam/mockExams.js';
 import { loadPlans, savePlans } from '../services/planService.js';
 import { getMonthGrid, layoutWeek } from '../plan/calendar.js';
+import { holidayName } from '../plan/holidays.js';
 import {
   RANGE_COLORS, REPEAT_PRESETS, addPlan, togglePlan, removePlan, renamePlan, editRepeat, planProgress,
   addRepeat, toggleRepeatDone, stopRepeat, itemsForDate, setMemo, memoFor,
@@ -103,12 +104,18 @@ function renderCalendar() {
       if (day.getMonth() !== month.month) cell.classList.add('outside');
       if (day.getDay() === 0) cell.classList.add('sun');
       if (day.getDay() === 6) cell.classList.add('sat');
+      const holiday = holidayName(date);
+      if (holiday) {
+        cell.classList.add('holiday');
+        cell.title = holiday;
+      }
       if (date === today) cell.classList.add('today');
       if (date === selected && !editing) cell.classList.add('selected');
       if (preview && preview[0] <= date && date <= preview[1]) cell.classList.add('in-range');
 
       const head = el('span', 'cal-cell-head');
       head.append(el('span', 'cal-num', String(day.getDate())));
+      if (holiday) head.append(el('span', 'cal-holiday', holiday.split(', ')[0])); // 넓은 화면에서만 보인다
       const hasMemo = Boolean(memoFor(plans, date));
       if (hasMemo) {
         cell.classList.add('has-memo');
@@ -130,6 +137,7 @@ function renderCalendar() {
       const dayRanges = rangesOnDate(plans.ranges, date).length;
       cell.setAttribute('aria-label', [
         formatKoreanDate(day),
+        holiday || '',
         dayRanges ? `기간 계획 ${dayRanges}개` : '',
         items.length ? `할 일 ${items.length}개` : '',
         hasMemo ? '메모 있음' : ''
@@ -272,6 +280,9 @@ function renderDay() {
   if (editingItem && editingDate !== selected) editingItem = null; // 다른 날로 가면 고치던 것 취소
   editingDate = selected;
   $('plan-date').textContent = formatKoreanDate(parseDate(selected));
+  const holiday = holidayName(selected);
+  $('plan-holiday').hidden = !holiday;
+  $('plan-holiday').textContent = holiday || '';
   renderMemo();
   $('day-ranges').replaceChildren(...rangesOnDate(plans.ranges, selected).map((r) => rangeItem(r, selected, true)));
 

@@ -277,3 +277,20 @@ body.has-nav .countdown { gap: 0; }
   body.has-nav #panel-home .omr-bubbles { grid-template-columns: repeat(5, 11px); grid-template-rows: 15px 15px; gap: 4px 5px; padding: 10px 10px 12px; }
   body.has-nav #panel-home .omr-bubbles i { border-width: 1.5px; }
 }
+
+/* ---------- 공휴일: 일요일처럼 빨간 숫자, 넓은 화면에서는 숫자 옆에 이름 ---------- */
+.cal-cell.holiday .cal-num { color: var(--sun); }
+.cal-cell.holiday.today .cal-num { color: var(--on-primary); }
+.cal-holiday {
+  display: none;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.66rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--sun);
+}
+@media (min-width: 760px) { .cal-holiday { display: block; margin-left: 2px; } }
+.day-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; min-width: 0; }
+.holiday-badge { font-size: 0.82rem; font-weight: 600; color: var(--sun); }
