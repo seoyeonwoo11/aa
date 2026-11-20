@@ -192,15 +192,13 @@ body.has-nav .countdown { gap: 0; }
 @media (hover: hover) { .nav-item:hover { background: var(--primary-soft); } }
 @media (min-width: 1024px) {
   .nav-item[aria-current="page"] { background: var(--primary-soft); border-radius: 12px; }
-  /* 메뉴 맨 위: 칠한 동그라미 로고 */
+  /* 메뉴 맨 위: 로고(넘어가는 일력) */
   .nav-bar::before {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    font-family: var(--font-paper);
-    color: var(--on-primary);
-    background: var(--primary);
-    box-shadow: 0 0 0 3px var(--nav-bg), 0 0 0 4.5px var(--red);
+    content: '';
+    width: 44px;
+    height: 44px;
+    background: url('../assets/logo.svg') center / contain no-repeat;
+    border-radius: 0;
   }
 }
 
@@ -217,17 +215,15 @@ body.has-nav .countdown { gap: 0; }
 .focus-screen .focus-subjects .chip[aria-checked="true"] { color: #0e1430; background: #9cc9ff; border-color: #9cc9ff; }
 .focus-screen.paused .focus-status { color: #9cc9ff; }
 
-/* ---------- 로그인: 칠한 동그라미 로고 ---------- */
+/* ---------- 로그인: 로고(넘어가는 일력) ---------- */
 .auth-logo {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  font-family: var(--font-paper);
-  color: var(--on-primary);
-  background: var(--primary);
-  box-shadow: 0 0 0 4px var(--bg), 0 0 0 5.5px var(--red);
+  width: 68px;
+  height: 68px;
+  background: url('../assets/logo.svg') center / contain no-repeat;
+  border-radius: 0;
+  box-shadow: none;
 }
-@media (max-height: 700px) { .auth-logo { width: 48px; height: 48px; } }
+@media (max-height: 700px) { .auth-logo { width: 52px; height: 52px; } }
 .auth-title { font-weight: 750; }
 .auth-dday { color: var(--text); border-color: var(--rule); background: var(--card); border-radius: 6px; }
 .auth-message { color: var(--text); background: var(--primary-soft); }

@@ -4,7 +4,7 @@
 // - 앱 파일(js·css·아이콘): 저장해 둔 사본을 먼저 쓴다. 파일 이름에 버전이 들어 있어 내용이 바뀌면 이름도 바뀐다.
 // - 다른 주소(Supabase 등)는 건드리지 않는다. 데이터는 앱의 저장 방식(브라우저 사본 + 동기화)이 처리한다.
 
-const CACHE = 'haru-suneung-v3'; // 로고를 동그라미로: 새 아이콘
+const CACHE = 'haru-suneung-v4'; // 새 로고(넘어가는 일력): 새 아이콘
 const SHELL = ['./', './manifest.webmanifest', './favicon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {
