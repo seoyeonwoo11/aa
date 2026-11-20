@@ -53,6 +53,7 @@
   --font-paper: "Hahmlet Variable", "Hahmlet", "AppleMyungjo", "Noto Serif KR", serif;
   --highlight-soft: #e4f0ff;
   --on-highlight: #1c2340;
+  --mark: #9cc9ff;              /* 지금 탭 이름에 그은 형광펜 */
 }
 
 /* 어두운 화면: 기기 설정을 따르거나(설정에서 '자동') 직접 '어둡게'를 고른 경우 */
@@ -105,6 +106,7 @@
     --subject-4-text: #ffffff;
     --highlight-soft: #1d2c4d;
     --on-highlight: #0e1430;
+    --mark: #30558f;            /* 어두운 화면: 밝은 글자가 보이게 짙은 하늘색 */
   }
 }
 :root[data-theme="dark"] {
@@ -155,6 +157,7 @@
   --subject-4-text: #ffffff;
   --highlight-soft: #1d2c4d;
   --on-highlight: #0e1430;
+  --mark: #30558f;
 }
 
 * { box-sizing: border-box; }

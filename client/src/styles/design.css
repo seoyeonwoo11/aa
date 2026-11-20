@@ -182,8 +182,8 @@ body.has-nav .countdown { gap: 0; }
 /* 지금 탭: 이름에 형광펜을 그은 모양 */
 .nav-item[aria-current="page"] span {
   padding: 0 3px;
-  color: var(--on-highlight);
-  background: linear-gradient(transparent 52%, var(--highlight) 52%, var(--highlight) 92%, transparent 92%);
+  color: var(--text);
+  background: linear-gradient(transparent 52%, var(--mark) 52%, var(--mark) 92%, transparent 92%);
 }
 @media (hover: hover) { .nav-item:hover { background: var(--primary-soft); } }
 @media (min-width: 1024px) {
