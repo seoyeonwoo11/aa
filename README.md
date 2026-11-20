@@ -53,8 +53,8 @@ npm run build    # 배포용 빌드 → client/dist/
 1. Supabase 대시보드 → **SQL Editor**에 [`supabase/schema.sql`](supabase/schema.sql)을 붙여 넣고 **Run**
    (사용자별 데이터 테이블 `user_data`와, 본인 데이터만 읽고 쓰게 하는 보안 규칙(RLS)을 만듭니다)
 2. **Authentication → URL Configuration**
-   - Site URL: `https://seoyeonwoo11.github.io/aa/`
-   - Redirect URLs에 추가: `https://seoyeonwoo11.github.io/aa/`, `http://localhost:5173/`
+   - Site URL: `https://seoyeonwoo11.github.io/haru-suneung/`
+   - Redirect URLs에 추가: `https://seoyeonwoo11.github.io/haru-suneung/`, `http://localhost:5173/`
 3. (선택) **Authentication → Sign In / Providers → Email**의 *Confirm email*을 끄면 가입 즉시 로그인됩니다.
    켜 두면 가입 확인 메일의 링크를 눌러야 로그인됩니다.
 
@@ -66,7 +66,7 @@ npm run build    # 배포용 빌드 → client/dist/
 `main`에 머지되면 GitHub Actions(`.github/workflows/deploy.yml`)가 테스트 → 빌드 → GitHub Pages 배포를 자동으로 합니다.
 PR에서는 테스트와 빌드만 확인합니다.
 
-- 주소: https://seoyeonwoo11.github.io/aa/
+- 주소: https://seoyeonwoo11.github.io/haru-suneung/
 - 처음 한 번: 저장소 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 설정
 - 수동 배포: Actions 탭 → *Test and deploy* → *Run workflow*
 
