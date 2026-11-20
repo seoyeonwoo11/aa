@@ -296,5 +296,8 @@ body.has-nav .countdown { gap: 0; }
 .holiday-badge { font-size: 0.82rem; font-weight: 600; color: var(--sun); }
 
 /* 설정: 직접 정한 시험의 이름·날짜는 한 줄에 둘 */
-.custom-fields { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 8px; }
-.custom-fields input { min-width: 0; }
+.custom-fields { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 8px; align-items: start; margin-bottom: 14px; }
+.custom-fields input { min-width: 0; height: 46px; }
+/* 묶음 안 두 칸은 여백 없이 나란히 두고, 아래 여백은 묶음이 갖는다 */
+body.has-nav #panel-settings .custom-fields .field { margin-bottom: 0; }
+body.has-nav #panel-settings .custom-fields { margin-bottom: 10px; }
