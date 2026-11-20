@@ -163,6 +163,9 @@ body.has-nav .countdown { gap: 0; }
 /* ---------- 달력: OMR 칸 선 ---------- */
 .cal-grid { border-top-color: var(--rule); }
 .cal-week { box-shadow: inset 0 -1px 0 var(--rule); }
+/* 칸이 주 아래 빨간 선을 덮지 않게 1px 띄우고, 마우스를 올리면 바탕보다 살짝 밝게(어두운 화면) 칠한다 */
+.cal-cell { margin-bottom: 1px; }
+@media (hover: hover) { .cal-cell:hover { background: var(--primary-soft); } }
 .cal-weekdays { color: var(--muted); }
 .cal-cell.today .cal-num { width: 22px; height: 27px; border-radius: 50%; color: var(--on-primary); background: var(--primary); }
 .cal-cell.selected { background: var(--highlight-soft); box-shadow: inset 0 0 0 1.5px var(--primary); }
