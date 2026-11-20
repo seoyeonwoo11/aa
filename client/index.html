@@ -299,15 +299,22 @@
         <div class="card goal-card">
           <h2>목표</h2>
           <label class="field">
+            <span>목표 시험</span>
+            <select id="target-select"></select>
+          </label>
+          <div id="custom-fields" class="custom-fields" hidden>
+            <label class="field">
+              <span>시험 이름</span>
+              <input id="custom-name" type="text" maxlength="30" placeholder="예: 2학기 기말고사" autocomplete="off">
+            </label>
+            <label class="field">
+              <span>시험 날짜</span>
+              <input id="custom-date" type="date">
+            </label>
+          </div>
+          <label class="field">
             <span>수능 학년도</span>
             <select id="exam-select"></select>
-          </label>
-          <label class="field">
-            <span>날짜 직접 입력</span>
-            <div class="field-row">
-              <input id="custom-date" type="date">
-              <button id="clear-custom" type="button" class="text-btn">지우기</button>
-            </div>
           </label>
           <label class="field">
             <span>하루 목표 공부 시간</span>

@@ -4,6 +4,7 @@ import { $ } from './dom.js';
 import { readJSON, writeJSON } from '../storage/localStore.js';
 import { toDateText, parseDate, formatKoreanDate } from '../utils/date.js';
 import { getTarget } from '../exam/target.js';
+import { getExam } from '../exam/examDates.js';
 import { mockExamsByDate } from '../exam/mockExams.js';
 import { loadPlans, savePlans } from '../services/planService.js';
 import { getMonthGrid, layoutWeek } from '../plan/calendar.js';
@@ -64,8 +65,10 @@ const shortDate = (text) => {
 
 function renderCalendar() {
   const today = toDateText(new Date());
-  const examDate = settings && !settings.customDate ? toDateText(getTarget(settings).date) : null;
-  const customDate = settings?.customDate || null;
+  // 수능 날은 늘 '수능', 직접 정한 목표 시험 날은 '목표' (모의고사는 아래 시험 표시로 나온다)
+  const examDate = settings ? toDateText(getExam(settings.academicYear).date) : null;
+  const target = settings ? getTarget(settings) : null;
+  const customDate = target?.kind === 'custom' ? toDateText(target.date) : null;
   const mocks = settings ? mockExamsByDate(settings) : {};
   const weeks = getMonthGrid(month.year, month.month);
   const preview = editing?.start && editing?.end

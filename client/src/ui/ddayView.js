@@ -4,7 +4,7 @@ import { $, pad2 } from './dom.js';
 import { toDateText, formatKoreanDate, parseDate, daysBetween } from '../utils/date.js';
 import { getTarget } from '../exam/target.js';
 import { formatDday, getSummary, getCountdown } from '../exam/dday.js';
-import { nextMockExam } from '../exam/mockExams.js';
+import { getMockExams } from '../exam/mockExams.js';
 
 let settings = null;
 let lastDay = null;
@@ -42,9 +42,9 @@ function renderSummary() {
   $('exam-badge').className = `badge${target.badge === '예상' ? ' estimated' : ''}`;
   $('exam-date').textContent = formatKoreanDate(target.date);
 
-  // 다음 모의고사
   const now = new Date();
-  const mock = nextMockExam(settings, toDateText(now));
+  // 다음 모의고사 (목표로 고른 모의고사는 위 D-Day와 같으니 그다음 시험을 보여준다)
+  const mock = getMockExams(settings).find((e) => e.date >= toDateText(now) && !(target.kind === 'mock' && e.id === target.id)) || null;
   $('next-mock').hidden = !mock;
   if (mock) {
     const mockDate = parseDate(mock.date);

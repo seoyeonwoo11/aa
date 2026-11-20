@@ -6,6 +6,7 @@ import { getExam, getSelectableYears } from '../exam/examDates.js';
 import { getMockExams, isDateText } from '../exam/mockExams.js';
 import { GOAL_OPTIONS } from '../settings/settings.js';
 import { getThemePref, setThemePref } from './theme.js';
+import { getTarget } from '../exam/target.js';
 
 let settings = null;
 let onChange = () => {};
@@ -24,6 +25,28 @@ function update(patch) {
   onChange(settings);
 }
 
+// 목표 시험 고르기: 수능 / 모의고사 목록 / 직접 정하기
+function renderTarget() {
+  const select = $('target-select');
+  const exam = getExam(settings.academicYear);
+  const options = [['suneung', `${exam.academicYear}학년도 수능`]];
+  for (const mock of getMockExams(settings)) {
+    options.push([`mock:${mock.id}`, `${mock.name}, ${shortKoreanDate(mock.date)}${mock.status === 'estimated' ? ' 예상' : ''}`]);
+  }
+  options.push(['custom', '직접 정하기']);
+  select.replaceChildren(...options.map(([value, text]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = text;
+    return option;
+  }));
+  const target = getTarget(settings); // 없어진 모의고사를 골라 뒀으면 수능으로 보인다
+  select.value = settings.targetKind === 'custom' ? 'custom' : target.kind === 'mock' ? `mock:${target.id}` : 'suneung';
+  $('custom-fields').hidden = settings.targetKind !== 'custom';
+  $('custom-name').value = settings.customName;
+  $('custom-date').value = settings.customDate;
+}
+
 function renderOptions() {
   const select = $('exam-select');
   select.innerHTML = '';
@@ -35,8 +58,8 @@ function renderOptions() {
     select.appendChild(option);
   }
   select.value = settings.academicYear;
-  $('custom-date').value = settings.customDate;
   $('goal-select').value = settings.dailyGoalMinutes;
+  renderTarget();
 }
 
 // 모의고사 목록: 6월·9월 모의평가는 날짜만 고칠 수 있고, 직접 추가한 시험은 지울 수 있다.
@@ -95,15 +118,28 @@ export function initSettingsView({ onChange: handleChange, onLogout }) {
   }
 
   $('exam-select').addEventListener('change', (event) => {
-    $('custom-date').value = '';
-    update({ academicYear: Number(event.target.value), customDate: '' });
+    const year = Number(event.target.value);
+    const patch = { academicYear: year };
+    // 6월·9월 모의평가를 목표로 했으면 새 학년도의 같은 시험으로 옮긴다
+    const preset = settings.targetKind === 'mock' && settings.targetMockId.match(/^\d{4}-(june|sept)$/);
+    if (preset) patch.targetMockId = `${year}-${preset[1]}`;
+    update(patch);
+    renderTarget();
     renderMocks(); // 학년도가 바뀌면 모의평가 날짜도 바뀐다
   });
-  $('custom-date').addEventListener('change', (event) => update({ customDate: event.target.value }));
-  $('clear-custom').addEventListener('click', () => {
-    $('custom-date').value = '';
-    update({ customDate: '' });
+  $('target-select').addEventListener('change', (event) => {
+    const value = event.target.value;
+    if (value === 'custom') {
+      update({ targetKind: 'custom' });
+      renderTarget();
+      if (!settings.customDate) $('custom-name').focus();
+      return;
+    }
+    update(value.startsWith('mock:') ? { targetKind: 'mock', targetMockId: value.slice(5) } : { targetKind: 'suneung' });
+    renderTarget();
   });
+  $('custom-name').addEventListener('change', (event) => update({ customName: event.target.value.trim().slice(0, 30) }));
+  $('custom-date').addEventListener('change', (event) => update({ customDate: event.target.value }));
   goal.addEventListener('change', (event) => update({ dailyGoalMinutes: Number(event.target.value) }));
 
   // 모의고사 날짜 고치기·되돌리기·삭제
@@ -118,6 +154,7 @@ export function initSettingsView({ onChange: handleChange, onLogout }) {
       update({ customExams: settings.customExams.map((e) => (e.id === row.dataset.id ? { ...e, date: value } : e)) });
     }
     renderMocks();
+    renderTarget();
   });
   $('mock-list').addEventListener('click', (event) => {
     const action = event.target.dataset.action;
@@ -130,9 +167,12 @@ export function initSettingsView({ onChange: handleChange, onLogout }) {
     if (action === 'remove') {
       const exam = settings.customExams.find((e) => e.id === id);
       if (!exam || !confirm(`'${exam.name}'을(를) 지울까요?`)) return;
-      update({ customExams: settings.customExams.filter((e) => e.id !== id) });
+      const patch = { customExams: settings.customExams.filter((e) => e.id !== id) };
+      if (settings.targetKind === 'mock' && settings.targetMockId === id) patch.targetKind = 'suneung';
+      update(patch);
     }
     renderMocks();
+    renderTarget();
   });
 
   // 시험 추가: '+ 추가'를 누르면 입력칸이 열린다
@@ -157,6 +197,7 @@ export function initSettingsView({ onChange: handleChange, onLogout }) {
     $('mock-form').reset();
     setFormOpen(false);
     renderMocks();
+    renderTarget();
     $('mock-list').querySelector(`[data-id="${id}"]`)?.scrollIntoView({ block: 'nearest' });
   });
 

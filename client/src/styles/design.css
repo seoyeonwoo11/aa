@@ -294,3 +294,7 @@ body.has-nav .countdown { gap: 0; }
 @media (min-width: 760px) { .cal-holiday { display: block; margin-left: 2px; } }
 .day-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; min-width: 0; }
 .holiday-badge { font-size: 0.82rem; font-weight: 600; color: var(--sun); }
+
+/* 설정: 직접 정한 시험의 이름·날짜는 한 줄에 둘 */
+.custom-fields { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 8px; }
+.custom-fields input { min-width: 0; }
