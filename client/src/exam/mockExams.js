@@ -1,4 +1,5 @@
-// 모의고사 일정: 고3 전국연합학력평가(3·5·7·10월, 시도교육청) + 평가원 6월·9월 모의평가
+// 모의고사 일정: 고3 전국연합학력평가(3·5·7·10월, 시도교육청)
+//               + 평가원 6월·9월 모의평가 (2028학년도부터는 6월·8월)
 //               + 사용자가 추가한 시험(사설 모의고사, 학교 시험 등)
 //
 // 날짜는 해마다 따로 발표되므로, 모르는 해는 '예상' 날짜로 보여주고
@@ -34,6 +35,11 @@ export const PRESETS = [
   { key: 'sept', name: '9월 모의평가', short: '9모', estimate: (y) => nthWeekday(y, 8, 3, 1) }, // 첫째 수요일
   { key: 'oct', name: '10월 학력평가', short: '10학평', estimate: (y) => nthWeekday(y, 9, 2, 3) } // 셋째 화요일
 ];
+// 2028학년도(2027년 시행)부터 평가원 하반기 모의평가는 9월 → 8월 넷째·다섯째 주로 옮겨진다
+// (모의평가 성적을 보고 수시 원서를 낼 수 있게). 저장된 날짜·목표와 이어지도록 id는 그대로 'sept'를 쓴다.
+const AUGUST_FROM = 2028;
+const AUGUST_MOCK = { name: '8월 모의평가', short: '8모', estimate: (y) => nthWeekday(y, 7, 3, 4) }; // 넷째 수요일
+
 export const PRESET_ID = new RegExp(`^\\d{4}-(${PRESETS.map((p) => p.key).join('|')})$`);
 
 // 예상: 그 달의 첫 번째 수요일 (6월·9월 모의평가)
@@ -46,7 +52,8 @@ export function estimateMockDate(calendarYear, month) {
 export function getMockExams(settings) {
   const year = settings.academicYear;
   const overrides = settings.mockOverrides || {};
-  const presets = PRESETS.map((p) => {
+  const presets = PRESETS.map((preset) => {
+    const p = preset.key === 'sept' && year >= AUGUST_FROM ? { ...preset, ...AUGUST_MOCK } : preset;
     const key = `${year}-${p.key}`;
     const official = OFFICIAL_MOCK_DATES[key];
     const edited = overrides[key];

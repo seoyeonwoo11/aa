@@ -62,7 +62,7 @@ function renderOptions() {
   renderTarget();
 }
 
-// 모의고사 목록: 6월·9월 모의평가는 날짜만 고칠 수 있고, 직접 추가한 시험은 지울 수 있다.
+// 모의고사 목록: 학력평가·모의평가는 날짜만 고칠 수 있고, 직접 추가한 시험은 지울 수 있다.
 function renderMocks() {
   const list = $('mock-list');
   list.replaceChildren(...getMockExams(settings).map((exam) => {
