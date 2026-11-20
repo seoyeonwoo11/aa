@@ -1,25 +1,44 @@
-// 모의고사 일정: 평가원 6월·9월 모의평가 + 사용자가 추가한 시험(학력평가, 학교 시험 등)
+// 모의고사 일정: 고3 전국연합학력평가(3·5·7·10월, 시도교육청) + 평가원 6월·9월 모의평가
+//               + 사용자가 추가한 시험(사설 모의고사, 학교 시험 등)
 //
-// 평가원은 모의평가 날짜를 해마다 따로 발표하므로, 모르는 해는 '예상' 날짜로 보여주고
+// 날짜는 해마다 따로 발표되므로, 모르는 해는 '예상' 날짜로 보여주고
 // 사용자가 설정에서 실제 날짜로 고칠 수 있게 한다.
 
 import { parseDate, toDateText } from '../utils/date.js';
 
-// 공식 날짜를 알면 여기에 추가한다. 키: `${학년도}-june` / `${학년도}-sept`
+// 공식 날짜를 알면 여기에 추가한다. 키: `${학년도}-${PRESETS key}`
 export const OFFICIAL_MOCK_DATES = {
   '2026-june': '2025-06-04',
-  '2026-sept': '2025-09-03'
+  '2026-sept': '2025-09-03',
+  // 2027학년도 (2026년 시행)
+  '2027-mar': '2026-03-24',
+  '2027-may': '2026-05-07',
+  '2027-june': '2026-06-04', // 지방선거(6월 3일)로 하루 미뤄짐
+  '2027-jul': '2026-07-08',
+  '2027-sept': '2026-09-02',
+  '2027-oct': '2026-10-20'
 };
 
-export const PRESETS = [
-  { key: 'june', name: '6월 모의평가', short: '6모', month: 5 },
-  { key: 'sept', name: '9월 모의평가', short: '9모', month: 8 }
-];
+// n번째 (weekday)요일. from일 이후(그날 포함)부터 센다.
+function nthWeekday(year, month, weekday, n, from = 1) {
+  const start = new Date(year, month, from);
+  return new Date(year, month, from + ((weekday - start.getDay() + 7) % 7) + (n - 1) * 7);
+}
 
-// 예상: 그 달의 첫 번째 수요일 (최근 몇 년의 실제 날짜와 가장 가깝다)
+// 예상 날짜는 최근 몇 년의 실제 날짜에 가장 가까운 규칙으로 정했다.
+export const PRESETS = [
+  { key: 'mar', name: '3월 학력평가', short: '3학평', estimate: (y) => nthWeekday(y, 2, 3, 4) }, // 넷째 수요일
+  { key: 'may', name: '5월 학력평가', short: '5학평', estimate: (y) => nthWeekday(y, 4, 4, 1, 6) }, // 어린이날 다음 첫 목요일
+  { key: 'june', name: '6월 모의평가', short: '6모', estimate: (y) => nthWeekday(y, 5, 3, 1) }, // 첫째 수요일
+  { key: 'jul', name: '7월 학력평가', short: '7학평', estimate: (y) => nthWeekday(y, 6, 3, 2) }, // 둘째 수요일
+  { key: 'sept', name: '9월 모의평가', short: '9모', estimate: (y) => nthWeekday(y, 8, 3, 1) }, // 첫째 수요일
+  { key: 'oct', name: '10월 학력평가', short: '10학평', estimate: (y) => nthWeekday(y, 9, 2, 3) } // 셋째 화요일
+];
+export const PRESET_ID = new RegExp(`^\\d{4}-(${PRESETS.map((p) => p.key).join('|')})$`);
+
+// 예상: 그 달의 첫 번째 수요일 (6월·9월 모의평가)
 export function estimateMockDate(calendarYear, month) {
-  const first = new Date(calendarYear, month, 1);
-  return new Date(calendarYear, month, 1 + ((3 - first.getDay() + 7) % 7));
+  return nthWeekday(calendarYear, month, 3, 1);
 }
 
 // 목표 학년도의 모의고사 목록 (날짜순)
@@ -35,7 +54,7 @@ export function getMockExams(settings) {
       id: key,
       name: p.name,
       short: p.short,
-      date: edited || official || toDateText(estimateMockDate(year - 1, p.month)),
+      date: edited || official || toDateText(p.estimate(year - 1)),
       status: edited ? 'edited' : official ? 'official' : 'estimated',
       preset: true
     };

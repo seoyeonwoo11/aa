@@ -17,10 +17,10 @@ describe('settings', () => {
 
   it('keeps valid mock exam settings only', () => {
     const s = normalizeSettings({
-      mockOverrides: { '2028-june': '2027-06-03', '2028-bad': '2027-01-01', '2028-sept': 'nope' },
+      mockOverrides: { '2028-june': '2027-06-03', '2028-mar': '2027-03-23', '2028-bad': '2027-01-01', '2028-sept': 'nope' },
       customExams: [{ id: 'a', name: ' 3월 학력평가 ', date: '2027-03-24' }, { id: 'b', name: '', date: '2027-04-01' }, { id: 'c', name: 'x', date: 'bad' }]
     }, examDay);
-    expect(s.mockOverrides).toEqual({ '2028-june': '2027-06-03' });
+    expect(s.mockOverrides).toEqual({ '2028-june': '2027-06-03', '2028-mar': '2027-03-23' });
     expect(s.customExams).toEqual([{ id: 'a', name: '3월 학력평가', date: '2027-03-24' }]);
   });
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { toDateText } from '../src/utils/date.js';
-import { estimateMockDate, getMockExams, nextMockExam, mockExamsByDate } from '../src/exam/mockExams.js';
+import { estimateMockDate, getMockExams, nextMockExam, mockExamsByDate, PRESETS } from '../src/exam/mockExams.js';
 
 describe('mock exams', () => {
   it('estimates the first Wednesday of June/September', () => {
@@ -11,15 +11,29 @@ describe('mock exams', () => {
   });
 
   it('lists presets for the target year with official, estimated and edited dates', () => {
-    expect(getMockExams({ academicYear: 2026 }).map((e) => [e.name, e.date, e.status])).toEqual([
-      ['6월 모의평가', '2025-06-04', 'official'], ['9월 모의평가', '2025-09-03', 'official']
+    expect(getMockExams({ academicYear: 2026 }).filter((e) => e.status === 'official').map((e) => [e.name, e.date])).toEqual([
+      ['6월 모의평가', '2025-06-04'], ['9월 모의평가', '2025-09-03']
     ]);
-    const s = { academicYear: 2028, mockOverrides: { '2028-june': '2027-06-03' }, customExams: [{ id: 'a', name: '3월 학력평가', date: '2027-03-24' }] };
+    const s = { academicYear: 2028, mockOverrides: { '2028-june': '2027-06-03' }, customExams: [{ id: 'a', name: '사설 모의고사', date: '2027-04-15' }] };
     expect(getMockExams(s).map((e) => [e.short, e.date, e.status])).toEqual([
-      ['3월 학력평가', '2027-03-24', 'custom'], ['6모', '2027-06-03', 'edited'], ['9모', '2027-09-01', 'estimated']
+      ['3학평', '2027-03-24', 'estimated'], ['사설 모의고사', '2027-04-15', 'custom'], ['5학평', '2027-05-06', 'estimated'],
+      ['6모', '2027-06-03', 'edited'], ['7학평', '2027-07-14', 'estimated'], ['9모', '2027-09-01', 'estimated'], ['10학평', '2027-10-19', 'estimated']
     ]);
-    expect(nextMockExam(s, '2027-03-25').name).toBe('6월 모의평가');
-    expect(nextMockExam(s, '2027-09-02')).toBeNull();
-    expect(Object.keys(mockExamsByDate(s))).toEqual(['2027-03-24', '2027-06-03', '2027-09-01']);
+    expect(nextMockExam(s, '2027-03-25').name).toBe('사설 모의고사');
+    expect(nextMockExam(s, '2027-06-04').name).toBe('7월 학력평가');
+    expect(nextMockExam(s, '2027-10-20')).toBeNull();
+    expect(Object.keys(mockExamsByDate(s))).toHaveLength(7);
+  });
+
+  it('2027학년도(2026년 시행) 고3 학력평가·모의평가는 발표된 날짜', () => {
+    expect(getMockExams({ academicYear: 2027 }).map((e) => [e.name, e.date, e.status])).toEqual([
+      ['3월 학력평가', '2026-03-24', 'official'], ['5월 학력평가', '2026-05-07', 'official'], ['6월 모의평가', '2026-06-04', 'official'],
+      ['7월 학력평가', '2026-07-08', 'official'], ['9월 모의평가', '2026-09-02', 'official'], ['10월 학력평가', '2026-10-20', 'official']
+    ]);
+  });
+
+  it('예상 규칙이 2026년 실제 날짜와 대부분 맞는다 (5·7·9·10월)', () => {
+    const est = Object.fromEntries(PRESETS.map((p) => [p.key, toDateText(p.estimate(2026))]));
+    expect([est.may, est.jul, est.sept, est.oct]).toEqual(['2026-05-07', '2026-07-08', '2026-09-02', '2026-10-20']);
   });
 });

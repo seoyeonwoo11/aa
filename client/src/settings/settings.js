@@ -2,7 +2,7 @@
 
 import { startOfDay } from '../utils/date.js';
 import { getDefaultAcademicYear, getSelectableYears } from '../exam/examDates.js';
-import { isDateText } from '../exam/mockExams.js';
+import { isDateText, PRESET_ID } from '../exam/mockExams.js';
 
 export const DEFAULT_GOAL_MINUTES = 360;
 export const TARGET_KINDS = ['suneung', 'mock', 'custom'];
@@ -14,7 +14,7 @@ export function normalizeSettings(saved, today = startOfDay(new Date())) {
   const goal = Number(saved?.dailyGoalMinutes);
   const overrides = {};
   for (const [key, date] of Object.entries(saved?.mockOverrides || {})) {
-    if (/^\d{4}-(june|sept)$/.test(key) && isDateText(date)) overrides[key] = date;
+    if (PRESET_ID.test(key) && isDateText(date)) overrides[key] = date;
   }
   const customExams = (Array.isArray(saved?.customExams) ? saved.customExams : [])
     .filter((e) => e && typeof e.name === 'string' && e.name.trim() && isDateText(e.date))

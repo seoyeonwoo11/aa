@@ -3,7 +3,7 @@
 import { $ } from './dom.js';
 import { startOfDay, parseDate, formatKoreanDate } from '../utils/date.js';
 import { getExam, getSelectableYears } from '../exam/examDates.js';
-import { getMockExams, isDateText } from '../exam/mockExams.js';
+import { getMockExams, isDateText, PRESET_ID } from '../exam/mockExams.js';
 import { GOAL_OPTIONS } from '../settings/settings.js';
 import { getThemePref, setThemePref } from './theme.js';
 import { getTarget } from '../exam/target.js';
@@ -120,8 +120,8 @@ export function initSettingsView({ onChange: handleChange, onLogout }) {
   $('exam-select').addEventListener('change', (event) => {
     const year = Number(event.target.value);
     const patch = { academicYear: year };
-    // 6월·9월 모의평가를 목표로 했으면 새 학년도의 같은 시험으로 옮긴다
-    const preset = settings.targetKind === 'mock' && settings.targetMockId.match(/^\d{4}-(june|sept)$/);
+    // 학력평가·모의평가를 목표로 했으면 새 학년도의 같은 시험으로 옮긴다
+    const preset = settings.targetKind === 'mock' && settings.targetMockId.match(PRESET_ID);
     if (preset) patch.targetMockId = `${year}-${preset[1]}`;
     update(patch);
     renderTarget();
