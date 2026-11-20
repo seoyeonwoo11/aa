@@ -109,3 +109,49 @@ describe('switching subject mid-study', () => {
     expect(switchSubject(null, '국어')).toEqual({ running: null, session: null });
   });
 });
+
+import { settleAway, getElapsedSeconds as elapsed } from '../src/study/studyLog.js';
+
+describe('안드로이드 앱: 화면 끄기와 다른 앱으로 나가기 구분', () => {
+  const t0 = 1_000_000_000_000;
+  const running = { subject: '수학', firstStartedAt: t0, startedAt: t0, elapsedBefore: 0, lastSeenAt: t0, hiddenAt: t0 + 600_000 };
+  const hidden = t0 + 600_000; // 10분 공부하고 가려짐
+
+  it('가려진 때 화면이 꺼졌으면 계속 잰다 (꺼져 있던 시간 포함)', () => {
+    const back = hidden + 1_800_000; // 30분 뒤 화면 켜고 잠금 해제 후 바로 돌아옴
+    const r = settleAway(running, hidden, { screenOffAt: hidden + 200, screenOnAt: back - 3000, unlockedAt: back - 1000 }, back);
+    expect(r.reason).toBe('screen-off');
+    expect(r.running.startedAt).toBe(t0);
+    expect('hiddenAt' in r.running).toBe(false);
+    expect(elapsed(r.running, back)).toBe(2400);
+  });
+
+  it('화면이 안 꺼졌으면 다른 앱으로 나간 것: 가려진 시각에 멈춘다', () => {
+    const back = hidden + 1_800_000;
+    const r = settleAway(running, hidden, { screenOffAt: 0, screenOnAt: 0, unlockedAt: 0 }, back);
+    expect(r.reason).toBe('left');
+    expect(r.running.startedAt).toBeNull();
+    expect(r.running.elapsedBefore).toBe(600);
+    expect(r.running.autoPausedAt).toBe(hidden);
+  });
+
+  it('다른 앱으로 나간 뒤 한참 있다가 화면을 꺼도 나간 것으로 본다', () => {
+    const r = settleAway(running, hidden, { screenOffAt: hidden + 300_000 }, hidden + 900_000);
+    expect(r.reason).toBe('left');
+    expect(r.running.elapsedBefore).toBe(600);
+  });
+
+  it('화면을 켜고 잠금을 푼 뒤 다른 일을 하다 늦게 돌아오면 잠금 해제 시각에 멈춘다', () => {
+    const unlock = hidden + 1_200_000; // 20분 꺼 둠
+    const r = settleAway(running, hidden, { screenOffAt: hidden + 100, screenOnAt: unlock - 2000, unlockedAt: unlock }, unlock + 600_000);
+    expect(r.reason).toBe('left-after-unlock');
+    expect(r.running.elapsedBefore).toBe(1800);
+    expect(r.running.autoPausedAt).toBe(unlock);
+  });
+
+  it('잠금 없이 화면만 켠 경우 켜진 시각을 쓴다, 휴대폰에 물어볼 수 없으면 나간 것으로 본다', () => {
+    const on = hidden + 60_000;
+    expect(settleAway(running, hidden, { screenOffAt: hidden, screenOnAt: on, unlockedAt: 0 }, on + 2000).reason).toBe('screen-off');
+    expect(settleAway(running, hidden, null, on).reason).toBe('left');
+  });
+});

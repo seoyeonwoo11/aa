@@ -106,3 +106,20 @@ PR에서는 테스트와 빌드만 확인합니다.
 - **계산 로직은 `exam/`, `study/`, `plan/`, `utils/`에** 두고 DOM에 접근하지 않습니다. 그래야 테스트하기 쉽고 서버에서도 재사용할 수 있습니다.
 - **UI는 `services/`를 통해서만 데이터에 접근**합니다. 서비스 함수는 모두 Promise를 반환합니다.
 - 새 수능 날짜가 공식 발표되면 `client/src/exam/examDates.js`의 `OFFICIAL_DATES`에, 모의평가 날짜는 `client/src/exam/mockExams.js`의 `OFFICIAL_MOCK_DATES`에 추가합니다.
+
+## 안드로이드 앱 (APK)
+
+`android-app/`은 배포된 웹앱(https://seoyeonwoo11.github.io/haru-suneung/)을 그대로 불러오는 안드로이드 앱입니다([Capacitor](https://capacitorjs.com)). 화면은 웹과 같고, 웹 배포만 하면 앱도 바로 바뀝니다.
+
+웹앱에 더한 것은 하나입니다. **공부 중에 화면을 꺼도 타이머가 계속 갑니다.** 다른 앱으로 나가면 지금처럼 멈춥니다. 웹은 둘을 구별할 수 없지만, 앱은 휴대폰이 기억해 둔 화면 꺼짐·켜짐·잠금 해제 시각(`ScreenStatePlugin.java`)으로 구별합니다. 화면을 다시 켜고 잠금을 푼 뒤 15초 넘게 앱으로 돌아오지 않으면 그때부터는 자리를 비운 것으로 봅니다.
+
+빌드하려면 JDK 21과 안드로이드 SDK(플랫폼 36)가 필요합니다.
+
+```bash
+cd android-app
+npm install
+echo "sdk.dir=$HOME/android-sdk" > android/local.properties
+npm run apk   # android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+네이티브 코드(`android/`)를 바꿨을 때만 APK를 새로 만들면 됩니다. 디버그 서명은 빌드한 컴퓨터마다 달라서, 다른 컴퓨터에서 만든 APK로 바꿔 설치하려면 먼저 지워야 합니다(데이터는 서버에 있어 로그인하면 그대로입니다).

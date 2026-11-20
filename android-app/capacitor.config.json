@@ -1,0 +1,12 @@
+{
+  "appId": "io.github.seoyeonwoo11.harusuneung",
+  "appName": "하루수능",
+  "webDir": "www",
+  "server": {
+    "url": "https://seoyeonwoo11.github.io/haru-suneung/",
+    "allowNavigation": ["seoyeonwoo11.github.io", "sevriwawtgcbacifiqdg.supabase.co"]
+  },
+  "android": {
+    "backgroundColor": "#f5f6f8"
+  }
+}

@@ -5,7 +5,8 @@ import { $ } from './dom.js';
 let installPrompt = null; // 안드로이드·PC 크롬이 주는 설치 창
 
 const isInstalled = () =>
-  window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true ||
+  Boolean(window.Capacitor?.isNativePlatform?.()); // 안드로이드 앱(설치 파일)으로 열었을 때
 
 // iPadOS는 맥처럼 보고하므로 터치 지원으로 구분한다.
 const isIOS = () =>

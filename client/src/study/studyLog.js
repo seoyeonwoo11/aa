@@ -35,6 +35,26 @@ export function autoPauseTimer(running, now = Date.now()) {
   return { ...pauseTimer(running, now), autoPausedAt: now };
 }
 
+// 안드로이드 앱에서 화면이 가려졌다가 돌아왔을 때: 그 사이 화면이 꺼졌었는지로 판단한다.
+// (웹은 화면 끄기와 다른 앱으로 나가기를 구별하지 못하지만, 앱은 휴대폰에게 물어볼 수 있다)
+//   screen: { screenOffAt, screenOnAt, unlockedAt } (휴대폰이 기억해 둔 시각, 없으면 0)
+//   - 가려진 때쯤 화면이 꺼졌다 → 화면을 끈 것: 계속 잰다
+//       단, 화면을 다시 켜고 잠금을 푼 뒤 15초 넘게 앱으로 안 돌아왔다면 그때 다른 일을 한 것으로 보고 그 시각에 멈춘다
+//   - 아니면 다른 앱으로 나간 것: 가려진 시각에 멈춘다
+// 반환: { running, reason: 'screen-off' | 'left' | 'left-after-unlock' | null }
+export const SCREEN_OFF_WINDOW = 3000;
+export const BACK_AFTER_UNLOCK = 15000;
+export function settleAway(running, hiddenAt, screen, now = Date.now()) {
+  const { hiddenAt: _drop, ...clean } = running || {};
+  if (!running?.startedAt || !hiddenAt) return { running: running && clean, reason: null };
+  const off = screen?.screenOffAt || 0;
+  const wentOff = off >= hiddenAt - SCREEN_OFF_WINDOW && off <= hiddenAt + SCREEN_OFF_WINDOW;
+  if (!screen || !wentOff) return { running: autoPauseTimer(clean, hiddenAt), reason: 'left' };
+  const backOn = [screen.unlockedAt, screen.screenOnAt].find((t) => t > off) || now;
+  if (now - backOn > BACK_AFTER_UNLOCK) return { running: autoPauseTimer(clean, backOn), reason: 'left-after-unlock' };
+  return { running: clean, reason: 'screen-off' };
+}
+
 // 화면을 나간 이벤트를 받지 못하고 앱이 꺼진 경우(강제 종료 등):
 // 마지막으로 앱이 살아 있던 시각에 멈춘 것으로 처리해, 나가 있던 시간이 공부 시간에 들어가지 않게 한다.
 export function recoverTimer(running, now = Date.now()) {

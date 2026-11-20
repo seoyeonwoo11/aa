@@ -5,7 +5,7 @@ import { toDateText } from '../utils/date.js';
 import { loadStudy, saveStudy } from '../services/studyService.js';
 import { SUBJECT_COLORS } from './statsView.js';
 import {
-  SUBJECTS, MIN_SESSION_SECONDS, getElapsedSeconds, getTotalSeconds, startTimer, pauseTimer, autoPauseTimer, recoverTimer, finishTimer,
+  SUBJECTS, MIN_SESSION_SECONDS, getElapsedSeconds, getTotalSeconds, startTimer, pauseTimer, autoPauseTimer, recoverTimer, finishTimer, settleAway,
   switchSubject, runSummary,
   totalsForDate, lastDaysTotals, formatClock, formatDuration
 } from '../study/studyLog.js';
@@ -41,9 +41,43 @@ async function keepScreenOn(on) {
 
 function autoPause() {
   if (!isRunning()) return;
-  data.running = autoPauseTimer(data.running);
+  const { hiddenAt, ...running } = data.running;
+  data.running = autoPauseTimer(running, hiddenAt ?? Date.now());
   persist(); // localStorage 저장은 즉시 끝나므로 앱이 닫히기 전에 기록된다.
   renderAll();
+}
+
+/* ---------- 안드로이드 앱: 화면을 끄면 계속 재고, 다른 앱으로 나가면 멈춘다 ---------- */
+
+// 안드로이드 앱(Capacitor) 안에서 열렸으면 휴대폰에 화면 상태를 물어볼 수 있다.
+const nativeApp = () => (window.Capacitor?.isNativePlatform?.() ? window.Capacitor : null);
+
+async function screenState() {
+  try {
+    return await nativeApp().nativePromise('ScreenState', 'getState', {});
+  } catch {
+    return null; // 예전 버전 앱 등: 물어볼 수 없으면 다른 앱으로 나간 것으로 본다
+  }
+}
+
+// 가려질 때는 멈추지 않고 시각만 남긴다. (화면을 끈 것인지는 돌아와서 판단)
+function markHidden() {
+  if (!isRunning()) return;
+  data.running = { ...data.running, hiddenAt: Date.now() };
+  persist();
+}
+
+async function settleNativeAway() {
+  const hiddenAt = data?.running?.hiddenAt;
+  if (!hiddenAt) return;
+  const screen = await screenState();
+  if (data?.running?.hiddenAt !== hiddenAt) return; // 그 사이 바뀜
+  const { running, reason } = settleAway(data.running, hiddenAt, screen);
+  data.running = running;
+  persist();
+  renderAll();
+  if (reason === 'screen-off') setNotice('화면이 꺼져 있던 동안에도 계속 쟀어요.');
+  else showAutoPauseNotice();
 }
 
 function showAutoPauseNotice() {
@@ -295,8 +329,12 @@ export function initStudyView() {
 
   // 다른 앱에 갔다 오면 화면 켜짐을 다시 요청한다.
   // 앱을 나가면(홈 화면, 다른 앱, 다른 탭, 화면 잠금) 타이머를 자동으로 멈춘다.
+  // 안드로이드 앱에서는 화면을 끈 경우 멈추지 않는다(돌아왔을 때 휴대폰에 물어 판단).
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') autoPause();
+    if (document.visibilityState === 'hidden') {
+      if (nativeApp()) markHidden();
+      else autoPause();
+    } else if (nativeApp()) settleNativeAway();
     else showAutoPauseNotice();
   });
   window.addEventListener('pagehide', autoPause);
