@@ -136,3 +136,55 @@
 @media (min-width: 760px) and (max-width: 1023px) {
   body.has-nav .plan-panel { grid-template-columns: minmax(0, 1.25fr) minmax(300px, 1fr); }
 }
+
+/* ---------- 계획 탭(태블릿·PC): 달력 카드도 그날 계획 카드와 같은 높이로, 한 화면에 ----------
+   달력 카드를 계획 탭 높이에 맞춰 늘리고, 주(줄)마다 남는 높이를 똑같이 나눠 갖는다.
+   화면이 낮으면 날짜·기간 막대·할 일 줄을 단계별로 줄여, 6주짜리 달도 스크롤 없이 들어가게 한다. */
+@media (min-width: 760px) {
+  body.has-nav .plan-panel {
+    --date-h: 30px;
+    --lane: 20px;
+    --count-h: 22px;
+  }
+  body.has-nav .plan-panel:not(.editing) > .calendar-card {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  body.has-nav .plan-panel:not(.editing) .cal-grid {
+    flex: 1 1 auto;
+    grid-auto-rows: minmax(calc(var(--date-h) + 3 * var(--lane) + var(--count-h) + 9px), 1fr);
+  }
+  body.has-nav .plan-panel .cal-week {
+    --lane: inherit;
+    grid-template-rows: var(--date-h) repeat(3, var(--lane)) minmax(var(--count-h), 1fr);
+  }
+  body.has-nav .plan-panel .range-add { flex: none; }
+}
+@media (min-width: 760px) and (max-height: 940px) {
+  body.has-nav .plan-panel { --date-h: 26px; --lane: 16px; --count-h: 18px; }
+}
+@media (min-width: 760px) and (max-height: 810px) {
+  body.has-nav .plan-panel { --date-h: 24px; --lane: 14px; --count-h: 16px; }
+  body.has-nav .plan-panel .cal-bar { font-size: 0.64rem; }
+  body.has-nav .plan-panel .cal-header .icon-btn { width: 36px; height: 36px; min-height: 36px; }
+  body.has-nav .plan-panel .cal-weekdays { margin-top: 8px; }
+  body.has-nav .plan-panel .range-add { margin-top: 8px; min-height: 38px; }
+}
+@media (min-width: 760px) and (max-height: 720px) {
+  body.has-nav .plan-panel { --date-h: 22px; --lane: 11px; --count-h: 13px; }
+  body.has-nav .plan-panel .cal-bar { font-size: 0.6rem; }
+  body.has-nav .plan-panel .cal-num { width: 20px; height: 20px; font-size: 0.8rem; }
+  body.has-nav .plan-panel .cal-cell.today .cal-num { width: 18px; height: 22px; }
+  body.has-nav .plan-panel .cal-cell-foot { font-size: 0.66rem; }
+  body.has-nav .plan-panel > .calendar-card { padding-top: 10px; padding-bottom: 10px; }
+  body.has-nav .plan-panel .range-add { min-height: 34px; }
+}
+@media (min-width: 760px) and (max-height: 640px) {
+  body.has-nav .plan-panel { --date-h: 20px; --lane: 10px; --count-h: 12px; }
+  body.has-nav .plan-panel .cal-bar { font-size: 0.56rem; }
+  body.has-nav .plan-panel .cal-cell-foot { font-size: 0.62rem; }
+  body.has-nav .plan-panel .cal-header .icon-btn { width: 32px; height: 32px; min-height: 32px; }
+  body.has-nav .plan-panel .cal-weekdays { margin-top: 4px; }
+}
