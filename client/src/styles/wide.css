@@ -220,7 +220,5 @@
   /* 오늘 공부는 오늘 계획과 같은 높이로, 시작 버튼은 맨 아래 */
   #panel-home > .home-study-card { display: flex; flex-direction: column; }
   #panel-home > .home-study-card #home-study-btn { margin-top: auto; }
-  #panel-home > .home-study-card .home-subject-pick { margin-top: auto; }
-  #panel-home > .home-study-card .home-subject-pick:not([hidden]) + #home-study-btn { margin-top: 10px; }
   #panel-home > .home-study-card .home-subjects { margin-bottom: 14px; }
 }

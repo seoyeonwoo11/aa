@@ -351,7 +351,24 @@ body.has-nav #panel-settings .custom-fields { margin-bottom: 10px; }
 .home-subjects li { display: flex; align-items: center; gap: 6px; }
 .home-subjects .swatch { width: 9px; height: 9px; border-radius: 2px; }
 .home-study-card #home-study-btn { margin-top: 14px; }
-.home-subject-pick { margin-top: 14px; }
-.home-subject-pick .hint { margin: 0 0 8px; }
-.home-subject-pick .chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.home-subject-pick .chip { min-height: 44px; }
+
+/* ---------- 과목 고르기 창 (홈의 '공부 시작') ---------- */
+.subject-dialog {
+  width: min(360px, calc(100vw - 32px));
+  padding: 0;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.subject-dialog-body { padding: 22px; }
+.subject-dialog::backdrop { background: rgba(14, 18, 34, 0.45); }
+.subject-dialog h2 { margin: 0 0 14px; font-family: var(--font-paper); font-size: 1.15rem; text-align: center; }
+.subject-dialog-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.subject-dialog .subject-dialog-chips .chip { height: auto; min-height: 52px; padding: 0 4px; font-size: 1rem; }
+.subject-dialog form { margin: 14px 0 0; }
+.subject-dialog .secondary-btn { width: 100%; }
+@media (prefers-reduced-motion: no-preference) {
+  .subject-dialog[open] { animation: dialog-in 0.16s ease-out; }
+  @keyframes dialog-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } }
+}
