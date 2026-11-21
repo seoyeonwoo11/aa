@@ -750,12 +750,6 @@ function initHomeCard() {
     setTimeout(() => $('memo-input').focus(), 50); // 탭이 보이고 나서
   });
 
-  $('home-plan-more').addEventListener('click', () => {
-    selected = today();
-    showMonthOf(selected);
-    render();
-    location.hash = 'plan';
-  });
 
   $('home-ranges').addEventListener('click', (event) => {
     const id = event.target.closest('.range-item')?.dataset.id;

@@ -1,4 +1,4 @@
-// 홈 탭: D-Day 카드, 카운트다운, 남은 기간
+// 홈 탭: D-Day 카드, 카운트다운
 
 import { $, pad2 } from './dom.js';
 import { toDateText, formatKoreanDate, parseDate, daysBetween } from '../utils/date.js';
@@ -53,16 +53,6 @@ function renderSummary() {
 
   renderOmr(formatDday(summary.diff));
   $('dday').classList.toggle('today', summary.diff === 0);
-
-  $('stat-weeks').textContent = `${summary.weeks}주`;
-  $('stat-weekends').textContent = `${summary.weekends}번`;
-  $('stat-months').textContent = `${summary.months}개월`;
-
-  $('progress-section').hidden = summary.progress === null;
-  if (summary.progress !== null) {
-    $('progress-text').textContent = `${summary.progress.toFixed(1)}%`;
-    $('progress-fill').style.width = `${summary.progress}%`;
-  }
 }
 
 function renderCountdown() {

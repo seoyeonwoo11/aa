@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getElapsedSeconds, startTimer, pauseTimer, autoPauseTimer, recoverTimer, finishTimer, totalsForDate, lastDaysTotals, formatClock, formatDuration
+  getElapsedSeconds, startTimer, pauseTimer, autoPauseTimer, recoverTimer, finishTimer, totalsForDate, formatClock, formatDuration
 } from '../src/study/studyLog.js';
 
 const at = (h, m = 0, s = 0) => new Date(2026, 10, 19, h, m, s).getTime();
@@ -48,14 +48,6 @@ describe('study totals', () => {
 
   it('sums by date and subject', () => {
     expect(totalsForDate(sessions, '2026-11-19')).toEqual({ total: 5400, bySubject: { 수학: 4200, 국어: 1200 } });
-  });
-
-  it('lists the last 7 days ending today', () => {
-    const days = lastDaysTotals(sessions, new Date(2026, 10, 19, 15), 7);
-    expect(days).toHaveLength(7);
-    expect(days[0].date).toBe('2026-11-13');
-    expect(days[6]).toMatchObject({ date: '2026-11-19', seconds: 5400 });
-    expect(days[4].seconds).toBe(900);
   });
 
   it('formats durations', () => {

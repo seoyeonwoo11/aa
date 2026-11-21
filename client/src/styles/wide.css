@@ -24,26 +24,22 @@
   body.has-nav #panel-home .countdown { margin-top: 20px; gap: 10px; }
   body.has-nav #panel-home .countdown div { padding: 12px 4px; }
   body.has-nav #panel-home .countdown span { font-size: clamp(1.4rem, 2.6vw, 2.2rem); }
-  body.has-nav #panel-home .stat-grid { margin-top: 22px; }
   body.has-nav #panel-home .stat-value { font-size: 1.35rem; }
-  body.has-nav #panel-home .progress-head { margin-top: 16px; }
 
-  /* ---------- 공부 모드: 왼쪽 타이머, 오른쪽 오늘 공부·최근 7일 ---------- */
+  /* ---------- 공부 모드: 왼쪽 타이머, 오른쪽 오늘 공부 ---------- */
   body.has-nav #panel-study {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) auto;
-    grid-template-areas: "timer today" "timer week";
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "timer today";
   }
   #panel-study > .study-card { grid-area: timer; display: flex; flex-direction: column; justify-content: center; padding: 28px; }
   #panel-study > .today-study-card { grid-area: today; }
-  #panel-study > .week-card { grid-area: week; }
   body.has-nav #panel-study .study-timer { margin-top: 28px; font-size: clamp(3.5rem, 7.5vw, 6.5rem); }
   body.has-nav #panel-study .study-status { font-size: 1rem; }
   body.has-nav #panel-study .study-actions { width: min(440px, 100%); margin: 24px auto 0; }
   body.has-nav #panel-study .chips { width: min(560px, 100%); margin: 0 auto; }
   body.has-nav #panel-study .chip { min-height: 40px; font-size: 0.9rem; }
-  body.has-nav #panel-study .week-chart { height: 130px; }
 
   /* ---------- 통계: 위 요약, 아래 왼쪽 날짜별 막대 + 오른쪽 과목별 ---------- */
   body.has-nav #panel-stats {

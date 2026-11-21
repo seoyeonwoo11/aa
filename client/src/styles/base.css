@@ -39,7 +39,6 @@
   --axis: #c6cad6;
   --goal-line: #e2404e;
   --meter-track: #e9ecf5;
-  --week-bar: #b9c1de;
   /* 과목 색 (색약 구분 검사 통과 순서) */
   --subject-1: #2a78d6;
   --subject-2: #eb6834;
@@ -96,7 +95,6 @@
     --axis: #39416a;
     --goal-line: #ff6574;
     --meter-track: #232a45;
-    --week-bar: #3a4470;
     --subject-1: #3987e5;
     --subject-2: #d95926;
     --subject-3: #199e70;
@@ -147,7 +145,6 @@
   --axis: #39416a;
   --goal-line: #ff6574;
   --meter-track: #232a45;
-  --week-bar: #3a4470;
   --subject-1: #3987e5;
   --subject-2: #d95926;
   --subject-3: #199e70;

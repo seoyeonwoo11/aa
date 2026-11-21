@@ -68,10 +68,7 @@ body.has-nav .countdown { margin-top: 12px; gap: 6px; }
 body.has-nav .countdown div { padding: 6px 2px; border-radius: 10px; }
 body.has-nav .countdown span { font-size: 1.25rem; }
 body.has-nav .countdown small { font-size: 0.72rem; }
-.main-card .stat-grid { margin-top: 14px; }
-body.has-nav .stat-value { font-size: 1.05rem; }
 body.has-nav .stat-label { font-size: 0.75rem; }
-body.has-nav .progress-head { margin-top: 10px; font-size: 0.78rem; }
 body.has-nav .progress-bar { height: 8px; }
 
 /* 홈: 오늘 계획 */
@@ -85,7 +82,6 @@ body.has-nav .study-timer { margin-top: 14px; font-size: clamp(2.5rem, 12vw, 4re
 body.has-nav .study-status { font-size: 0.9rem; }
 body.has-nav .study-actions { margin-top: 12px; }
 body.has-nav .study-card .hint:empty { display: none; }
-body.has-nav .week-chart { height: 104px; }
 body.has-nav .subject-totals li { padding: 6px 12px; }
 
 /* 목록 항목 높이 조금 줄이기 */
@@ -130,7 +126,6 @@ body.has-nav .range-add { margin-top: 8px; min-height: 42px; }
   body.has-nav .tab-panel:not(.plan-panel), body.has-nav .plan-panel { gap: 10px; }
   body.has-nav .card { padding: 14px; }
   body.has-nav .study-timer { margin-top: 10px; font-size: 2.5rem; }
-  body.has-nav .week-chart { height: 84px; }
   body.has-nav .dday { font-size: 2.6rem; }
 }
 

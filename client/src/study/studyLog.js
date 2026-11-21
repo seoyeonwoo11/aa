@@ -139,17 +139,6 @@ export function totalsForDate(sessions, dateText) {
   return { total, bySubject };
 }
 
-// today를 포함한 최근 n일의 날짜별 합계 (오래된 날부터)
-export function lastDaysTotals(sessions, today, n = 7) {
-  const base = parseDate(toDateText(today));
-  return Array.from({ length: n }, (_, i) => {
-    const day = new Date(base);
-    day.setDate(base.getDate() - (n - 1 - i));
-    const date = toDateText(day);
-    return { date, weekday: day.getDay(), seconds: totalsForDate(sessions, date).total };
-  });
-}
-
 export function formatClock(seconds) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);

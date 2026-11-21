@@ -66,32 +66,3 @@
 }
 .subject-totals:empty { display: none; }
 
-.week-chart {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  height: 160px;
-}
-.week-col {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 4px;
-  text-align: center;
-  min-width: 0;
-}
-.week-value { font-size: 0.7rem; color: var(--muted); min-height: 1em; }
-.week-track {
-  display: flex;
-  align-items: flex-end;
-  background: var(--bg);
-  border-radius: 8px;
-  overflow: hidden;
-}
-.week-bar {
-  width: 100%;
-  background: var(--week-bar);
-  border-radius: 8px 8px 0 0;
-  transition: height 0.3s ease;
-}
-.week-bar.today { background: var(--primary); }
-.week-label { font-size: 0.78rem; color: var(--muted); }

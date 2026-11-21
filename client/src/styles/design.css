@@ -205,7 +205,6 @@ body.has-nav .countdown { gap: 0; }
 /* ---------- 공부: 타이머 숫자는 흔들리지 않게 고정폭 ---------- */
 .study-timer, .focus-timer { font-family: var(--font-ui); font-weight: 700; letter-spacing: -0.02em; }
 .study-timer.active { color: var(--text); }
-.week-bar.today { background: var(--primary); }
 
 /* 집중 화면: 깊은 남색 밤, 하늘색 */
 .focus-screen { background: #0b1028; }
@@ -243,12 +242,7 @@ body.has-nav .countdown { gap: 0; }
   body.has-nav .countdown div { padding: 4px 2px; }
   body.has-nav .countdown span { font-size: 1.1rem; }
   body.has-nav .countdown small { font-size: 0.68rem; }
-  /* 남은 주·주말·개월은 한 줄로 */
-  .main-card .stat-grid { margin-top: 8px; }
-  .main-card .stat-grid > div { display: flex; justify-content: center; align-items: baseline; gap: 4px; }
-  body.has-nav .main-card .stat-value { font-size: 0.95rem; }
   body.has-nav .main-card .stat-label { font-size: 0.72rem; }
-  body.has-nav .main-card .progress-head { margin-top: 6px; }
 
   .today-plan-card .card-scroll { min-height: 64px; }
   .today-plan-card .row-between .text-btn { min-height: 30px; }
@@ -256,7 +250,6 @@ body.has-nav .countdown { gap: 0; }
   /* 공부 */
   body.has-nav .study-timer { margin-top: 8px; }
   body.has-nav .study-actions { margin-top: 8px; }
-  body.has-nav .week-chart { height: 84px; }
   .today-study-card .card-scroll { min-height: 48px; }
 
   /* 계획 */

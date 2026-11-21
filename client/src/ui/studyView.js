@@ -7,10 +7,9 @@ import { SUBJECT_COLORS } from './statsView.js';
 import {
   SUBJECTS, MIN_SESSION_SECONDS, getElapsedSeconds, getTotalSeconds, startTimer, pauseTimer, autoPauseTimer, recoverTimer, finishTimer, settleAway,
   switchSubject, runSummary,
-  totalsForDate, lastDaysTotals, formatClock, formatDuration
+  totalsForDate, formatClock, formatDuration
 } from '../study/studyLog.js';
 
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 let userId = null;
 let data = null;
@@ -196,33 +195,6 @@ function renderToday() {
   }
 }
 
-function renderWeek() {
-  const days = lastDaysTotals(data.sessions, new Date(), 7);
-  days[days.length - 1].seconds += data.running ? getElapsedSeconds(data.running) : 0; // 진행 중인 공부 포함
-  const max = Math.max(goalMinutes * 60, ...days.map((d) => d.seconds), 1);
-  const chart = $('week-chart');
-  chart.innerHTML = '';
-  days.forEach((day, i) => {
-    const col = document.createElement('div');
-    col.className = 'week-col';
-    const value = document.createElement('span');
-    value.className = 'week-value';
-    value.textContent = day.seconds ? `${(day.seconds / 3600).toFixed(1)}h` : '';
-    const track = document.createElement('div');
-    track.className = 'week-track';
-    const bar = document.createElement('div');
-    bar.className = `week-bar${i === days.length - 1 ? ' today' : ''}`;
-    bar.style.height = `${(day.seconds / max) * 100}%`;
-    track.appendChild(bar);
-    const label = document.createElement('span');
-    label.className = 'week-label';
-    label.textContent = i === days.length - 1 ? '오늘' : WEEKDAYS[day.weekday];
-    col.append(value, track, label);
-    col.title = `${day.date}: ${formatDuration(day.seconds)}`;
-    chart.appendChild(col);
-  });
-}
-
 /* ---------- 시작·일시정지·종료 (공부 탭과 집중 화면이 같이 씀) ---------- */
 
 async function start() {
@@ -285,7 +257,6 @@ function renderAll() {
   renderChips();
   renderTimer();
   renderToday();
-  renderWeek();
 }
 
 function setFocusSubjectsOpen(open) {
@@ -360,7 +331,6 @@ export function initStudyView() {
     }
     renderTimer();
     renderToday();
-    renderWeek();
   }, 1000);
 }
 
@@ -393,7 +363,6 @@ export function setStudySettings(settings) {
   goalMinutes = settings.dailyGoalMinutes;
   if (data) {
     renderToday();
-    renderWeek();
   }
 }
 
