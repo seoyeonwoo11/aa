@@ -350,4 +350,8 @@ body.has-nav #panel-settings .custom-fields { margin-bottom: 10px; }
 .home-subjects:empty { display: none; }
 .home-subjects li { display: flex; align-items: center; gap: 6px; }
 .home-subjects .swatch { width: 9px; height: 9px; border-radius: 2px; }
-.home-study-card .primary-btn { margin-top: 14px; }
+.home-study-card #home-study-btn { margin-top: 14px; }
+.home-subject-pick { margin-top: 14px; }
+.home-subject-pick .hint { margin: 0 0 8px; }
+.home-subject-pick .chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.home-subject-pick .chip { min-height: 44px; }

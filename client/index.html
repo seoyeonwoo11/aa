@@ -135,7 +135,11 @@
           <div class="progress-bar"><div id="home-goal-fill"></div></div>
           <p id="home-goal-text" class="hint"></p>
           <ul id="home-subjects" class="home-subjects"></ul>
-          <button id="home-study-btn" type="button" class="primary-btn">공부 시작</button>
+          <div id="home-subject-pick" class="home-subject-pick" hidden>
+            <p class="hint">어떤 과목을 공부할까요?</p>
+            <div id="home-subject-chips" class="chips" role="group" aria-label="공부할 과목"></div>
+          </div>
+          <button id="home-study-btn" type="button" class="primary-btn" aria-controls="home-subject-pick">공부 시작</button>
         </div>
 
         <div class="card today-plan-card fill-card">

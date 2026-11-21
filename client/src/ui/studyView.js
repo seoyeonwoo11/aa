@@ -268,11 +268,19 @@ function renderHomeStudy(todayTotal, percent, bySubject) {
     li.append(swatch, `${name} ${formatDuration(bySubject[name])}`);
     return li;
   }));
-  const running = data.running;
-  const label = isRunning() ? `${running.subject} 공부 중, 집중 화면 열기`
-    : running ? `${running.subject} 이어서 공부하기`
-    : `${subject} 공부 시작`;
+  // 공부 전: '공부 시작'(누르면 과목 고르기), 공부 중: 집중 화면 열기, 일시정지 중: 이어서 공부하기
+  const picking = !$('home-subject-pick').hidden;
+  const label = isRunning() ? '집중 화면 열기'
+    : data.running ? '이어서 공부하기'
+    : picking ? '닫기' : '공부 시작';
   if ($('home-study-btn').textContent !== label) $('home-study-btn').textContent = label;
+  $('home-study-btn').className = picking && !data.running ? 'secondary-btn' : 'primary-btn';
+  $('home-study-btn').setAttribute('aria-expanded', String(picking));
+}
+
+function setHomePickOpen(open) {
+  $('home-subject-pick').hidden = !open;
+  if (data) renderToday();
 }
 
 function renderAll() {
@@ -308,11 +316,31 @@ export function initStudyView() {
     start();
     openFocus();
   });
-  // 홈의 오늘 공부 카드: 공부 중이면 집중 화면을, 아니면 마지막 과목으로 시작(또는 이어서)하며 집중 화면을 연다
+  // 홈의 오늘 공부 카드: 공부 전이면 과목을 고르게 하고, 고르면 바로 시작해 집중 화면을 연다.
+  // 공부 중이면 집중 화면을 열고, 일시정지 중이면 같은 과목으로 이어서 한다.
+  for (const name of SUBJECTS) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.textContent = name;
+    chip.addEventListener('click', () => {
+      if (!data || data.running) return;
+      subject = name;
+      setHomePickOpen(false);
+      start();
+      openFocus();
+    });
+    $('home-subject-chips').appendChild(chip);
+  }
   $('home-study-btn').addEventListener('click', () => {
     if (!data) return;
-    if (!isRunning()) start();
-    openFocus();
+    if (data.running) {
+      if (!isRunning()) start();
+      openFocus();
+      return;
+    }
+    setHomePickOpen($('home-subject-pick').hidden);
+    if (!$('home-subject-pick').hidden) $('home-subject-chips').firstElementChild?.focus();
   });
   $('study-pause').addEventListener('click', pause);
   $('study-stop').addEventListener('click', stop);
