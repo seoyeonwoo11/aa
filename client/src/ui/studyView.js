@@ -345,7 +345,11 @@ export function initStudyView() {
     } else if (nativeApp()) settleNativeAway();
     else showAutoPauseNotice();
   });
-  window.addEventListener('pagehide', autoPause);
+  // 웹 화면이 닫히거나 정리될 때: 웹은 바로 멈추고, 안드로이드 앱은 시각만 남긴 뒤 다시 열릴 때 휴대폰 기록으로 판단한다
+  window.addEventListener('pagehide', () => {
+    if (!nativeApp()) autoPause();
+    else if (isRunning() && !data.running.hiddenAt) markHidden();
+  });
 
   setInterval(() => {
     if (!data?.running) return;
@@ -365,12 +369,23 @@ export async function showStudy(id, settings) {
   goalMinutes = settings.dailyGoalMinutes;
   data = await loadStudy(id);
   if (data.running) subject = data.running.subject;
-  if (isRunning()) {
+  let reason = null;
+  if (isRunning() && nativeApp()) {
+    // 안드로이드 앱: 화면이 오래 꺼져 있어 앱이 처음부터 다시 열린 경우에도 휴대폰 기록으로 판단한다
+    const settled = settleAway(data.running, data.running.hiddenAt, await screenState());
+    if (settled.reason) {
+      data.running = settled.running;
+      reason = settled.reason;
+      await persist();
+    }
+  }
+  if (isRunning() && !reason) {
     data.running = recoverTimer(data.running);
     await persist();
   }
   setNotice('');
-  showAutoPauseNotice();
+  if (reason === 'screen-off') setNotice('화면이 꺼져 있던 동안에도 계속 쟀어요.');
+  else showAutoPauseNotice();
   renderAll();
 }
 
