@@ -252,16 +252,32 @@
   #panel-home > .home-study-card #home-study-btn { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; }
 }
 
-/* 세로가 짧은 넓은 화면(태블릿 가로 + 브라우저 막대 등): D-Day는 왼쪽 칸 전체 높이, 오른쪽에 오늘 공부·오늘 계획 */
+/* 세로가 짧은 넓은 화면(태블릿 가로 + 브라우저 막대 등): 배치는 그대로, D-Day 쪽을 작게
+   오늘 공부는 버튼을 오른쪽에 붙여 납작하게 해서 D-Day에 자리를 더 준다 */
 @media (min-width: 760px) and (max-height: 700px) {
   body.has-nav #panel-home {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
-    grid-template-areas: "dday study" "dday plan";
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: "dday plan" "study plan";
   }
-  #panel-home > .main-card { padding: 18px 20px; container-type: size; }
-  #panel-home > .home-study-card { display: block; }
-  #panel-home > .home-study-card #home-study-btn { margin-top: 12px; }
-  body.has-nav #panel-home .countdown span { font-size: clamp(1.2rem, 2.2vw, 1.8rem); }
-  body.has-nav #panel-home .countdown div { padding: 8px 4px; }
+  #panel-home > .main-card { padding: 14px 18px; container-type: size; --omr-rest: 160px; }
+  body.has-nav #panel-home .exam-meta { font-size: 0.9rem; }
+  body.has-nav #panel-home .dday.omr { margin-top: 8px; }
+  body.has-nav #panel-home .exam-date { margin-top: 2px; font-size: 0.85rem; }
+  body.has-nav #panel-home .next-mock { margin-top: 4px; font-size: 0.78rem; }
+  body.has-nav #panel-home .countdown { margin-top: 8px; }
+  body.has-nav #panel-home .countdown div { padding: 4px 2px; }
+  body.has-nav #panel-home .countdown span { font-size: clamp(1rem, 2vw, 1.4rem); }
+  body.has-nav #panel-home .countdown small { font-size: 0.7rem; }
+  #panel-home > .home-study-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 0.55fr);
+    column-gap: 16px;
+    align-items: center;
+    padding: 14px 18px;
+  }
+  #panel-home > .home-study-card > :not(#home-study-btn) { grid-column: 1; }
+  #panel-home > .home-study-card #home-study-btn { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; }
+  #panel-home > .home-study-card .progress-bar { margin-top: 6px; }
+  #panel-home > .home-study-card .home-subjects { margin-top: 4px; }
 }

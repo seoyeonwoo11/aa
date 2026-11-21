@@ -266,7 +266,7 @@ body.has-nav .countdown { gap: 0; }
   /* 폭(cqi)뿐 아니라 높이(cqh)도 본다: 세로가 짧은 화면에서 OMR이 눌려 잘리지 않게
      (OMR 높이는 대략 칸 크기 x 14.7, 나머지 글·카운트다운이 약 230px) */
   body.has-nav #panel-home .dday.omr {
-    --omr-w: max(4px, min(calc(86cqi / var(--omr-n, 5) / 8.2), calc((100cqh - 230px) / 14.7), 13px));
+    --omr-w: max(4px, min(calc(86cqi / var(--omr-n, 5) / 8.2), calc((100cqh - var(--omr-rest, 230px)) / 14.7), 13px));
   }
   body.has-nav #panel-home .main-card > * { flex-shrink: 0; }
   body.has-nav #panel-home .omr-char {
