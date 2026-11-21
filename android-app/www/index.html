@@ -14,5 +14,9 @@
     <p>인터넷에 연결되면 하루수능이 열려요.</p>
     <button onclick="location.href='https://seoyeonwoo11.github.io/haru-suneung/'">다시 시도</button>
   </div>
+  <script>
+    // 안드로이드 앱: 사이트를 못 불러와 이 화면이 뜨면 시작 화면(로고)을 닫는다
+    window.Capacitor?.nativePromise?.('SplashScreen', 'hide', {}).catch(() => {});
+  </script>
 </body>
 </html>

@@ -16,7 +16,13 @@
     </style>
 
 
+    <!-- 시작 화면: 안드로이드 12 이상은 앱 아이콘 + 배경색, 그 아래 버전은 splash 그림.
+         웹앱이 준비되면(로그인 확인·데이터 불러오기) 웹앱이 직접 닫는다. -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/ic_launcher_background</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>

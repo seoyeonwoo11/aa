@@ -20,6 +20,7 @@ import { initPlanView, showPlans, setPlanSettings, refreshPlans, clearPlans, get
 import { initStatsView, showStats, clearStats } from './ui/statsView.js';
 import { initSettingsView, showSettings } from './ui/settingsView.js';
 import { initSetupView, runSetup, hideSetup } from './ui/setupView.js';
+import { hideNativeSplash } from './ui/nativeSplash.js';
 
 let currentUser = null;
 let settings = null;
@@ -36,7 +37,9 @@ function enterApp(user) {
     if (!saved) {
       // 처음 로그인: 준비하는 시험부터 고른다
       setTabsVisible(false);
-      const chosen = await runSetup(settings);
+      const setupDone = runSetup(settings);
+      hideNativeSplash();
+      const chosen = await setupDone;
       if (currentUser?.id !== user.id) return; // 고르는 동안 로그아웃됨
       settings = normalizeSettings(chosen);
       saveSettings(user.id, settings);
@@ -129,4 +132,5 @@ getCurrentUser()
     if (user && recovering) return showRecoveryView(); // 새 비밀번호부터 정한다
     return user ? enterApp(user) : showAuthView();
   })
-  .catch(() => showAuthView('인터넷 연결을 확인해 주세요.'));
+  .catch(() => showAuthView('인터넷 연결을 확인해 주세요.'))
+  .finally(hideNativeSplash); // 안드로이드 앱: 첫 화면이 준비되면 로고 화면을 닫는다
