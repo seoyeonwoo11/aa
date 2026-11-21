@@ -263,7 +263,12 @@ body.has-nav .countdown { gap: 0; }
 @media (min-width: 760px) {
   body.has-nav #panel-home .dday.omr { margin-top: 18px; border-width: 2px; }
   /* 카드 폭(cqi)과 칸 수(--omr-n)로 크기를 정한다: 칸 수가 늘어도 카드 밖으로 나가지 않게, 넓으면 크게 */
-  body.has-nav #panel-home .dday.omr { --omr-w: min(calc(86cqi / var(--omr-n, 5) / 8.2), 13px); }
+  /* 폭(cqi)뿐 아니라 높이(cqh)도 본다: 세로가 짧은 화면에서 OMR이 눌려 잘리지 않게
+     (OMR 높이는 대략 칸 크기 x 14.7, 나머지 글·카운트다운이 약 230px) */
+  body.has-nav #panel-home .dday.omr {
+    --omr-w: max(4px, min(calc(86cqi / var(--omr-n, 5) / 8.2), calc((100cqh - 230px) / 14.7), 13px));
+  }
+  body.has-nav #panel-home .main-card > * { flex-shrink: 0; }
   body.has-nav #panel-home .omr-char {
     padding: calc(var(--omr-w) * 0.9) calc(var(--omr-w) * 1.1) calc(var(--omr-w) * 0.3);
     font-size: min(calc(var(--omr-w) * 7.2), 6.5rem);
