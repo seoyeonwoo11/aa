@@ -177,8 +177,6 @@ function renderToday() {
   $('focus-goal-fill').style.width = `${percent}%`;
   $('focus-goal-text').textContent = `오늘 ${formatDuration(todayTotal)} / 목표 ${goalMinutes / 60}시간`;
 
-  renderHomeStudy(todayTotal, percent, bySubject);
-
   const list = $('subject-totals');
   list.innerHTML = '';
   for (const name of SUBJECTS) {
@@ -255,24 +253,6 @@ function closeFocus() {
   if (data) renderAll();
 }
 
-// 홈(태블릿·PC)의 오늘 공부 카드: 오늘 공부량, 목표 달성률, 과목별, 바로 시작 버튼
-function renderHomeStudy(todayTotal, percent, bySubject) {
-  $('home-study-total').textContent = formatDuration(todayTotal);
-  $('home-goal-fill').style.width = `${percent}%`;
-  $('home-goal-text').textContent = `목표 ${goalMinutes / 60}시간 중 ${Math.floor(percent)}%`;
-  $('home-subjects').replaceChildren(...SUBJECTS.filter((name) => bySubject[name]).map((name) => {
-    const li = document.createElement('li');
-    const swatch = document.createElement('span');
-    swatch.className = 'swatch';
-    swatch.style.background = SUBJECT_COLORS[name];
-    li.append(swatch, `${name} ${formatDuration(bySubject[name])}`);
-    return li;
-  }));
-  // 공부 전: '공부 시작'(누르면 과목 고르기 창), 공부 중: 집중 화면 열기, 일시정지 중: 이어서 공부하기
-  const label = isRunning() ? '집중 화면 열기' : data.running ? '이어서 공부하기' : '공부 시작';
-  if ($('home-study-btn').textContent !== label) $('home-study-btn').textContent = label;
-}
-
 function renderAll() {
   renderChips();
   renderTimer();
@@ -305,35 +285,6 @@ export function initStudyView() {
   $('study-start').addEventListener('click', () => {
     start();
     openFocus();
-  });
-  // 홈의 오늘 공부 카드: 공부 전이면 과목 고르기 창을 띄우고, 고르면 바로 시작해 집중 화면을 연다.
-  // 공부 중이면 집중 화면을 열고, 일시정지 중이면 같은 과목으로 이어서 한다.
-  const dialog = $('subject-dialog');
-  for (const name of SUBJECTS) {
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'chip';
-    chip.textContent = name;
-    chip.addEventListener('click', () => {
-      dialog.close();
-      if (!data || data.running) return;
-      subject = name;
-      start();
-      openFocus();
-    });
-    $('subject-dialog-chips').appendChild(chip);
-  }
-  // 창 바깥(어두운 부분)을 누르면 닫는다
-  dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
-  $('home-study-btn').addEventListener('click', () => {
-    if (!data) return;
-    if (data.running) {
-      if (!isRunning()) start();
-      openFocus();
-      return;
-    }
-    dialog.showModal();
-    $('subject-dialog-chips').firstElementChild?.focus();
   });
   $('study-pause').addEventListener('click', pause);
   $('study-stop').addEventListener('click', stop);

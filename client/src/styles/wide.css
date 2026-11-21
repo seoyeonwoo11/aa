@@ -16,12 +16,11 @@
   body.has-nav #panel-home {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) auto;
-    grid-template-areas: "dday plan" "study plan";
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "dday plan";
   }
   #panel-home > .main-card { grid-area: dday; display: flex; flex-direction: column; justify-content: center; padding: 28px; container-type: size; }
   #panel-home > .today-plan-card { grid-area: plan; }
-  #panel-home > .home-study-card { grid-area: study; display: block; }
   body.has-nav #panel-home .dday { font-size: clamp(4rem, 8.5vw, 7.5rem); }
   body.has-nav #panel-home .exam-date { font-size: 1rem; }
   body.has-nav #panel-home .countdown { margin-top: 20px; gap: 10px; }
@@ -232,33 +231,23 @@
   }
 }
 
-/* 태블릿 세로(760~1023px): 홈은 위에서부터 D-Day, 오늘 공부, 오늘 계획 (가로로 길게) */
+/* 태블릿 세로(760~1023px): 홈은 D-Day를 위에 가로로 길게, 아래에 오늘 계획 */
 @media (min-width: 760px) and (max-width: 1023px) {
   body.has-nav #panel-home {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto minmax(0, 1fr);
-    grid-template-areas: "dday" "study" "plan";
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "dday" "plan";
   }
   /* 여기서는 D-Day 카드 높이가 내용으로 정해지므로 폭만 기준으로 크기를 정한다 */
   #panel-home > .main-card { container-type: inline-size; }
-  /* 오늘 공부: 왼쪽 합계·목표·과목, 오른쪽 시작 버튼 */
-  #panel-home > .home-study-card {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(200px, 0.6fr);
-    column-gap: 24px;
-    align-items: center;
-  }
-  #panel-home > .home-study-card > :not(#home-study-btn) { grid-column: 1; }
-  #panel-home > .home-study-card #home-study-btn { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; }
 }
 
-/* 세로가 짧은 넓은 화면(태블릿 가로 + 브라우저 막대 등): 배치는 그대로, D-Day 쪽을 작게
-   오늘 공부는 버튼을 오른쪽에 붙여 납작하게 해서 D-Day에 자리를 더 준다 */
+/* 세로가 짧은 넓은 화면(태블릿 가로 + 브라우저 막대 등): 왼쪽 D-Day, 오른쪽 오늘 계획으로 두고 D-Day 쪽을 작게 */
 @media (min-width: 760px) and (max-height: 700px) {
   body.has-nav #panel-home {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) auto;
-    grid-template-areas: "dday plan" "study plan";
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "dday plan";
   }
   #panel-home > .main-card { padding: 14px 18px; container-type: size; --omr-rest: 160px; }
   body.has-nav #panel-home .exam-meta { font-size: 0.9rem; }
@@ -269,15 +258,4 @@
   body.has-nav #panel-home .countdown div { padding: 4px 2px; }
   body.has-nav #panel-home .countdown span { font-size: clamp(1rem, 2vw, 1.4rem); }
   body.has-nav #panel-home .countdown small { font-size: 0.7rem; }
-  #panel-home > .home-study-card {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(150px, 0.55fr);
-    column-gap: 16px;
-    align-items: center;
-    padding: 14px 18px;
-  }
-  #panel-home > .home-study-card > :not(#home-study-btn) { grid-column: 1; }
-  #panel-home > .home-study-card #home-study-btn { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; }
-  #panel-home > .home-study-card .progress-bar { margin-top: 6px; }
-  #panel-home > .home-study-card .home-subjects { margin-top: 4px; }
 }
