@@ -1,7 +1,7 @@
 // 설정 탭: 목표(수능 학년도·직접 입력 날짜·하루 공부 시간), 모의고사 일정, 계정
 
 import { $ } from './dom.js';
-import { startOfDay, parseDate, formatKoreanDate } from '../utils/date.js';
+import { startOfDay, parseDate } from '../utils/date.js';
 import { getExam, getSelectableYears } from '../exam/examDates.js';
 import { getMockExams, isDateText, PRESET_ID } from '../exam/mockExams.js';
 import { GOAL_OPTIONS } from '../settings/settings.js';
@@ -31,7 +31,7 @@ function renderTarget() {
   const exam = getExam(settings.academicYear);
   const options = [['suneung', `${exam.academicYear}학년도 수능`]];
   for (const mock of getMockExams(settings)) {
-    options.push([`mock:${mock.id}`, `${mock.name}, ${shortKoreanDate(mock.date)}${mock.status === 'estimated' ? ' 예상' : ''}`]);
+    options.push([`mock:${mock.id}`, `${mock.name} (${shortDate(mock.date)}${mock.status === 'estimated' ? ' 예상' : ''})`]);
   }
   options.push(['custom', '직접 정하기']);
   select.replaceChildren(...options.map(([value, text]) => {
@@ -54,7 +54,7 @@ function renderOptions() {
     const exam = getExam(year);
     const option = document.createElement('option');
     option.value = year;
-    option.textContent = `${year}학년도, ${formatKoreanDate(exam.date)}${exam.official ? '' : ' 예상'}`;
+    option.textContent = `${year}학년도 (${exam.date.getMonth() + 1}월 ${exam.date.getDate()}일${exam.official ? '' : ' 예상'})`;
     select.appendChild(option);
   }
   select.value = settings.academicYear;
@@ -216,5 +216,8 @@ export function initSettingsView({ onChange: handleChange, onLogout }) {
   $('logout-btn').addEventListener('click', onLogout);
 }
 
-// 화면에 보여줄 날짜 (예: 6월 2일 (수))
-export const shortKoreanDate = (text) => formatKoreanDate(parseDate(text)).replace(/^\d+년 /, '');
+// 선택칸에 넣는 짧은 날짜 (예: 6월 2일)
+export const shortDate = (text) => {
+  const d = parseDate(text);
+  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+};

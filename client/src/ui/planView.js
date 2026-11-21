@@ -202,7 +202,10 @@ function rangeItem(range, date, editable) {
       ? `${shortDate(range.start)} ~ ${shortDate(range.end)} ${describeDays(range.days)}, ${total}회 중 ${n}회째`
       : `${shortDate(range.start)} ~ ${shortDate(range.end)}, ${total}일 중 ${n}일째`)
   );
-  li.append(el('span', 'range-color'), check, body);
+  // 동그라미 둘레까지 눌리게 넓은 터치 영역으로 감싼다 (옆을 눌러 수정 폼이 열리지 않게)
+  const hit = el('label', 'range-check');
+  hit.append(check);
+  li.append(el('span', 'range-color'), hit, body);
   return li;
 }
 
@@ -260,8 +263,11 @@ function todoItem(item, removable) {
   check.type = 'checkbox';
   check.checked = item.done;
   check.dataset.action = 'toggle';
-  label.append(check, el('span', 'plan-text', item.text));
-  if (item.repeat) label.append(el('span', 'repeat-tag', `↻ ${item.repeatLabel}`));
+  // 글과 반복 표시만 줄을 바꾼다 (체크 동그라미는 늘 왼쪽에)
+  const body = el('span', 'plan-body');
+  body.append(el('span', 'plan-text', item.text));
+  if (item.repeat) body.append(el('span', 'repeat-tag', `↻ ${item.repeatLabel}`));
+  label.append(check, body);
   li.append(label);
   if (removable) {
     const edit = el('button', 'icon-btn edit-btn');

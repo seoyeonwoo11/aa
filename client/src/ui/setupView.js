@@ -7,7 +7,7 @@ import { getExam, getSelectableYears } from '../exam/examDates.js';
 import { getMockExams, isDateText } from '../exam/mockExams.js';
 import { getTarget } from '../exam/target.js';
 import { formatDday, getSummary } from '../exam/dday.js';
-import { shortKoreanDate } from './settingsView.js';
+import { shortDate } from './settingsView.js';
 
 let draft = null;
 let finish = null;
@@ -36,7 +36,7 @@ function renderMocks() {
   const keep = select.value;
   const today = toDateText(new Date());
   const mocks = getMockExams({ ...draft, academicYear: Number($('setup-year').value) });
-  select.replaceChildren(...mocks.map((m) => option(m.id, `${m.name}, ${shortKoreanDate(m.date)}${m.status === 'estimated' ? ' 예상' : ''}`)));
+  select.replaceChildren(...mocks.map((m) => option(m.id, `${m.name} (${shortDate(m.date)}${m.status === 'estimated' ? ' 예상' : ''})`)));
   // 같은 시험(학년도만 다름)이 있으면 유지하고, 아니면 다가오는 첫 시험
   const sameKind = mocks.find((m) => keep && m.id.slice(5) === keep.slice(5));
   select.value = (sameKind || mocks.find((m) => m.date >= today) || mocks[0])?.id || '';
@@ -64,7 +64,7 @@ export function initSetupView() {
   const years = getSelectableYears(startOfDay(new Date()));
   $('setup-year').replaceChildren(...years.map((y) => {
     const exam = getExam(y);
-    return option(y, `${y}학년도, ${formatKoreanDate(exam.date)}${exam.official ? '' : ' 예상'}`);
+    return option(y, `${y}학년도 (${exam.date.getMonth() + 1}월 ${exam.date.getDate()}일${exam.official ? '' : ' 예상'})`);
   }));
   document.querySelectorAll('#setup-kinds .setup-kind').forEach((btn) => {
     btn.addEventListener('click', () => {

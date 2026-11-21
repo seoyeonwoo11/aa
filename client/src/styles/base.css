@@ -21,8 +21,8 @@
   --success: #1f8a4c;
   --sun: #e2404e;
   --sat: #3a5fd0;
-  --mock: #8d3fb4;
-  --mock-soft: #f5edfa;
+  --mock: #22306b;              /* 모의고사: 남색 펜 + 하늘색 형광펜 (앱 색 안에서) */
+  --mock-soft: #e4f0ff;
   --estimated-bg: #fff6cc;
   --estimated-text: #8a6100;
   --divider: #f6d9dc;
@@ -78,8 +78,8 @@
     --success: #4cc27a;
     --sun: #ff6574;
     --sat: #8ea6ff;
-    --mock: #cf8df0;
-    --mock-soft: #2a2140;
+    --mock: #9cc9ff;
+    --mock-soft: #1d2c4d;
     --estimated-bg: #3a3214;
     --estimated-text: #f2c14b;
     --divider: #33263a;
@@ -128,8 +128,8 @@
   --success: #4cc27a;
   --sun: #ff6574;
   --sat: #8ea6ff;
-  --mock: #cf8df0;
-  --mock-soft: #2a2140;
+  --mock: #9cc9ff;
+  --mock-soft: #1d2c4d;
   --estimated-bg: #3a3214;
   --estimated-text: #f2c14b;
   --divider: #33263a;
@@ -296,7 +296,7 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 1
 .account-row strong { display: block; font-size: 1.05rem; }
 
 /* 설정: 모의고사 일정 */
-.mock-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.mock-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .mock-item {
   display: flex;
   align-items: center;
@@ -305,10 +305,18 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 1
   background: var(--bg);
   border-radius: 12px;
 }
-.mock-info { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.mock-name { font-weight: 600; overflow-wrap: anywhere; }
+.mock-info { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
+/* 이름이 길면 한 줄로 줄이고(말줄임), 확정·예상 표시는 이름 옆에 그대로 */
+.mock-name { min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mock-info .badge { flex: none; }
 .mock-item .mock-date { width: auto; flex: none; min-height: 38px; padding: 4px 8px; font-size: 0.85rem; }
 .mock-action { width: 38px; height: 38px; flex: none; font-size: 1.1rem; }
+/* 폭이 좁은 휴대폰: 이름이 잘리지 않게 날짜 칸은 다음 줄 오른쪽으로 */
+@media (max-width: 380px) {
+  .mock-item { flex-wrap: wrap; row-gap: 4px; }
+  .mock-info { flex-basis: 100%; }
+  .mock-item .mock-date { margin-left: auto; }
+}
 .mock-form { margin-top: 10px; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; flex: none; }
 .mock-form input[type="date"] { width: auto; min-width: 0; }
 .mock-form .primary-btn { width: auto; padding: 0 16px; }

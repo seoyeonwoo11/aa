@@ -124,7 +124,7 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 
 .cal-tag {
   padding: 0 4px;
-  font-size: 0.62rem;
+  font-size: 0.69rem;
   font-weight: 700;
   color: #fff;
   background: var(--accent);
@@ -136,8 +136,9 @@ body[data-tab="plan"] .app { max-width: 1080px; }
   display: flex;
   justify-content: center;
   gap: 4px;
+  padding: 0 3px;
   min-height: 16px;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -151,7 +152,7 @@ body[data-tab="plan"] .app { max-width: 1080px; }
   margin: 0 2px;
   padding: 0 5px;
   overflow: hidden;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 600;
   line-height: var(--lane);
   white-space: nowrap;
@@ -302,7 +303,7 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 
 /* ---------- 반복 할 일 ---------- */
 
-.plan-item label { flex-wrap: wrap; row-gap: 0; }
+.plan-body { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; min-width: 0; padding: 6px 0; }
 .plan-text { min-width: 0; }
 .repeat-tag {
   padding: 1px 7px;
@@ -344,7 +345,7 @@ body[data-tab="plan"] .app { max-width: 1080px; }
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #fff;
+  color: var(--on-primary);
   background: var(--mock);
 }
 
@@ -467,3 +468,10 @@ body[data-tab="plan"] .app { max-width: 1080px; }
 .edit-days { flex: 1 1 100%; }
 .edit-actions { flex: 1 1 100%; display: flex; justify-content: flex-end; gap: 6px; }
 .edit-save { width: auto; min-height: 36px; padding: 0 16px; }
+
+/* 칸 아래: 숨은 기간 계획 수(+1)는 왼쪽, 할 일 수(0/1)는 오른쪽으로 떨어뜨려 붙어 보이지 않게 */
+.cal-cell-foot:has(.cal-more) { justify-content: space-between; }
+.cal-more { font-weight: 600; }
+
+/* 기간 계획 완료 동그라미: 둘레까지 눌리게 (최소 40px 높이) */
+.range-check { display: grid; place-items: center; align-self: stretch; min-width: 36px; margin: -4px -6px -4px -8px; padding: 0 6px 0 8px; cursor: pointer; }

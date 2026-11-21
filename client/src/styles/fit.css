@@ -116,12 +116,21 @@ body.has-nav .range-add { margin-top: 8px; min-height: 42px; }
 @media (max-height: 900px) and (min-width: 700px) {
   .cal-week { --lane: 16px; grid-template-rows: 26px repeat(3, var(--lane)) 18px; }
   .cal-num { width: 24px; height: 24px; font-size: 0.85rem; }
-  .cal-bar { font-size: 0.68rem; }
+  .cal-bar { font-size: 0.7rem; }
   .calendar-card { padding: 14px 16px; }
 }
 
 /* 아주 작은 휴대폰(iPhone SE 등 높이 620px 이하) */
 @media (max-height: 620px) {
+  /* 계획 탭: 그날 카드에 메모와 할 일 두 줄은 보이게, 달력 쪽 버튼은 작게 */
+  body.has-nav .plan-panel:not(.editing) .day-card .card-scroll { min-height: 132px; }
+  body.has-nav .plan-panel .cal-header .icon-btn { width: 36px; height: 36px; min-height: 36px; }
+  body.has-nav .plan-panel .cal-weekdays { margin-top: 6px; }
+  body.has-nav .plan-panel .cal-toggle { min-height: 28px; }
+  body.has-nav .plan-panel .range-add { margin-top: 2px; min-height: 36px; }
+  /* 홈: 카운트다운 설명은 빼고 오늘 계획 칸을 넓힌다 (메모 + 할 일 한두 줄) */
+  body.has-nav #panel-home .countdown-caption { display: none; }
+  body.has-nav #panel-home .today-plan-card .card-scroll { min-height: 98px; }
   body.has-nav .app { gap: 10px; }
   body.has-nav .tab-panel:not(.plan-panel), body.has-nav .plan-panel { gap: 10px; }
   body.has-nav .card { padding: 14px; }
