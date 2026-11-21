@@ -154,4 +154,30 @@ describe('안드로이드 앱: 화면 끄기와 다른 앱으로 나가기 구�
     expect(settleAway(running, hidden, { screenOffAt: hidden, screenOnAt: on, unlockedAt: 0 }, on + 2000).reason).toBe('screen-off');
     expect(settleAway(running, hidden, null, on).reason).toBe('left');
   });
+
+  it('휴대폰 기록: 앱이 뒤로 갈 때 화면이 꺼져 있었으면 화면 끄기 (웹의 가려짐 기록이 늦거나 없어도)', () => {
+    const back = hidden + 1_800_000;
+    const fromPhone = { pausedAt: hidden, pausedInteractive: false, stoppedAt: hidden + 300, stoppedInteractive: false, screenOffAt: 0, screenOnAt: back - 2000, unlockedAt: back - 1000 };
+    // 웹이 '가려짐'을 화면을 다시 켤 때에야 받은 경우
+    const late = settleAway({ ...running, hiddenAt: back - 500 }, back - 500, fromPhone, back);
+    expect(late.reason).toBe('screen-off');
+    expect(elapsed(late.running, back)).toBe(2400);
+    // 웹이 '가려짐'을 아예 못 받은 경우
+    const { hiddenAt: _h, ...noHidden } = running;
+    expect(settleAway(noHidden, undefined, fromPhone, back).reason).toBe('screen-off');
+  });
+
+  it('휴대폰 기록: 화면이 켜진 채 뒤로 갔으면 다른 앱 (몇 초 뒤 화면을 꺼도)', () => {
+    const r = settleAway(running, hidden, { pausedAt: hidden, pausedInteractive: true, stoppedAt: hidden + 400, stoppedInteractive: true, screenOffAt: hidden + 2500 }, hidden + 1_800_000);
+    expect(r.reason).toBe('left');
+    expect(r.running.elapsedBefore).toBe(600);
+  });
+
+  it('한 번 판단한 자리 비움은 다시 판단하지 않는다', () => {
+    const back = hidden + 60_000;
+    const phone = { pausedAt: hidden, pausedInteractive: false, stoppedAt: hidden, stoppedInteractive: false, screenOnAt: back - 1000 };
+    const first = settleAway(running, hidden, phone, back);
+    expect(first.reason).toBe('screen-off');
+    expect(settleAway(first.running, undefined, phone, back + 120_000).reason).toBeNull();
+  });
 });

@@ -68,11 +68,12 @@ function markHidden() {
 }
 
 async function settleNativeAway() {
-  const hiddenAt = data?.running?.hiddenAt;
-  if (!hiddenAt) return;
+  if (!isRunning()) return;
+  const hiddenAt = data.running.hiddenAt;
   const screen = await screenState();
-  if (data?.running?.hiddenAt !== hiddenAt) return; // 그 사이 바뀜
+  if (!isRunning() || data.running.hiddenAt !== hiddenAt) return; // 그 사이 바뀜
   const { running, reason } = settleAway(data.running, hiddenAt, screen);
+  if (!reason) return;
   data.running = running;
   persist();
   renderAll();
@@ -329,6 +330,13 @@ export function initStudyView() {
 
   // 다른 앱에 갔다 오면 화면 켜짐을 다시 요청한다.
   // 앱을 나가면(홈 화면, 다른 앱, 다른 탭, 화면 잠금) 타이머를 자동으로 멈춘다.
+  // 안드로이드 앱: 휴대폰 기능과 연결되면 안내 문구를 바꿔, 화면을 꺼도 계속 잰다는 걸 알 수 있게 한다.
+  if (nativeApp()) {
+    screenState().then((state) => {
+      if (state) $('autopause-hint').textContent = '화면을 꺼도 계속 재요. 다른 앱으로 나가면 일시정지돼요.';
+    });
+  }
+
   // 안드로이드 앱에서는 화면을 끈 경우 멈추지 않는다(돌아왔을 때 휴대폰에 물어 판단).
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {

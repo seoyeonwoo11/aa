@@ -37,22 +37,38 @@ export function autoPauseTimer(running, now = Date.now()) {
 
 // 안드로이드 앱에서 화면이 가려졌다가 돌아왔을 때: 그 사이 화면이 꺼졌었는지로 판단한다.
 // (웹은 화면 끄기와 다른 앱으로 나가기를 구별하지 못하지만, 앱은 휴대폰에게 물어볼 수 있다)
-//   screen: { screenOffAt, screenOnAt, unlockedAt } (휴대폰이 기억해 둔 시각, 없으면 0)
-//   - 가려진 때쯤 화면이 꺼졌다 → 화면을 끈 것: 계속 잰다
+//   screen: 휴대폰이 기억해 둔 것 (없으면 0)
+//     pausedAt/pausedInteractive, stoppedAt/stoppedInteractive: 앱이 뒤로 간 시각과 그때 화면이 켜져 있었는지
+//     screenOffAt, screenOnAt, unlockedAt: 화면이 꺼진·켜진·잠금이 풀린 시각
+//   hiddenAt: 웹이 '가려짐'을 받은 시각 (화면이 꺼지면 웹 코드가 멈춰 늦게 기록될 수 있어 휴대폰 기록을 먼저 쓴다)
+//   - 앱이 뒤로 갈 때 화면이 꺼져 있었다 → 화면을 끈 것: 계속 잰다
 //       단, 화면을 다시 켜고 잠금을 푼 뒤 15초 넘게 앱으로 안 돌아왔다면 그때 다른 일을 한 것으로 보고 그 시각에 멈춘다
-//   - 아니면 다른 앱으로 나간 것: 가려진 시각에 멈춘다
+//   - 아니면 다른 앱으로 나간 것: 뒤로 간 시각에 멈춘다
 // 반환: { running, reason: 'screen-off' | 'left' | 'left-after-unlock' | null }
 export const SCREEN_OFF_WINDOW = 3000;
 export const BACK_AFTER_UNLOCK = 15000;
 export function settleAway(running, hiddenAt, screen, now = Date.now()) {
   const { hiddenAt: _drop, ...clean } = running || {};
-  if (!running?.startedAt || !hiddenAt) return { running: running && clean, reason: null };
-  const off = screen?.screenOffAt || 0;
-  const wentOff = off >= hiddenAt - SCREEN_OFF_WINDOW && off <= hiddenAt + SCREEN_OFF_WINDOW;
-  if (!screen || !wentOff) return { running: autoPauseTimer(clean, hiddenAt), reason: 'left' };
-  const backOn = [screen.unlockedAt, screen.screenOnAt].find((t) => t > off) || now;
-  if (now - backOn > BACK_AFTER_UNLOCK) return { running: autoPauseTimer(clean, backOn), reason: 'left-after-unlock' };
-  return { running: clean, reason: 'screen-off' };
+  if (!running?.startedAt) return { running: running && clean, reason: null };
+  const since = Math.max(running.startedAt, running.settledAt || 0);
+  const paused = screen?.pausedAt > since && screen.pausedAt <= now ? screen.pausedAt : 0;
+  const awayAt = paused || (hiddenAt > since ? hiddenAt : 0);
+  if (!awayAt) return { running: clean, reason: null };
+  const settled = { ...clean, settledAt: awayAt };
+  if (!screen) return { running: autoPauseTimer(settled, awayAt), reason: 'left' };
+
+  const off = screen.screenOffAt || 0;
+  const offNearAway = off >= awayAt - SCREEN_OFF_WINDOW && off <= awayAt + SCREEN_OFF_WINDOW;
+  const stoppedThisTime = screen.stoppedAt >= awayAt - 1000;
+  const wentOff = (paused && screen.pausedInteractive === false)
+    || (stoppedThisTime && screen.stoppedInteractive === false)
+    || (!stoppedThisTime && offNearAway); // 휴대폰 기록이 없으면 화면 꺼짐 시각으로 짐작
+  if (!wentOff) return { running: autoPauseTimer(settled, awayAt), reason: 'left' };
+
+  const offAt = off >= awayAt - SCREEN_OFF_WINDOW ? off : awayAt;
+  const backOn = [screen.unlockedAt, screen.screenOnAt].find((t) => t > offAt) || now;
+  if (now - backOn > BACK_AFTER_UNLOCK) return { running: autoPauseTimer(settled, backOn), reason: 'left-after-unlock' };
+  return { running: settled, reason: 'screen-off' };
 }
 
 // 화면을 나간 이벤트를 받지 못하고 앱이 꺼진 경우(강제 종료 등):
