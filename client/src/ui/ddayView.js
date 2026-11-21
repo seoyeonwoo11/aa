@@ -13,6 +13,7 @@ let lastDay = null;
 function renderOmr(text) {
   const box = $('dday');
   box.setAttribute('aria-label', text);
+  box.style.setProperty('--omr-n', [...text].length); // 칸 수: 넓은 화면에서 카드 폭에 맞춰 크기를 정한다
   box.replaceChildren(...[...text].map((ch) => {
     const col = document.createElement('span');
     col.className = 'omr-col';

@@ -16,9 +16,12 @@
   body.has-nav #panel-home {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: "dday plan" "study plan";
   }
-  #panel-home > .main-card { display: flex; flex-direction: column; justify-content: center; padding: 28px; }
+  #panel-home > .main-card { grid-area: dday; display: flex; flex-direction: column; justify-content: center; padding: 28px; container-type: inline-size; }
+  #panel-home > .today-plan-card { grid-area: plan; }
+  #panel-home > .home-study-card { grid-area: study; display: block; }
   body.has-nav #panel-home .dday { font-size: clamp(4rem, 8.5vw, 7.5rem); }
   body.has-nav #panel-home .exam-date { font-size: 1rem; }
   body.has-nav #panel-home .countdown { margin-top: 20px; gap: 10px; }
@@ -205,4 +208,17 @@
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+}
+
+/* 태블릿 세로(760~1023px): 홈은 D-Day를 위에 가로로 길게, 아래에 오늘 공부·오늘 계획을 나란히 */
+@media (min-width: 760px) and (max-width: 1023px) {
+  body.has-nav #panel-home {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "dday dday" "study plan";
+  }
+  /* 오늘 공부는 오늘 계획과 같은 높이로, 시작 버튼은 맨 아래 */
+  #panel-home > .home-study-card { display: flex; flex-direction: column; }
+  #panel-home > .home-study-card .primary-btn { margin-top: auto; }
+  #panel-home > .home-study-card .home-subjects { margin-bottom: 14px; }
 }

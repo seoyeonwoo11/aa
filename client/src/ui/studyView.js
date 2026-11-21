@@ -177,6 +177,8 @@ function renderToday() {
   $('focus-goal-fill').style.width = `${percent}%`;
   $('focus-goal-text').textContent = `오늘 ${formatDuration(todayTotal)} / 목표 ${goalMinutes / 60}시간`;
 
+  renderHomeStudy(todayTotal, percent, bySubject);
+
   const list = $('subject-totals');
   list.innerHTML = '';
   for (const name of SUBJECTS) {
@@ -253,6 +255,26 @@ function closeFocus() {
   if (data) renderAll();
 }
 
+// 홈(태블릿·PC)의 오늘 공부 카드: 오늘 공부량, 목표 달성률, 과목별, 바로 시작 버튼
+function renderHomeStudy(todayTotal, percent, bySubject) {
+  $('home-study-total').textContent = formatDuration(todayTotal);
+  $('home-goal-fill').style.width = `${percent}%`;
+  $('home-goal-text').textContent = `목표 ${goalMinutes / 60}시간 중 ${Math.floor(percent)}%`;
+  $('home-subjects').replaceChildren(...SUBJECTS.filter((name) => bySubject[name]).map((name) => {
+    const li = document.createElement('li');
+    const swatch = document.createElement('span');
+    swatch.className = 'swatch';
+    swatch.style.background = SUBJECT_COLORS[name];
+    li.append(swatch, `${name} ${formatDuration(bySubject[name])}`);
+    return li;
+  }));
+  const running = data.running;
+  const label = isRunning() ? `${running.subject} 공부 중, 집중 화면 열기`
+    : running ? `${running.subject} 이어서 공부하기`
+    : `${subject} 공부 시작`;
+  if ($('home-study-btn').textContent !== label) $('home-study-btn').textContent = label;
+}
+
 function renderAll() {
   renderChips();
   renderTimer();
@@ -284,6 +306,12 @@ export function initStudyView() {
   // 시작하면 집중 화면으로 들어간다.
   $('study-start').addEventListener('click', () => {
     start();
+    openFocus();
+  });
+  // 홈의 오늘 공부 카드: 공부 중이면 집중 화면을, 아니면 마지막 과목으로 시작(또는 이어서)하며 집중 화면을 연다
+  $('home-study-btn').addEventListener('click', () => {
+    if (!data) return;
+    if (!isRunning()) start();
     openFocus();
   });
   $('study-pause').addEventListener('click', pause);
